@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       temperature: 0.6, // Low temperature for stability but enough for empathy
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error("AI Error:", error);
     return new Response("حدث خطأ داخلي في نظام الدعم الذكي.", { status: 500 });
