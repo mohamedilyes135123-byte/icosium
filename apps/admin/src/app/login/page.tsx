@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
-  const [role, setRole] = useState("patient");
+  const role = "admin";
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,19 +25,18 @@ export default function LoginPage() {
     setSuccessMsg(null);
 
     // --- QUICK DEBUG CREDENTIALS ---
-    const debugAccounts: Record<string, string> = {
-      'admin': 'admin',
-      'doctor': 'doctor',
-      'patient': 'patient',
-      'pharmacy': 'pharmacy',
-      'lab': 'lab'
-    };
-
-    if (password === "123" && debugAccounts[email.toLowerCase()]) {
-      const targetRole = debugAccounts[email.toLowerCase()];
-      document.cookie = `testing_bypass=${targetRole}; path=/; max-age=86400`;
-      window.location.href = `/${targetRole}/dashboard`;
-      setLoading(false);
+    if (password === "1" && email === '1') {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: 'admin@3inaya.com',
+        password: '123456',
+      });
+      if (authError) {
+         setError("لم يتم رفع البيانات (Seed) إلى قواعد البيانات بعد. جرب إدخالها.");
+         setLoading(false);
+         return;
+      }
+      document.cookie = `testing_bypass=admin; path=/; max-age=86400`;
+      window.location.href = `/dashboard`;
       return;
     }
     // -------------------------------
@@ -55,10 +54,10 @@ export default function LoginPage() {
       }
 
       const userRole = data?.user?.user_metadata?.role;
-      if (userRole) {
-        router.push(`/${userRole}/dashboard`);
+      if (userRole === role) {
+        router.push(`/dashboard`);
       } else {
-         setError("حسابك غير مرتبط بصلاحيات. يرجى مراجعة الدعم.");
+         setError("يرجى التأكد من الدخول من البوابة المخصصة لك.");
          setLoading(false);
       }
     } else {
@@ -92,11 +91,11 @@ export default function LoginPage() {
       
       <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-2xl border border-white relative z-10">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-tr from-brand-500 to-teal-400 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-brand-500/30 mb-4 element-glow">
+          <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-blue-400 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 mb-4 element-glow">
              <Activity className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-black text-slate-800">{isLogin ? "تسجيل الدخول" : "إنشاء حساب جديد"}</h1>
-          <p className="text-slate-500 text-sm mt-1">بوابة عناية الموحدة للصحة</p>
+          <h1 className="text-2xl font-black text-slate-800">مركز إدارة النظام</h1>
+          <p className="text-slate-500 text-sm mt-1">الولوج مقتصر على مسؤولي الدعم فقط</p>
         </div>
 
         {successMsg && (
@@ -113,27 +112,16 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
-            <>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="الاسم الكامل" 
-                  className="w-full h-12 px-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-right"
-                  required={!isLogin} 
-                />
-              </div>
-              <div className="flex gap-2 mb-4">
-                <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full h-12 px-4 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500">
-                  <option value="patient">مريض (Patient)</option>
-                  <option value="doctor">طبيب (Doctor)</option>
-                  <option value="pharmacy">صيدلية (Pharmacy)</option>
-                  <option value="lab">مخبر (Lab)</option>
-                  <option value="admin">مدير نظام (Admin)</option>
-                </select>
-              </div>
-            </>
+            <div className="relative">
+              <input 
+                type="text" 
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="الاسم الكامل" 
+                className="w-full h-12 px-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-right"
+                required={!isLogin} 
+              />
+            </div>
           )}
           <div className="relative">
             <Mail className="absolute right-4 top-3.5 w-5 h-5 text-slate-400" />
