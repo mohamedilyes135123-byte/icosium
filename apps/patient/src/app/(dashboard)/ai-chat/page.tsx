@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+export const dynamic = 'force-dynamic';
 
 import { useChat } from '@ai-sdk/react';
 import { useState, useRef, useEffect } from "react";
@@ -15,7 +17,7 @@ export default function PatientAIChat() {
        {
           id: 'system-welcome',
           role: 'assistant',
-          content: 'أهلاً بك في منصة عناية 😊. أنا هنا لمساعدتك والاستماع إليك بكل اهتمام. كيف تشعر اليوم؟ وأخبرني مما تعاني بأي لغة تريحك.'
+          content: 'Ã˜Â£Ã™â€¡Ã™â€žÃ˜Â§Ã™â€¹ Ã˜Â¨Ã™Æ’ Ã™ÂÃ™Å  Ã™â€¦Ã™â€ Ã˜ÂµÃ˜Â© Ã˜Â¹Ã™â€ Ã˜Â§Ã™Å Ã˜Â© Ã°Å¸ËœÅ . Ã˜Â£Ã™â€ Ã˜Â§ Ã™â€¡Ã™â€ Ã˜Â§ Ã™â€žÃ™â€¦Ã˜Â³Ã˜Â§Ã˜Â¹Ã˜Â¯Ã˜ÂªÃ™Æ’ Ã™Ë†Ã˜Â§Ã™â€žÃ˜Â§Ã˜Â³Ã˜ÂªÃ™â€¦Ã˜Â§Ã˜Â¹ Ã˜Â¥Ã™â€žÃ™Å Ã™Æ’ Ã˜Â¨Ã™Æ’Ã™â€ž Ã˜Â§Ã™â€¡Ã˜ÂªÃ™â€¦Ã˜Â§Ã™â€¦. Ã™Æ’Ã™Å Ã™Â Ã˜ÂªÃ˜Â´Ã˜Â¹Ã˜Â± Ã˜Â§Ã™â€žÃ™Å Ã™Ë†Ã™â€¦Ã˜Å¸ Ã™Ë†Ã˜Â£Ã˜Â®Ã˜Â¨Ã˜Â±Ã™â€ Ã™Å  Ã™â€¦Ã™â€¦Ã˜Â§ Ã˜ÂªÃ˜Â¹Ã˜Â§Ã™â€ Ã™Å  Ã˜Â¨Ã˜Â£Ã™Å  Ã™â€žÃ˜ÂºÃ˜Â© Ã˜ÂªÃ˜Â±Ã™Å Ã˜Â­Ã™Æ’.'
        }
     ]
   });
@@ -32,13 +34,13 @@ export default function PatientAIChat() {
 
   const sendToDoctor = async () => {
     if (messages.length < 3) {
-      alert("الرجاء التحدث مع المساعد قليلاً ليتمكن من جمع تفاصيل حالتك للطبيب.");
+      alert("Ã˜Â§Ã™â€žÃ˜Â±Ã˜Â¬Ã˜Â§Ã˜Â¡ Ã˜Â§Ã™â€žÃ˜ÂªÃ˜Â­Ã˜Â¯Ã˜Â« Ã™â€¦Ã˜Â¹ Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â³Ã˜Â§Ã˜Â¹Ã˜Â¯ Ã™â€šÃ™â€žÃ™Å Ã™â€žÃ˜Â§Ã™â€¹ Ã™â€žÃ™Å Ã˜ÂªÃ™â€¦Ã™Æ’Ã™â€  Ã™â€¦Ã™â€  Ã˜Â¬Ã™â€¦Ã˜Â¹ Ã˜ÂªÃ™ÂÃ˜Â§Ã˜ÂµÃ™Å Ã™â€ž Ã˜Â­Ã˜Â§Ã™â€žÃ˜ÂªÃ™Æ’ Ã™â€žÃ™â€žÃ˜Â·Ã˜Â¨Ã™Å Ã˜Â¨.");
       return;
     }
     setSubmitting(true);
 
     // Create a compiled summary text manually from the chat log for the doctor
-    const chatLog = messages.filter(m => m.id !== 'system-welcome').map(m => `${m.role === 'user' ? 'المريض' : 'المساعد'}: ${m.content}`).join('\n');
+    const chatLog = messages.filter(m => m.id !== 'system-welcome').map(m => `${m.role === 'user' ? 'Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â±Ã™Å Ã˜Â¶' : 'Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â³Ã˜Â§Ã˜Â¹Ã˜Â¯'}: ${m.content}`).join('\n');
     
     // Quick concise summary structure based on user prompts
     const userMessages = messages.filter(m => m.role === 'user').map(m => m.content).join(' | ');
@@ -48,9 +50,9 @@ export default function PatientAIChat() {
       .insert([
         { 
           patient_id: '00000000-0000-0000-0000-000000000000', // Dummy UUID for bypass mode
-          symptoms: `سجل المحادثة مع المساعد الذكي:\n\n${chatLog}`,
+          symptoms: `Ã˜Â³Ã˜Â¬Ã™â€ž Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â­Ã˜Â§Ã˜Â¯Ã˜Â«Ã˜Â© Ã™â€¦Ã˜Â¹ Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â³Ã˜Â§Ã˜Â¹Ã˜Â¯ Ã˜Â§Ã™â€žÃ˜Â°Ã™Æ’Ã™Å :\n\n${chatLog}`,
            // We use the raw user messages as a quick TL;DR for the doctor dashboard preview
-          ai_summary: `أهم ما ذكره المريض: ${userMessages.substring(0, 150)}...`, 
+          ai_summary: `Ã˜Â£Ã™â€¡Ã™â€¦ Ã™â€¦Ã˜Â§ Ã˜Â°Ã™Æ’Ã˜Â±Ã™â€¡ Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â±Ã™Å Ã˜Â¶: ${userMessages.substring(0, 150)}...`, 
           status: 'pending'
         }
       ]);
@@ -60,7 +62,7 @@ export default function PatientAIChat() {
     if (!dbError) {
       router.push('/patient/requests');
     } else {
-      alert("حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى.");
+      alert("Ã˜Â­Ã˜Â¯Ã˜Â« Ã˜Â®Ã˜Â·Ã˜Â£ Ã˜Â£Ã˜Â«Ã™â€ Ã˜Â§Ã˜Â¡ Ã˜Â§Ã™â€žÃ˜Â¥Ã˜Â±Ã˜Â³Ã˜Â§Ã™â€ž. Ã™Å Ã˜Â±Ã˜Â¬Ã™â€° Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â­Ã˜Â§Ã™Ë†Ã™â€žÃ˜Â© Ã™â€¦Ã˜Â±Ã˜Â© Ã˜Â£Ã˜Â®Ã˜Â±Ã™â€°.");
     }
   };
 
@@ -77,10 +79,10 @@ export default function PatientAIChat() {
              <HeartHandshake className="w-6 h-6 relative z-10" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-slate-800">مساعد عناية الودي</h1>
+            <h1 className="text-xl font-black text-slate-800">Ã™â€¦Ã˜Â³Ã˜Â§Ã˜Â¹Ã˜Â¯ Ã˜Â¹Ã™â€ Ã˜Â§Ã™Å Ã˜Â© Ã˜Â§Ã™â€žÃ™Ë†Ã˜Â¯Ã™Å </h1>
             <p className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-               متصل ويستمع إليك
+               Ã™â€¦Ã˜ÂªÃ˜ÂµÃ™â€ž Ã™Ë†Ã™Å Ã˜Â³Ã˜ÂªÃ™â€¦Ã˜Â¹ Ã˜Â¥Ã™â€žÃ™Å Ã™Æ’
             </p>
           </div>
         </div>
@@ -92,7 +94,7 @@ export default function PatientAIChat() {
            className="bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-50 rounded-xl"
         >
            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Hospital className="w-4 h-4 ml-2" />}
-           مشاركة مع الطبيب
+           Ã™â€¦Ã˜Â´Ã˜Â§Ã˜Â±Ã™Æ’Ã˜Â© Ã™â€¦Ã˜Â¹ Ã˜Â§Ã™â€žÃ˜Â·Ã˜Â¨Ã™Å Ã˜Â¨
         </Button>
       </motion.header>
 
@@ -100,7 +102,7 @@ export default function PatientAIChat() {
       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
         {error && (
             <div className="bg-rose-50 text-rose-600 p-4 rounded-xl text-sm font-bold border border-rose-100 text-center">
-               عذراً، لم نتمكن من الوصول لمحرك الذكاء الاصطناعي. تأكد من إضافة (API Key) في ملف .env.local 
+               Ã˜Â¹Ã˜Â°Ã˜Â±Ã˜Â§Ã™â€¹Ã˜Å’ Ã™â€žÃ™â€¦ Ã™â€ Ã˜ÂªÃ™â€¦Ã™Æ’Ã™â€  Ã™â€¦Ã™â€  Ã˜Â§Ã™â€žÃ™Ë†Ã˜ÂµÃ™Ë†Ã™â€ž Ã™â€žÃ™â€¦Ã˜Â­Ã˜Â±Ã™Æ’ Ã˜Â§Ã™â€žÃ˜Â°Ã™Æ’Ã˜Â§Ã˜Â¡ Ã˜Â§Ã™â€žÃ˜Â§Ã˜ÂµÃ˜Â·Ã™â€ Ã˜Â§Ã˜Â¹Ã™Å . Ã˜ÂªÃ˜Â£Ã™Æ’Ã˜Â¯ Ã™â€¦Ã™â€  Ã˜Â¥Ã˜Â¶Ã˜Â§Ã™ÂÃ˜Â© (API Key) Ã™ÂÃ™Å  Ã™â€¦Ã™â€žÃ™Â .env.local 
             </div>
         )}
         <AnimatePresence>
@@ -152,19 +154,19 @@ export default function PatientAIChat() {
           <input 
             value={input}
             onChange={handleInputChange}
-            placeholder="اكتب هنا، كيف تشعر؟"
+            placeholder="Ã˜Â§Ã™Æ’Ã˜ÂªÃ˜Â¨ Ã™â€¡Ã™â€ Ã˜Â§Ã˜Å’ Ã™Æ’Ã™Å Ã™Â Ã˜ÂªÃ˜Â´Ã˜Â¹Ã˜Â±Ã˜Å¸"
             className="flex-1 h-14 bg-white border border-slate-200 rounded-2xl pl-16 pr-5 shadow-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
             disabled={isLoading}
           />
           <Button 
             type="submit" 
-            disabled={!input.trim() || isLoading}
+            disabled={!input?.trim() || isLoading}
             className="absolute left-2 w-10 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-md flex items-center justify-center p-0"
           >
             <Send className="w-5 h-5 rtl:-translate-x-0.5 rtl:rotate-180" />
           </Button>
         </form>
-        <p className="text-center text-[10px] font-bold text-slate-400 mt-3">الذكاء الاصطناعي مبرمج على الاستماع المطمئن ولا يحل محل التشخيص العيادي لطبيبك.</p>
+        <p className="text-center text-[10px] font-bold text-slate-400 mt-3">Ã˜Â§Ã™â€žÃ˜Â°Ã™Æ’Ã˜Â§Ã˜Â¡ Ã˜Â§Ã™â€žÃ˜Â§Ã˜ÂµÃ˜Â·Ã™â€ Ã˜Â§Ã˜Â¹Ã™Å  Ã™â€¦Ã˜Â¨Ã˜Â±Ã™â€¦Ã˜Â¬ Ã˜Â¹Ã™â€žÃ™â€° Ã˜Â§Ã™â€žÃ˜Â§Ã˜Â³Ã˜ÂªÃ™â€¦Ã˜Â§Ã˜Â¹ Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â·Ã™â€¦Ã˜Â¦Ã™â€  Ã™Ë†Ã™â€žÃ˜Â§ Ã™Å Ã˜Â­Ã™â€ž Ã™â€¦Ã˜Â­Ã™â€ž Ã˜Â§Ã™â€žÃ˜ÂªÃ˜Â´Ã˜Â®Ã™Å Ã˜Âµ Ã˜Â§Ã™â€žÃ˜Â¹Ã™Å Ã˜Â§Ã˜Â¯Ã™Å  Ã™â€žÃ˜Â·Ã˜Â¨Ã™Å Ã˜Â¨Ã™Æ’.</p>
       </div>
     </div>
   );

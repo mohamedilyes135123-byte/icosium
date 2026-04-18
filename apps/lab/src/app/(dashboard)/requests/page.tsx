@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -11,10 +13,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  PENDING:    { label: "قيد الانتظار",  color: "bg-amber-100 text-amber-700 border-amber-200" },
-  PROCESSING: { label: "جاري التحليل", color: "bg-blue-100 text-blue-700 border-blue-200" },
-  COMPLETED:  { label: "النتائج جاهزة", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  CANCELLED:  { label: "ملغى",          color: "bg-slate-100 text-slate-500 border-slate-200" },
+  PENDING:    { label: "Ù‚ÙŠØ¯ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±",  color: "bg-amber-100 text-amber-700 border-amber-200" },
+  PROCESSING: { label: "Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù„ÙŠÙ„", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  COMPLETED:  { label: "Ø§Ù„Ù†ØªØ§Ø¦Ø¬ Ø¬Ø§Ù‡Ø²Ø©", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  CANCELLED:  { label: "Ù…Ù„ØºÙ‰",          color: "bg-slate-100 text-slate-500 border-slate-200" },
 };
 
 export default function LabRequests() {
@@ -29,12 +31,12 @@ export default function LabRequests() {
   const [resultFileUrl, setResultFileUrl] = useState("");
   const [uploading, setUploading] = useState(false);
 
-  // ── Get current user ──────────────────────────────────────────
+  // â”€â”€ Get current user â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
   }, [supabase]);
 
-  // ── Fetch lab requests (ONLY assigned to THIS lab by patient) ──
+  // â”€â”€ Fetch lab requests (ONLY assigned to THIS lab by patient) â”€â”€
   const fetchRequests = useCallback(async () => {
     if (!currentUser) return;
     const { data } = await supabase
@@ -61,15 +63,15 @@ export default function LabRequests() {
     return () => { supabase.removeChannel(channel); };
   }, [supabase, fetchRequests]);
 
-  // ── Update lab request status ─────────────────────────────────
+  // â”€â”€ Update lab request status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const updateStatus = async (id: string, status: string) => {
     setProcessing(id);
-    // Lab can ONLY update status — cannot modify tests_list
+    // Lab can ONLY update status â€” cannot modify tests_list
     await supabase.from("lab_requests").update({ status }).eq("id", id);
     setProcessing(null);
   };
 
-  // ── Upload lab results ────────────────────────────────────────
+  // â”€â”€ Upload lab results â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const submitResults = async () => {
     if (!uploadPanel || !currentUser) return;
     setUploading(true);
@@ -91,37 +93,37 @@ export default function LabRequests() {
     setUploading(false);
   };
 
-  // ─────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="pb-32 w-full" dir="rtl">
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
         className="mb-8 pb-6 border-b border-cyan-100/50">
         <h1 className="text-3xl font-extrabold text-slate-800 mb-2 tracking-tight">
-          طلبات التحاليل
+          Ø·Ù„Ø¨Ø§Øª Ø§Ù„ØªØ­Ø§Ù„ÙŠÙ„
         </h1>
         <p className="text-slate-500">
-          تظهر هنا فقط الطلبات التي أرسلها المرضى مباشرة إلى مختبركm.
+          ØªØ¸Ù‡Ø± Ù‡Ù†Ø§ ÙÙ‚Ø· Ø§Ù„Ø·Ù„Ø¨Ø§Øª Ø§Ù„ØªÙŠ Ø£Ø±Ø³Ù„Ù‡Ø§ Ø§Ù„Ù…Ø±Ø¶Ù‰ Ù…Ø¨Ø§Ø´Ø±Ø© Ø¥Ù„Ù‰ Ù…Ø®ØªØ¨Ø±Ùƒm.
         </p>
       </motion.header>
 
-      {/* ── RBAC Notice ── */}
+      {/* â”€â”€ RBAC Notice â”€â”€ */}
       <div className="bg-cyan-50/50 border border-cyan-200 rounded-2xl p-4 mb-8 flex items-start gap-4 shadow-sm">
         <div className="bg-white p-2 rounded-full text-cyan-500 border border-cyan-100 shrink-0">
           <ShieldAlert className="w-5 h-5" />
         </div>
         <div>
-          <h4 className="font-bold text-cyan-900">صلاحياتك كمختبر (RBAC)</h4>
+          <h4 className="font-bold text-cyan-900">ØµÙ„Ø§Ø­ÙŠØ§ØªÙƒ ÙƒÙ…Ø®ØªØ¨Ø± (RBAC)</h4>
           <p className="text-sm text-slate-600 mt-1">
-            ✅ يمكنك تحديث الحالة ورفع النتائج.<br />
-            ❌ لا يمكنك تعديل قائمة التحاليل المطلوبة.<br />
-            🔐 لا ترى طلبات مختبرات أخرى — فقط ما أُرسل إليك مباشرة.
+            âœ… ÙŠÙ…ÙƒÙ†Ùƒ ØªØ­Ø¯ÙŠØ« Ø§Ù„Ø­Ø§Ù„Ø© ÙˆØ±ÙØ¹ Ø§Ù„Ù†ØªØ§Ø¦Ø¬.<br />
+            âŒ Ù„Ø§ ÙŠÙ…ÙƒÙ†Ùƒ ØªØ¹Ø¯ÙŠÙ„ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ­Ø§Ù„ÙŠÙ„ Ø§Ù„Ù…Ø·Ù„ÙˆØ¨Ø©.<br />
+            ðŸ” Ù„Ø§ ØªØ±Ù‰ Ø·Ù„Ø¨Ø§Øª Ù…Ø®ØªØ¨Ø±Ø§Øª Ø£Ø®Ø±Ù‰ â€” ÙÙ‚Ø· Ù…Ø§ Ø£ÙØ±Ø³Ù„ Ø¥Ù„ÙŠÙƒ Ù…Ø¨Ø§Ø´Ø±Ø©.
           </p>
         </div>
       </div>
 
-      {/* ── Requests Grid ── */}
+      {/* â”€â”€ Requests Grid â”€â”€ */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
           {labRequests.map((req) => {
@@ -147,7 +149,7 @@ export default function LabRequests() {
                       <div>
                         <CardTitle className="text-slate-800 text-base font-bold flex items-center gap-2">
                           <User className="w-4 h-4 text-cyan-500" />
-                          {req.patient?.full_name || "مريض"}
+                          {req.patient?.full_name || "Ù…Ø±ÙŠØ¶"}
                         </CardTitle>
                         {req.patient?.phone && (
                           <p className="text-xs text-slate-400 mt-0.5">{req.patient.phone}</p>
@@ -168,7 +170,7 @@ export default function LabRequests() {
                     {/* Doctor info */}
                     {req.doctor && (
                       <div className="text-xs text-slate-500 mb-3 flex items-center gap-1.5">
-                        <span className="font-bold text-slate-600">طلب بواسطة: {req.doctor.full_name}</span>
+                        <span className="font-bold text-slate-600">Ø·Ù„Ø¨ Ø¨ÙˆØ§Ø³Ø·Ø©: {req.doctor.full_name}</span>
                       </div>
                     )}
 
@@ -182,7 +184,7 @@ export default function LabRequests() {
                         />
                         <div>
                           <p className="text-xs font-bold text-cyan-700 mb-1 flex items-center gap-1">
-                            <QrCode className="w-3.5 h-3.5" /> رمز التحقق
+                            <QrCode className="w-3.5 h-3.5" /> Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚
                           </p>
                           <p className="text-xs font-mono text-cyan-600 break-all">
                             {req.qr_token?.substring(0, 16)}...
@@ -191,10 +193,10 @@ export default function LabRequests() {
                       </div>
                     )}
 
-                    {/* Tests list (READ ONLY — cannot be modified by lab) */}
+                    {/* Tests list (READ ONLY â€” cannot be modified by lab) */}
                     <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-4 flex-1 shadow-inner">
                       <h4 className="text-slate-500 text-xs font-bold mb-2 flex items-center gap-1.5">
-                        <TestTube className="w-3.5 h-3.5" /> التحاليل المطلوبة (للقراءة فقط)
+                        <TestTube className="w-3.5 h-3.5" /> Ø§Ù„ØªØ­Ø§Ù„ÙŠÙ„ Ø§Ù„Ù…Ø·Ù„ÙˆØ¨Ø© (Ù„Ù„Ù‚Ø±Ø§Ø¡Ø© ÙÙ‚Ø·)
                       </h4>
                       <div className="space-y-1.5">
                         {req.tests_list?.map((t: any, i: number) => (
@@ -217,7 +219,7 @@ export default function LabRequests() {
                     {hasResults && (
                       <div className="mb-3 bg-emerald-50 border border-emerald-200 rounded-2xl p-3">
                         <p className="text-xs font-bold text-emerald-700 mb-1 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> تم رفع النتائج
+                          <CheckCircle2 className="w-3.5 h-3.5" /> ØªÙ… Ø±ÙØ¹ Ø§Ù„Ù†ØªØ§Ø¦Ø¬
                         </p>
                         {req.lab_results[0].result_notes && (
                           <p className="text-xs text-slate-600">{req.lab_results[0].result_notes}</p>
@@ -225,13 +227,13 @@ export default function LabRequests() {
                       </div>
                     )}
 
-                    {/* ── Action Buttons ── */}
+                    {/* â”€â”€ Action Buttons â”€â”€ */}
                     {req.status === "PENDING" && (
                       <Button onClick={() => updateStatus(req.id, "PROCESSING")}
                         disabled={processing === req.id}
                         className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 h-11 rounded-2xl text-white font-bold flex items-center justify-center gap-2 mb-2 shadow-sm">
                         <FlaskConical className="w-4 h-4" />
-                        {processing === req.id ? "..." : "بدء التحليل"}
+                        {processing === req.id ? "..." : "Ø¨Ø¯Ø¡ Ø§Ù„ØªØ­Ù„ÙŠÙ„"}
                       </Button>
                     )}
 
@@ -239,13 +241,13 @@ export default function LabRequests() {
                       <Button
                         onClick={() => setUploadPanel({ open: true, requestId: req.id, patientId: req.patient_id })}
                         className="w-full bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-600 hover:to-teal-500 h-11 rounded-2xl text-white font-bold flex items-center justify-center gap-2 shadow-sm">
-                        <Upload className="w-4 h-4" /> رفع النتائج
+                        <Upload className="w-4 h-4" /> Ø±ÙØ¹ Ø§Ù„Ù†ØªØ§Ø¦Ø¬
                       </Button>
                     )}
 
                     {req.status === "COMPLETED" && (
                       <div className="flex items-center justify-center gap-2 py-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-700 font-bold text-sm">
-                        <CheckCircle2 className="w-4 h-4" /> النتائج أُرسلت للمريض
+                        <CheckCircle2 className="w-4 h-4" /> Ø§Ù„Ù†ØªØ§Ø¦Ø¬ Ø£ÙØ±Ø³Ù„Øª Ù„Ù„Ù…Ø±ÙŠØ¶
                       </div>
                     )}
                   </CardContent>
@@ -257,16 +259,16 @@ export default function LabRequests() {
           {labRequests.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/40 border border-white rounded-3xl shadow-sm text-slate-400">
               <FlaskConical className="w-16 h-16 mb-4 text-cyan-200" />
-              <h3 className="text-lg font-bold text-slate-600">لا توجد طلبات تحاليل حالياً</h3>
-              <p className="text-sm">ستظهر هنا الطلبات التي يرسلها المرضى إلى مختبركم مباشرة.</p>
+              <h3 className="text-lg font-bold text-slate-600">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø·Ù„Ø¨Ø§Øª ØªØ­Ø§Ù„ÙŠÙ„ Ø­Ø§Ù„ÙŠØ§Ù‹</h3>
+              <p className="text-sm">Ø³ØªØ¸Ù‡Ø± Ù‡Ù†Ø§ Ø§Ù„Ø·Ù„Ø¨Ø§Øª Ø§Ù„ØªÙŠ ÙŠØ±Ø³Ù„Ù‡Ø§ Ø§Ù„Ù…Ø±Ø¶Ù‰ Ø¥Ù„Ù‰ Ù…Ø®ØªØ¨Ø±ÙƒÙ… Ù…Ø¨Ø§Ø´Ø±Ø©.</p>
             </div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════ */}
-      {/* ── Upload Results Panel ── */}
-      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* â”€â”€ Upload Results Panel â”€â”€ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <AnimatePresence>
         {uploadPanel?.open && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -285,22 +287,22 @@ export default function LabRequests() {
                   <Upload className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-800">رفع نتائج التحليل</h3>
-                  <p className="text-xs text-slate-400">ستُرسل للمريض فوراً بعد الرفع</p>
+                  <h3 className="font-black text-slate-800">Ø±ÙØ¹ Ù†ØªØ§Ø¦Ø¬ Ø§Ù„ØªØ­Ù„ÙŠÙ„</h3>
+                  <p className="text-xs text-slate-400">Ø³ØªÙØ±Ø³Ù„ Ù„Ù„Ù…Ø±ÙŠØ¶ ÙÙˆØ±Ø§Ù‹ Ø¨Ø¹Ø¯ Ø§Ù„Ø±ÙØ¹</p>
                 </div>
               </div>
 
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="text-sm font-black text-slate-700 mb-2 block">ملخص النتائج</label>
+                  <label className="text-sm font-black text-slate-700 mb-2 block">Ù…Ù„Ø®Øµ Ø§Ù„Ù†ØªØ§Ø¦Ø¬</label>
                   <textarea value={resultNotes} onChange={e => setResultNotes(e.target.value)}
-                    placeholder="مثال: سكر الدم الصائم 110 mg/dL — في النطاق الطبيعي..."
+                    placeholder="Ù…Ø«Ø§Ù„: Ø³ÙƒØ± Ø§Ù„Ø¯Ù… Ø§Ù„ØµØ§Ø¦Ù… 110 mg/dL â€” ÙÙŠ Ø§Ù„Ù†Ø·Ø§Ù‚ Ø§Ù„Ø·Ø¨ÙŠØ¹ÙŠ..."
                     className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-emerald-400 outline-none resize-none h-28 text-slate-700 font-medium" />
                 </div>
                 <div>
-                  <label className="text-sm font-black text-slate-700 mb-2 block">رابط ملف النتائج (اختياري)</label>
+                  <label className="text-sm font-black text-slate-700 mb-2 block">Ø±Ø§Ø¨Ø· Ù…Ù„Ù Ø§Ù„Ù†ØªØ§Ø¦Ø¬ (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</label>
                   <input value={resultFileUrl} onChange={e => setResultFileUrl(e.target.value)}
-                    placeholder="https://... (رابط PDF أو صورة)"
+                    placeholder="https://... (Ø±Ø§Ø¨Ø· PDF Ø£Ùˆ ØµÙˆØ±Ø©)"
                     className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-emerald-400 outline-none text-slate-700 font-medium" />
                 </div>
               </div>
@@ -308,11 +310,11 @@ export default function LabRequests() {
               <div className="flex gap-3">
                 <Button onClick={submitResults} disabled={uploading || !resultNotes.trim()}
                   className="flex-1 h-12 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-sm">
-                  {uploading ? "جاري الرفع..." : "✅ رفع النتائج وإرسالها للمريض"}
+                  {uploading ? "Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø±ÙØ¹..." : "âœ… Ø±ÙØ¹ Ø§Ù„Ù†ØªØ§Ø¦Ø¬ ÙˆØ¥Ø±Ø³Ø§Ù„Ù‡Ø§ Ù„Ù„Ù…Ø±ÙŠØ¶"}
                 </Button>
                 <Button onClick={() => setUploadPanel(null)}
                   className="h-12 px-5 rounded-2xl border border-slate-200 bg-white text-slate-500 font-bold">
-                  إلغاء
+                  Ø¥Ù„ØºØ§Ø¡
                 </Button>
               </div>
             </motion.div>

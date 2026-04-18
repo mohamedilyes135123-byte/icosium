@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -29,17 +31,17 @@ const NORMAL_RANGES: Record<MetricType, { min: number; max: number; unit: string
 };
 
 const METRICS = [
-  { id: "blood_sugar" as MetricType, label: "سكر الدم", emoji: "🍬", color: "from-amber-500 to-orange-400", bg: "amber" },
-  { id: "blood_pressure" as MetricType, label: "ضغط الدم", emoji: "💓", color: "from-rose-500 to-pink-400", bg: "rose" },
-  { id: "weight" as MetricType, label: "الوزن", emoji: "⚖️", color: "from-blue-500 to-indigo-400", bg: "blue" },
-  { id: "oximetry" as MetricType, label: "تشبع الأكسجين", emoji: "💨", color: "from-cyan-500 to-teal-400", bg: "cyan" },
+  { id: "blood_sugar" as MetricType, label: "Ø³ÙƒØ± Ø§Ù„Ø¯Ù…", emoji: "ðŸ¬", color: "from-amber-500 to-orange-400", bg: "amber" },
+  { id: "blood_pressure" as MetricType, label: "Ø¶ØºØ· Ø§Ù„Ø¯Ù…", emoji: "ðŸ’“", color: "from-rose-500 to-pink-400", bg: "rose" },
+  { id: "weight" as MetricType, label: "Ø§Ù„ÙˆØ²Ù†", emoji: "âš–ï¸", color: "from-blue-500 to-indigo-400", bg: "blue" },
+  { id: "oximetry" as MetricType, label: "ØªØ´Ø¨Ø¹ Ø§Ù„Ø£ÙƒØ³Ø¬ÙŠÙ†", emoji: "ðŸ’¨", color: "from-cyan-500 to-teal-400", bg: "cyan" },
 ];
 
 const MEAL_CONTEXT_LABELS: Record<MealContext, string> = {
-  fasting: "صائم",
-  post_meal: "بعد الأكل",
-  before_sleep: "قبل النوم",
-  any: "أي وقت",
+  fasting: "ØµØ§Ø¦Ù…",
+  post_meal: "Ø¨Ø¹Ø¯ Ø§Ù„Ø£ÙƒÙ„",
+  before_sleep: "Ù‚Ø¨Ù„ Ø§Ù„Ù†ÙˆÙ…",
+  any: "Ø£ÙŠ ÙˆÙ‚Øª",
 };
 
 // Simple mini histogram bars
@@ -142,13 +144,13 @@ export default function PatientVitals() {
             <Activity className="w-6 h-6 text-rose-600" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-slate-800">قياساتي اليومية</h1>
-            <p className="text-xs font-bold text-slate-400">تتبع صحتك في الوقت الفعلي</p>
+            <h1 className="text-xl font-black text-slate-800">Ù‚ÙŠØ§Ø³Ø§ØªÙŠ Ø§Ù„ÙŠÙˆÙ…ÙŠØ©</h1>
+            <p className="text-xs font-bold text-slate-400">ØªØªØ¨Ø¹ ØµØ­ØªÙƒ ÙÙŠ Ø§Ù„ÙˆÙ‚Øª Ø§Ù„ÙØ¹Ù„ÙŠ</p>
           </div>
         </div>
         <button onClick={() => setShowAddForm(true)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-l from-rose-500 to-pink-400 text-white text-sm font-bold shadow-lg shadow-rose-500/30">
-          <Plus className="w-4 h-4" /> إضافة قياس
+          <Plus className="w-4 h-4" /> Ø¥Ø¶Ø§ÙØ© Ù‚ÙŠØ§Ø³
         </button>
       </motion.header>
 
@@ -174,7 +176,7 @@ export default function PatientVitals() {
           <div className="relative z-10">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <p className="text-sm font-bold text-white/70">آخر قياس</p>
+                <p className="text-sm font-bold text-white/70">Ø¢Ø®Ø± Ù‚ÙŠØ§Ø³</p>
                 <p className="text-xs text-white/50 mt-0.5">{new Date(latest.created_at).toLocaleString("ar-DZ")}</p>
               </div>
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black ${
@@ -182,9 +184,9 @@ export default function PatientVitals() {
                 latestStatus === "high" ? "bg-rose-500/50 text-white animate-pulse" :
                 "bg-amber-500/40 text-yellow-100"
               }`}>
-                {latestStatus === "normal" ? <><CheckCircle className="w-3.5 h-3.5" /> طبيعي</> :
-                 latestStatus === "high" ? <><AlertTriangle className="w-3.5 h-3.5" /> مرتفع</> :
-                 <><AlertTriangle className="w-3.5 h-3.5" /> منخفض</>}
+                {latestStatus === "normal" ? <><CheckCircle className="w-3.5 h-3.5" /> Ø·Ø¨ÙŠØ¹ÙŠ</> :
+                 latestStatus === "high" ? <><AlertTriangle className="w-3.5 h-3.5" /> Ù…Ø±ØªÙØ¹</> :
+                 <><AlertTriangle className="w-3.5 h-3.5" /> Ù…Ù†Ø®ÙØ¶</>}
               </div>
             </div>
 
@@ -214,18 +216,18 @@ export default function PatientVitals() {
 
       {/* Normal range reminder */}
       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-6">
-        <p className="text-xs font-bold text-slate-600 mb-1">النطاق الطبيعي:</p>
+        <p className="text-xs font-bold text-slate-600 mb-1">Ø§Ù„Ù†Ø·Ø§Ù‚ Ø§Ù„Ø·Ø¨ÙŠØ¹ÙŠ:</p>
         <p className="text-sm font-black text-slate-800">
-          {range.min} — {range.max} {range.unit}
-          {range.min2 && range.max2 && ` / ${range.min2} — ${range.max2} ${range.unit}`}
+          {range.min} â€” {range.max} {range.unit}
+          {range.min2 && range.max2 && ` / ${range.min2} â€” ${range.max2} ${range.unit}`}
         </p>
         {activeMetric === "blood_sugar" && (
-          <p className="text-xs text-slate-400 mt-1">أقل من 100 صائم / أقل من 140 بعد الأكل</p>
+          <p className="text-xs text-slate-400 mt-1">Ø£Ù‚Ù„ Ù…Ù† 100 ØµØ§Ø¦Ù… / Ø£Ù‚Ù„ Ù…Ù† 140 Ø¨Ø¹Ø¯ Ø§Ù„Ø£ÙƒÙ„</p>
         )}
       </div>
 
       {/* Measurements history */}
-      <h3 className="font-black text-slate-800 mb-4">تاريخ القياسات</h3>
+      <h3 className="font-black text-slate-800 mb-4">ØªØ§Ø±ÙŠØ® Ø§Ù„Ù‚ÙŠØ§Ø³Ø§Øª</h3>
       {loading && (
         <div className="space-y-3">
           {[1,2,3].map(i => <div key={i} className="h-16 bg-white/60 rounded-2xl animate-pulse border border-white" />)}
@@ -234,11 +236,11 @@ export default function PatientVitals() {
       {!loading && currentMeasurements.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Activity className="w-16 h-16 text-slate-200 mb-4" />
-          <p className="text-slate-500 font-bold">لم تُدخل أي قياس بعد</p>
-          <p className="text-slate-400 text-sm mt-1">ابدأ بتسجيل قياسك الأول اليوم</p>
+          <p className="text-slate-500 font-bold">Ù„Ù… ØªÙØ¯Ø®Ù„ Ø£ÙŠ Ù‚ÙŠØ§Ø³ Ø¨Ø¹Ø¯</p>
+          <p className="text-slate-400 text-sm mt-1">Ø§Ø¨Ø¯Ø£ Ø¨ØªØ³Ø¬ÙŠÙ„ Ù‚ÙŠØ§Ø³Ùƒ Ø§Ù„Ø£ÙˆÙ„ Ø§Ù„ÙŠÙˆÙ…</p>
           <button onClick={() => setShowAddForm(true)}
             className="mt-4 px-5 py-2.5 rounded-xl bg-rose-500 text-white text-sm font-bold">
-            + إضافة قياس
+            + Ø¥Ø¶Ø§ÙØ© Ù‚ÙŠØ§Ø³
           </button>
         </div>
       )}
@@ -269,14 +271,14 @@ export default function PatientVitals() {
                 s === "normal" ? "bg-emerald-50 text-emerald-700" :
                 s === "high" ? "bg-rose-50 text-rose-700" : "bg-amber-50 text-amber-700"
               }`}>
-                {s === "normal" ? "طبيعي" : s === "high" ? "مرتفع" : "منخفض"}
+                {s === "normal" ? "Ø·Ø¨ÙŠØ¹ÙŠ" : s === "high" ? "Ù…Ø±ØªÙØ¹" : "Ù…Ù†Ø®ÙØ¶"}
               </div>
             </motion.div>
           );
         })}
       </div>
 
-      {/* ── Add Measurement Bottom Sheet ── */}
+      {/* â”€â”€ Add Measurement Bottom Sheet â”€â”€ */}
       <AnimatePresence>
         {showAddForm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -289,14 +291,14 @@ export default function PatientVitals() {
 
               <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
               <h3 className="font-black text-slate-800 text-lg mb-5 text-center">
-                تسجيل قياس — {currentMetaInfo.emoji} {currentMetaInfo.label}
+                ØªØ³Ø¬ÙŠÙ„ Ù‚ÙŠØ§Ø³ â€” {currentMetaInfo.emoji} {currentMetaInfo.label}
               </h3>
 
               {/* Value inputs */}
               <div className={`grid ${activeMetric === "blood_pressure" ? "grid-cols-2" : "grid-cols-1"} gap-3 mb-4`}>
                 <div>
                   <label className="text-xs font-bold text-slate-500 mb-1 block">
-                    {activeMetric === "blood_pressure" ? "الضغط الانقباضي (Systolic)" : "القيمة"} — {range.unit}
+                    {activeMetric === "blood_pressure" ? "Ø§Ù„Ø¶ØºØ· Ø§Ù„Ø§Ù†Ù‚Ø¨Ø§Ø¶ÙŠ (Systolic)" : "Ø§Ù„Ù‚ÙŠÙ…Ø©"} â€” {range.unit}
                   </label>
                   <input type="number" value={val1} onChange={e => setVal1(e.target.value)}
                     placeholder={activeMetric === "blood_pressure" ? "120" : activeMetric === "blood_sugar" ? "95" : activeMetric === "oximetry" ? "98" : "70"}
@@ -304,7 +306,7 @@ export default function PatientVitals() {
                 </div>
                 {activeMetric === "blood_pressure" && (
                   <div>
-                    <label className="text-xs font-bold text-slate-500 mb-1 block">الضغط الانبساطي (Diastolic)</label>
+                    <label className="text-xs font-bold text-slate-500 mb-1 block">Ø§Ù„Ø¶ØºØ· Ø§Ù„Ø§Ù†Ø¨Ø³Ø§Ø·ÙŠ (Diastolic)</label>
                     <input type="number" value={val2} onChange={e => setVal2(e.target.value)}
                       placeholder="80"
                       className="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-400 outline-none text-center text-xl font-black" />
@@ -315,7 +317,7 @@ export default function PatientVitals() {
               {/* Meal context (for blood sugar) */}
               {activeMetric === "blood_sugar" && (
                 <div className="mb-4">
-                  <label className="text-xs font-bold text-slate-500 mb-2 block">سياق القياس</label>
+                  <label className="text-xs font-bold text-slate-500 mb-2 block">Ø³ÙŠØ§Ù‚ Ø§Ù„Ù‚ÙŠØ§Ø³</label>
                   <div className="grid grid-cols-2 gap-2">
                     {(Object.keys(MEAL_CONTEXT_LABELS) as MealContext[]).map(ctx => (
                       <button key={ctx} type="button" onClick={() => setMealCtx(ctx)}
@@ -331,20 +333,20 @@ export default function PatientVitals() {
 
               {/* Notes */}
               <div className="mb-6">
-                <label className="text-xs font-bold text-slate-500 mb-1 block">ملاحظات (اختياري)</label>
+                <label className="text-xs font-bold text-slate-500 mb-1 block">Ù…Ù„Ø§Ø­Ø¸Ø§Øª (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</label>
                 <input value={notes} onChange={e => setNotes(e.target.value)}
-                  placeholder="مثال: بعد المجهود الرياضي..."
+                  placeholder="Ù…Ø«Ø§Ù„: Ø¨Ø¹Ø¯ Ø§Ù„Ù…Ø¬Ù‡ÙˆØ¯ Ø§Ù„Ø±ÙŠØ§Ø¶ÙŠ..."
                   className="w-full h-10 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-400 outline-none text-sm" />
               </div>
 
               <div className="flex gap-3">
                 <button onClick={saveMeasurement} disabled={saving || !val1}
                   className="flex-1 h-12 rounded-2xl bg-gradient-to-l from-rose-500 to-pink-400 text-white font-bold shadow-lg disabled:opacity-50">
-                  {saving ? "جاري الحفظ..." : "✅ تسجيل القياس"}
+                  {saving ? "Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø­ÙØ¸..." : "âœ… ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ù‚ÙŠØ§Ø³"}
                 </button>
                 <button onClick={() => setShowAddForm(false)}
                   className="h-12 px-5 rounded-2xl border border-slate-200 bg-white text-slate-600 font-bold">
-                  إلغاء
+                  Ø¥Ù„ØºØ§Ø¡
                 </button>
               </div>
             </motion.div>

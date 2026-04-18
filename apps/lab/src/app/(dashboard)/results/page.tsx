@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -41,18 +43,18 @@ export default function LabResultsHistory() {
     fetchResults();
   }, [fetchResults]);
 
-  // ─────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="pb-32 w-full" dir="rtl">
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
         className="mb-8 pb-6 border-b border-purple-100/50">
         <h1 className="text-3xl font-extrabold text-slate-800 mb-2 tracking-tight">
-          سجل النتائج المرفوعة
+          Ø³Ø¬Ù„ Ø§Ù„Ù†ØªØ§Ø¦Ø¬ Ø§Ù„Ù…Ø±ÙÙˆØ¹Ø©
         </h1>
         <p className="text-slate-500">
-          جميع نتائج التحاليل التي رفعتموها للمرضى
+          Ø¬Ù…ÙŠØ¹ Ù†ØªØ§Ø¦Ø¬ Ø§Ù„ØªØ­Ø§Ù„ÙŠÙ„ Ø§Ù„ØªÙŠ Ø±ÙØ¹ØªÙ…ÙˆÙ‡Ø§ Ù„Ù„Ù…Ø±Ø¶Ù‰
         </p>
       </motion.header>
 
@@ -79,7 +81,7 @@ export default function LabResultsHistory() {
                   {/* Patient */}
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 font-black text-sm">
-                      {result.patient?.full_name?.charAt(0) || "؟"}
+                      {result.patient?.full_name?.charAt(0) || "ØŸ"}
                     </div>
                     <div>
                       <p className="font-bold text-slate-800">{result.patient?.full_name}</p>
@@ -89,7 +91,7 @@ export default function LabResultsHistory() {
                     </div>
                     <div className="mr-auto">
                       <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-200 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> مُرسلة
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Ù…ÙØ±Ø³Ù„Ø©
                       </span>
                     </div>
                   </div>
@@ -103,7 +105,7 @@ export default function LabResultsHistory() {
                   {/* Doctor */}
                   {lr?.doctor && (
                     <div className="text-xs text-slate-500 mb-3">
-                      <span className="font-bold">طلب بواسطة: </span>{lr.doctor.full_name}
+                      <span className="font-bold">Ø·Ù„Ø¨ Ø¨ÙˆØ§Ø³Ø·Ø©: </span>{lr.doctor.full_name}
                     </div>
                   )}
 
@@ -122,7 +124,7 @@ export default function LabResultsHistory() {
                   {result.result_notes && (
                     <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 mb-3 shadow-inner">
                       <p className="text-xs font-bold text-slate-500 mb-1.5 flex items-center gap-1">
-                        <FileText className="w-3.5 h-3.5" /> ملخص النتائج
+                        <FileText className="w-3.5 h-3.5" /> Ù…Ù„Ø®Øµ Ø§Ù„Ù†ØªØ§Ø¦Ø¬
                       </p>
                       <p className="text-sm text-slate-700 font-medium leading-relaxed line-clamp-3 whitespace-pre-wrap">
                         {result.result_notes}
@@ -134,7 +136,7 @@ export default function LabResultsHistory() {
                   {result.file_url && (
                     <a href={result.file_url} target="_blank" rel="noopener noreferrer"
                       className="flex items-center gap-2 w-full justify-center py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-2xl transition-colors">
-                      <Download className="w-4 h-4" /> عرض ملف النتائج
+                      <Download className="w-4 h-4" /> Ø¹Ø±Ø¶ Ù…Ù„Ù Ø§Ù„Ù†ØªØ§Ø¦Ø¬
                     </a>
                   )}
                 </div>
@@ -145,8 +147,8 @@ export default function LabResultsHistory() {
           {!loading && results.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/40 border border-white rounded-3xl text-slate-400">
               <CheckCircle2 className="w-16 h-16 mb-4 text-emerald-200" />
-              <h3 className="text-lg font-bold text-slate-600">لم تُرفع أي نتائج بعد</h3>
-              <p className="text-sm">النتائج التي ترفعها للمرضى ستظهر هنا</p>
+              <h3 className="text-lg font-bold text-slate-600">Ù„Ù… ØªÙØ±ÙØ¹ Ø£ÙŠ Ù†ØªØ§Ø¦Ø¬ Ø¨Ø¹Ø¯</h3>
+              <p className="text-sm">Ø§Ù„Ù†ØªØ§Ø¦Ø¬ Ø§Ù„ØªÙŠ ØªØ±ÙØ¹Ù‡Ø§ Ù„Ù„Ù…Ø±Ø¶Ù‰ Ø³ØªØ¸Ù‡Ø± Ù‡Ù†Ø§</p>
             </div>
           )}
         </AnimatePresence>

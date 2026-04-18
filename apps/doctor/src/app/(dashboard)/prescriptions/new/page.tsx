@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -10,40 +12,40 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 
-// ─── Common durations / frequencies ──────────────────────────────────────────
-const FREQUENCIES = ["مرة يومياً", "مرتان يومياً", "3 مرات يومياً", "كل 8 ساعات", "كل 12 ساعة", "عند اللزوم"];
-const DURATIONS = ["7 أيام", "10 أيام", "14 يوم", "شهر", "شهرين", "3 أشهر", "6 أشهر", "مستمر"];
+// â”€â”€â”€ Common durations / frequencies â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const FREQUENCIES = ["Ù…Ø±Ø© ÙŠÙˆÙ…ÙŠØ§Ù‹", "Ù…Ø±ØªØ§Ù† ÙŠÙˆÙ…ÙŠØ§Ù‹", "3 Ù…Ø±Ø§Øª ÙŠÙˆÙ…ÙŠØ§Ù‹", "ÙƒÙ„ 8 Ø³Ø§Ø¹Ø§Øª", "ÙƒÙ„ 12 Ø³Ø§Ø¹Ø©", "Ø¹Ù†Ø¯ Ø§Ù„Ù„Ø²ÙˆÙ…"];
+const DURATIONS = ["7 Ø£ÙŠØ§Ù…", "10 Ø£ÙŠØ§Ù…", "14 ÙŠÙˆÙ…", "Ø´Ù‡Ø±", "Ø´Ù‡Ø±ÙŠÙ†", "3 Ø£Ø´Ù‡Ø±", "6 Ø£Ø´Ù‡Ø±", "Ù…Ø³ØªÙ…Ø±"];
 
-// ─── Algerian drug database (subset) ─────────────────────────────────────────
+// â”€â”€â”€ Algerian drug database (subset) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const DRUG_DB = [
   "Amoxicilline 500mg", "Ampicilline", "Azithromycin 500mg",
   "Ciprofloxacine 500mg", "Metronidazole 500mg", "Ceftriaxone 1g",
-  "Paracétamol 1g", "Ibuprofène 400mg", "Ibuprofène 600mg",
+  "ParacÃ©tamol 1g", "IbuprofÃ¨ne 400mg", "IbuprofÃ¨ne 600mg",
   "Aspirine 100mg", "Doliprane 500mg",
   "Metformine 850mg", "Metformine 1000mg", "Glibenclamide 5mg", "Gliclazide 80mg",
   "Amlodipine 5mg", "Amlodipine 10mg", "Atenolol 50mg", "Bisoprolol 5mg",
   "Ramipril 5mg", "Enalapril 10mg", "Losartan 50mg", "Valsartan 80mg",
-  "Furosémide 40mg", "Spironolactone 25mg",
+  "FurosÃ©mide 40mg", "Spironolactone 25mg",
   "Atorvastatine 10mg", "Rosuvastatine 10mg", "Simvastatine 20mg",
-  "Oméprazole 20mg", "Pantoprazole 40mg", "Ranitidine 150mg",
+  "OmÃ©prazole 20mg", "Pantoprazole 40mg", "Ranitidine 150mg",
   "Cetirizine 10mg", "Loratadine 10mg",
   "Prednisolone 5mg", "Dexamethasone 0.5mg",
-  "Bromazépam 3mg", "Alprazolam 0.5mg",
+  "BromazÃ©pam 3mg", "Alprazolam 0.5mg",
   "Vitamine C 1g", "Vitamine D3 1000UI", "Acide Folique 5mg",
   "Fer (Fer 33mg/ml)", "Calcium 500mg",
   "Ventoline 100mcg (spray)", "Becotide 250mcg (spray)",
   "Insuline Rapide", "Insuline Lente",
 ];
 
-// ─── Known interactions (simplified AI-like check) ────────────────────────────
+// â”€â”€â”€ Known interactions (simplified AI-like check) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const INTERACTIONS: Record<string, string[]> = {
-  "Metformine": ["Furosémide", "Alcohol"],
-  "Metformine 850mg": ["Furosémide 40mg"],
-  "Metformine 1000mg": ["Furosémide 40mg"],
-  "Warfarine": ["Aspirine 100mg", "Ibuprofène 400mg", "Ibuprofène 600mg", "Ciprofloxacine 500mg"],
+  "Metformine": ["FurosÃ©mide", "Alcohol"],
+  "Metformine 850mg": ["FurosÃ©mide 40mg"],
+  "Metformine 1000mg": ["FurosÃ©mide 40mg"],
+  "Warfarine": ["Aspirine 100mg", "IbuprofÃ¨ne 400mg", "IbuprofÃ¨ne 600mg", "Ciprofloxacine 500mg"],
   "Ramipril 5mg": ["Spironolactone 25mg"],
   "Enalapril 10mg": ["Spironolactone 25mg"],
-  "Bromazépam 3mg": ["Alprazolam 0.5mg"],
+  "BromazÃ©pam 3mg": ["Alprazolam 0.5mg"],
 };
 
 interface Med {
@@ -60,7 +62,7 @@ function newMed(): Med {
   return { id: crypto.randomUUID(), name: "", dose: "", frequency: "", duration: "", quantity: "", notes: "" };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function NewPrescriptionPage() {
   const supabase = createClient();
   const router = useRouter();
@@ -139,7 +141,7 @@ export default function NewPrescriptionPage() {
       const conflicts = INTERACTIONS[drug] || [];
       const found = conflicts.filter(c => names.includes(c));
       found.forEach(conflict => {
-        warnings.push(`⚠️ تداخل محتمل بين ${drug} و${conflict}`);
+        warnings.push(`âš ï¸ ØªØ¯Ø§Ø®Ù„ Ù…Ø­ØªÙ…Ù„ Ø¨ÙŠÙ† ${drug} Ùˆ${conflict}`);
       });
     });
     setAiWarnings([...new Set(warnings)]);
@@ -169,7 +171,7 @@ export default function NewPrescriptionPage() {
       request_id: null,
     }]).select().single();
 
-    if (error || !rx) { setSaving(false); alert("خطأ في الحفظ: " + error?.message); return; }
+    if (error || !rx) { setSaving(false); alert("Ø®Ø·Ø£ ÙÙŠ Ø§Ù„Ø­ÙØ¸: " + error?.message); return; }
     setSaved({ rx, qr: rx.qr_token });
     setStep("preview");
     setSaving(false);
@@ -179,7 +181,7 @@ export default function NewPrescriptionPage() {
     window.print();
   };
 
-  // ── FORM VIEW ────────────────────────────────────────────────────────────────
+  // â”€â”€ FORM VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (step === "form") return (
     <div className="w-full max-w-3xl mx-auto pb-20" dir="rtl">
       {/* Header */}
@@ -190,13 +192,13 @@ export default function NewPrescriptionPage() {
             <ArrowRight className="w-5 h-5 text-slate-600" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-slate-800">وصفة طبية جديدة</h1>
-            <p className="text-xs text-blue-500 font-bold">إنشاء وصفة لمريض حضوري أو بعيد</p>
+            <h1 className="text-xl font-black text-slate-800">ÙˆØµÙØ© Ø·Ø¨ÙŠØ© Ø¬Ø¯ÙŠØ¯Ø©</h1>
+            <p className="text-xs text-blue-500 font-bold">Ø¥Ù†Ø´Ø§Ø¡ ÙˆØµÙØ© Ù„Ù…Ø±ÙŠØ¶ Ø­Ø¶ÙˆØ±ÙŠ Ø£Ùˆ Ø¨Ø¹ÙŠØ¯</p>
           </div>
         </div>
         <button onClick={() => setStep("preview")}
           className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white text-sm font-bold shadow-lg">
-          <FileText className="w-4 h-4" /> معاينة
+          <FileText className="w-4 h-4" /> Ù…Ø¹Ø§ÙŠÙ†Ø©
         </button>
       </motion.header>
 
@@ -207,7 +209,7 @@ export default function NewPrescriptionPage() {
             className="bg-amber-50 border-2 border-amber-300 rounded-3xl p-4 mb-6 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <BrainCircuit className="w-5 h-5 text-amber-600" />
-              <p className="font-black text-amber-800 text-sm">تنبيه الذكاء الاصطناعي</p>
+              <p className="font-black text-amber-800 text-sm">ØªÙ†Ø¨ÙŠÙ‡ Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ</p>
             </div>
             {aiWarnings.map((w, i) => (
               <p key={i} className="text-xs text-amber-700 font-medium mt-1">{w}</p>
@@ -218,14 +220,14 @@ export default function NewPrescriptionPage() {
 
       <div className="space-y-5">
         {/* Patient selection */}
-        <Section title="المريض" icon={<User className="w-5 h-5 text-blue-600" />}>
+        <Section title="Ø§Ù„Ù…Ø±ÙŠØ¶" icon={<User className="w-5 h-5 text-blue-600" />}>
           {!selectedPatient ? (
             <div className="relative">
               <Search className="absolute right-3 top-3 w-4 h-4 text-slate-400" />
               <input
                 value={patientQuery}
                 onChange={e => setPatientQuery(e.target.value)}
-                placeholder="ابحث عن المريض بالاسم..."
+                placeholder="Ø§Ø¨Ø­Ø« Ø¹Ù† Ø§Ù„Ù…Ø±ÙŠØ¶ Ø¨Ø§Ù„Ø§Ø³Ù…..."
                 className={`w-full h-11 pr-9 pl-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-sm`}
               />
               {patientResults.length > 0 && (
@@ -246,7 +248,7 @@ export default function NewPrescriptionPage() {
               )}
               {patientQuery.length >= 2 && patientResults.length === 0 && (
                 <div className="absolute top-12 right-0 left-0 bg-white border border-slate-100 rounded-2xl shadow-md z-10 p-4 text-center">
-                  <p className="text-xs text-slate-400">لا توجد نتائج — تأكد أن المريض مسجل في المنصة</p>
+                  <p className="text-xs text-slate-400">Ù„Ø§ ØªÙˆØ¬Ø¯ Ù†ØªØ§Ø¦Ø¬ â€” ØªØ£ÙƒØ¯ Ø£Ù† Ø§Ù„Ù…Ø±ÙŠØ¶ Ù…Ø³Ø¬Ù„ ÙÙŠ Ø§Ù„Ù…Ù†ØµØ©</p>
                 </div>
               )}
             </div>
@@ -269,21 +271,21 @@ export default function NewPrescriptionPage() {
         </Section>
 
         {/* Diagnosis */}
-        <Section title="التشخيص / الأعراض" icon={<Stethoscope className="w-5 h-5 text-blue-600" />}>
+        <Section title="Ø§Ù„ØªØ´Ø®ÙŠØµ / Ø§Ù„Ø£Ø¹Ø±Ø§Ø¶" icon={<Stethoscope className="w-5 h-5 text-blue-600" />}>
           <textarea
             value={diagnose}
             onChange={e => setDiagnose(e.target.value)}
-            placeholder="وصف الحالة والتشخيص..."
+            placeholder="ÙˆØµÙ Ø§Ù„Ø­Ø§Ù„Ø© ÙˆØ§Ù„ØªØ´Ø®ÙŠØµ..."
             className="w-full h-20 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none resize-none text-sm text-slate-700"
           />
         </Section>
 
         {/* Medications */}
-        <Section title="الأدوية الموصوفة" icon={<Pill className="w-5 h-5 text-blue-600" />}
+        <Section title="Ø§Ù„Ø£Ø¯ÙˆÙŠØ© Ø§Ù„Ù…ÙˆØµÙˆÙØ©" icon={<Pill className="w-5 h-5 text-blue-600" />}
           action={
             <button onClick={() => setMeds(prev => [...prev, newMed()])}
               className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition-colors border border-blue-200">
-              <Plus className="w-3.5 h-3.5" /> إضافة دواء
+              <Plus className="w-3.5 h-3.5" /> Ø¥Ø¶Ø§ÙØ© Ø¯ÙˆØ§Ø¡
             </button>
           }
         >
@@ -291,7 +293,7 @@ export default function NewPrescriptionPage() {
             {meds.map((med, idx) => (
               <div key={med.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 relative">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-black text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full">الدواء #{idx + 1}</span>
+                  <span className="text-xs font-black text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full">Ø§Ù„Ø¯ÙˆØ§Ø¡ #{idx + 1}</span>
                   {meds.length > 1 && (
                     <button onClick={() => removeMed(med.id)} className="text-rose-400 hover:text-rose-600 transition-colors">
                       <Trash2 className="w-4 h-4" />
@@ -310,7 +312,7 @@ export default function NewPrescriptionPage() {
                       handleDrugSearch(med.id, e.target.value);
                     }}
                     onFocus={() => med.name && handleDrugSearch(med.id, med.name)}
-                    placeholder="اسم الدواء — ابدأ بالكتابة..."
+                    placeholder="Ø§Ø³Ù… Ø§Ù„Ø¯ÙˆØ§Ø¡ â€” Ø§Ø¨Ø¯Ø£ Ø¨Ø§Ù„ÙƒØªØ§Ø¨Ø©..."
                     className="w-full h-10 px-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-sm font-medium"
                   />
                   {(suggestions[med.id] || []).length > 0 && (
@@ -318,7 +320,7 @@ export default function NewPrescriptionPage() {
                       {suggestions[med.id].map(drug => (
                         <button key={drug} onClick={() => selectDrug(med.id, drug)}
                           className="w-full px-4 py-2.5 text-right text-sm font-medium text-slate-700 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0">
-                          💊 {drug}
+                          ðŸ’Š {drug}
                         </button>
                       ))}
                     </div>
@@ -327,31 +329,31 @@ export default function NewPrescriptionPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-slate-500 font-bold mb-1 block">تواتر الجرعة</label>
+                    <label className="text-xs text-slate-500 font-bold mb-1 block">ØªÙˆØ§ØªØ± Ø§Ù„Ø¬Ø±Ø¹Ø©</label>
                     <select value={med.frequency} onChange={e => updateMed(med.id, "frequency", e.target.value)}
                       className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-400">
-                      <option value="">-- التكرار --</option>
+                      <option value="">-- Ø§Ù„ØªÙƒØ±Ø§Ø± --</option>
                       {FREQUENCIES.map(f => <option key={f} value={f}>{f}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-slate-500 font-bold mb-1 block">مدة العلاج</label>
+                    <label className="text-xs text-slate-500 font-bold mb-1 block">Ù…Ø¯Ø© Ø§Ù„Ø¹Ù„Ø§Ø¬</label>
                     <select value={med.duration} onChange={e => updateMed(med.id, "duration", e.target.value)}
                       className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-400">
-                      <option value="">-- المدة --</option>
+                      <option value="">-- Ø§Ù„Ù…Ø¯Ø© --</option>
                       {DURATIONS.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-slate-500 font-bold mb-1 block">الكمية (علب)</label>
+                    <label className="text-xs text-slate-500 font-bold mb-1 block">Ø§Ù„ÙƒÙ…ÙŠØ© (Ø¹Ù„Ø¨)</label>
                     <input value={med.quantity} onChange={e => updateMed(med.id, "quantity", e.target.value)}
-                      placeholder="مثال: 2 علبة"
+                      placeholder="Ù…Ø«Ø§Ù„: 2 Ø¹Ù„Ø¨Ø©"
                       className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-400" />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-500 font-bold mb-1 block">ملاحظات خاصة</label>
+                    <label className="text-xs text-slate-500 font-bold mb-1 block">Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø®Ø§ØµØ©</label>
                     <input value={med.notes} onChange={e => updateMed(med.id, "notes", e.target.value)}
-                      placeholder="مع الأكل، مع الماء..."
+                      placeholder="Ù…Ø¹ Ø§Ù„Ø£ÙƒÙ„ØŒ Ù…Ø¹ Ø§Ù„Ù…Ø§Ø¡..."
                       className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-400" />
                   </div>
                 </div>
@@ -361,11 +363,11 @@ export default function NewPrescriptionPage() {
         </Section>
 
         {/* Doctor notes */}
-        <Section title="ملاحظات الطبيب" icon={<FileText className="w-5 h-5 text-blue-600" />}>
+        <Section title="Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø§Ù„Ø·Ø¨ÙŠØ¨" icon={<FileText className="w-5 h-5 text-blue-600" />}>
           <textarea
             value={doctorNotes}
             onChange={e => setDoctorNotes(e.target.value)}
-            placeholder="توصيات إضافية للمريض..."
+            placeholder="ØªÙˆØµÙŠØ§Øª Ø¥Ø¶Ø§ÙÙŠØ© Ù„Ù„Ù…Ø±ÙŠØ¶..."
             className="w-full h-16 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none resize-none text-sm text-slate-700"
           />
         </Section>
@@ -378,36 +380,36 @@ export default function NewPrescriptionPage() {
             className="flex-1 flex items-center justify-center gap-2 h-14 rounded-3xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white font-black text-base shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="w-5 h-5" />
-            {saving ? "جاري الحفظ..." : "حفظ وإصدار الوصفة"}
+            {saving ? "Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø­ÙØ¸..." : "Ø­ÙØ¸ ÙˆØ¥ØµØ¯Ø§Ø± Ø§Ù„ÙˆØµÙØ©"}
           </button>
           <button onClick={() => router.back()}
             className="h-14 px-6 rounded-3xl border border-slate-200 bg-white text-slate-600 font-bold text-sm hover:bg-slate-50 transition-colors">
-            إلغاء
+            Ø¥Ù„ØºØ§Ø¡
           </button>
         </div>
       </div>
     </div>
   );
 
-  // ── PRESCRIPTION PREVIEW / PRINT ─────────────────────────────────────────────
+  // â”€â”€ PRESCRIPTION PREVIEW / PRINT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="w-full" dir="rtl">
       {/* Action bar */}
       <div className="flex gap-3 mb-6 print:hidden">
         <button onClick={() => setStep("form")}
           className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-slate-200 bg-white text-slate-600 font-bold text-sm hover:bg-slate-50 transition-colors">
-          <ArrowRight className="w-4 h-4" /> تعديل
+          <ArrowRight className="w-4 h-4" /> ØªØ¹Ø¯ÙŠÙ„
         </button>
         <button onClick={handlePrint}
           className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white font-bold text-sm shadow-lg">
-          <Printer className="w-4 h-4" /> طباعة
+          <Printer className="w-4 h-4" /> Ø·Ø¨Ø§Ø¹Ø©
         </button>
         <button className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 text-white font-bold text-sm shadow-lg">
-          <Send className="w-4 h-4" /> إرسال للمريض
+          <Send className="w-4 h-4" /> Ø¥Ø±Ø³Ø§Ù„ Ù„Ù„Ù…Ø±ÙŠØ¶
         </button>
       </div>
 
-      {/* ── PRINTABLE PRESCRIPTION ── */}
+      {/* â”€â”€ PRINTABLE PRESCRIPTION â”€â”€ */}
       <div ref={printRef} className="bg-white rounded-3xl shadow-2xl shadow-slate-200/60 border border-slate-200 overflow-hidden print:shadow-none print:border-0 print:rounded-none">
         
         {/* Header bar */}
@@ -416,11 +418,11 @@ export default function NewPrescriptionPage() {
             <div className="flex items-center gap-2 mb-1">
               <Stethoscope className="w-5 h-5 text-blue-200" />
               <span className="font-black text-xl">
-                {doctorProfile?.full_name || currentUser?.user_metadata?.full_name || "الطبيب"}
+                {doctorProfile?.full_name || currentUser?.user_metadata?.full_name || "Ø§Ù„Ø·Ø¨ÙŠØ¨"}
               </span>
             </div>
             <p className="text-blue-100 text-sm">
-              {doctorProfile?.specialty || currentUser?.user_metadata?.specialty || "طبيب عام"}
+              {doctorProfile?.specialty || currentUser?.user_metadata?.specialty || "Ø·Ø¨ÙŠØ¨ Ø¹Ø§Ù…"}
             </p>
             {doctorProfile?.license_number && (
               <p className="text-blue-200 text-xs mt-0.5">ONMC: {doctorProfile.license_number}</p>
@@ -430,7 +432,7 @@ export default function NewPrescriptionPage() {
             )}
           </div>
           <div className="text-right text-white">
-            <p className="font-black text-2xl">وصفة طبية</p>
+            <p className="font-black text-2xl">ÙˆØµÙØ© Ø·Ø¨ÙŠØ©</p>
             <p className="text-blue-100 text-sm mt-1">
               {new Date().toLocaleDateString("ar-DZ", { year: "numeric", month: "long", day: "numeric" })}
             </p>
@@ -441,7 +443,7 @@ export default function NewPrescriptionPage() {
           {/* Patient info */}
           <div className="flex justify-between items-start mb-6 pb-5 border-b-2 border-dashed border-slate-200">
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">المريض</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Ø§Ù„Ù…Ø±ÙŠØ¶</p>
               <h2 className="text-2xl font-black text-slate-800 mb-0.5">
                 {selectedPatient?.full_name}
               </h2>
@@ -453,17 +455,17 @@ export default function NewPrescriptionPage() {
             <div className="text-center">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=DOCTOR:${currentUser?.id}`}
-                alt="QR Médecin"
+                alt="QR MÃ©decin"
                 className="w-20 h-20 rounded-xl border-2 border-blue-100"
               />
-              <p className="text-xs text-slate-400 mt-1 font-bold">QR الطبيب</p>
+              <p className="text-xs text-slate-400 mt-1 font-bold">QR Ø§Ù„Ø·Ø¨ÙŠØ¨</p>
             </div>
           </div>
 
           {/* Diagnosis */}
           {diagnose && (
             <div className="mb-5 bg-blue-50 border border-blue-100 rounded-2xl p-4">
-              <p className="text-xs font-bold text-blue-600 mb-1">التشخيص</p>
+              <p className="text-xs font-bold text-blue-600 mb-1">Ø§Ù„ØªØ´Ø®ÙŠØµ</p>
               <p className="text-slate-700 font-medium text-sm">{diagnose}</p>
             </div>
           )}
@@ -472,23 +474,23 @@ export default function NewPrescriptionPage() {
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Pill className="w-5 h-5 text-blue-600" />
-              <h3 className="font-black text-slate-800">الأدوية الموصوفة</h3>
+              <h3 className="font-black text-slate-800">Ø§Ù„Ø£Ø¯ÙˆÙŠØ© Ø§Ù„Ù…ÙˆØµÙˆÙØ©</h3>
             </div>
             <div className="border border-slate-200 rounded-2xl overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">الدواء</th>
-                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">التكرار</th>
-                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">المدة</th>
-                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">الكمية</th>
-                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">ملاحظات</th>
+                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">Ø§Ù„Ø¯ÙˆØ§Ø¡</th>
+                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">Ø§Ù„ØªÙƒØ±Ø§Ø±</th>
+                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">Ø§Ù„Ù…Ø¯Ø©</th>
+                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">Ø§Ù„ÙƒÙ…ÙŠØ©</th>
+                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">Ù…Ù„Ø§Ø­Ø¸Ø§Øª</th>
                   </tr>
                 </thead>
                 <tbody>
                   {meds.filter(m => m.name).map((med, i) => (
                     <tr key={med.id} className={`border-b border-slate-100 ${i % 2 === 0 ? "bg-white" : "bg-slate-50/50"}`}>
-                      <td className="px-4 py-3 font-bold text-slate-800">💊 {med.name}</td>
+                      <td className="px-4 py-3 font-bold text-slate-800">ðŸ’Š {med.name}</td>
                       <td className="px-4 py-3 text-slate-600">{med.frequency}</td>
                       <td className="px-4 py-3 text-slate-600">{med.duration}</td>
                       <td className="px-4 py-3 text-slate-600">{med.quantity}</td>
@@ -503,7 +505,7 @@ export default function NewPrescriptionPage() {
           {/* Doctor notes */}
           {doctorNotes && (
             <div className="mb-6 bg-amber-50 border border-amber-100 rounded-2xl p-4">
-              <p className="text-xs font-bold text-amber-700 mb-1">توصيات الطبيب</p>
+              <p className="text-xs font-bold text-amber-700 mb-1">ØªÙˆØµÙŠØ§Øª Ø§Ù„Ø·Ø¨ÙŠØ¨</p>
               <p className="text-slate-700 text-sm">{doctorNotes}</p>
             </div>
           )}
@@ -512,7 +514,7 @@ export default function NewPrescriptionPage() {
           {aiWarnings.length > 0 && (
             <div className="mb-6 bg-rose-50 border border-rose-200 rounded-2xl p-4 print:hidden">
               <p className="text-xs font-bold text-rose-700 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" /> تنبيهات AI (غير مطبوعة)
+                <AlertTriangle className="w-4 h-4" /> ØªÙ†Ø¨ÙŠÙ‡Ø§Øª AI (ØºÙŠØ± Ù…Ø·Ø¨ÙˆØ¹Ø©)
               </p>
               {aiWarnings.map((w, i) => <p key={i} className="text-xs text-rose-600 mt-1">{w}</p>)}
             </div>
@@ -526,10 +528,10 @@ export default function NewPrescriptionPage() {
                 <div className="text-center">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${saved.qr}`}
-                    alt="QR Vérification"
+                    alt="QR VÃ©rification"
                     className="w-24 h-24 rounded-2xl border-2 border-slate-200 shadow-sm"
                   />
-                  <p className="text-xs text-slate-400 mt-1 font-bold">QR التحقق</p>
+                  <p className="text-xs text-slate-400 mt-1 font-bold">QR Ø§Ù„ØªØ­Ù‚Ù‚</p>
                   <p className="text-xs font-mono text-slate-300">{saved.qr.substring(0, 12)}...</p>
                 </div>
               )}
@@ -538,7 +540,7 @@ export default function NewPrescriptionPage() {
             <div className="text-center min-w-[160px]">
               <div className="border-t-2 border-slate-800 pt-2 mt-8">
                 <p className="text-sm font-black text-slate-800">
-                  {doctorProfile?.full_name || "التوقيع"}
+                  {doctorProfile?.full_name || "Ø§Ù„ØªÙˆÙ‚ÙŠØ¹"}
                 </p>
                 <p className="text-xs text-slate-500">{doctorProfile?.specialty || ""}</p>
               </div>
@@ -549,12 +551,12 @@ export default function NewPrescriptionPage() {
           <div className="mt-8 text-center">
             <div className="inline-flex items-center gap-2 text-xs text-slate-400 bg-slate-50 border border-slate-100 px-4 py-2 rounded-full">
               <Stethoscope className="w-3.5 h-3.5 text-blue-400" />
-              <span className="font-bold">منصة عناية</span>
-              <span>— طبيبك في بيتك —</span>
-              <span className="text-blue-400">لتقريبكم من الرعاية الصحية</span>
+              <span className="font-bold">Ù…Ù†ØµØ© Ø¹Ù†Ø§ÙŠØ©</span>
+              <span>â€” Ø·Ø¨ÙŠØ¨Ùƒ ÙÙŠ Ø¨ÙŠØªÙƒ â€”</span>
+              <span className="text-blue-400">Ù„ØªÙ‚Ø±ÙŠØ¨ÙƒÙ… Ù…Ù† Ø§Ù„Ø±Ø¹Ø§ÙŠØ© Ø§Ù„ØµØ­ÙŠØ©</span>
             </div>
             <p className="text-xs text-slate-300 mt-1">
-              منصة تواصل طبي مرخصة من وزارة الصحة | لا تُعوّض الطبيب في قراراته الطبية
+              Ù…Ù†ØµØ© ØªÙˆØ§ØµÙ„ Ø·Ø¨ÙŠ Ù…Ø±Ø®ØµØ© Ù…Ù† ÙˆØ²Ø§Ø±Ø© Ø§Ù„ØµØ­Ø© | Ù„Ø§ ØªÙØ¹ÙˆÙ‘Ø¶ Ø§Ù„Ø·Ø¨ÙŠØ¨ ÙÙŠ Ù‚Ø±Ø§Ø±Ø§ØªÙ‡ Ø§Ù„Ø·Ø¨ÙŠØ©
             </p>
           </div>
         </div>
@@ -563,7 +565,7 @@ export default function NewPrescriptionPage() {
   );
 }
 
-// ── Helper Section wrapper ─────────────────────────────────────────────────────
+// â”€â”€ Helper Section wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Section({ title, icon, children, action }: {
   title: string; icon: React.ReactNode; children: React.ReactNode; action?: React.ReactNode
 }) {

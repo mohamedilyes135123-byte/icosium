@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -54,33 +56,33 @@ export default function DoctorPrescriptions() {
   }, [fetchData]);
 
   const labStatusMap: Record<string, { label: string; color: string }> = {
-    PENDING:    { label: "لم يُختر مختبر بعد", color: "bg-slate-100 text-slate-600 border-slate-200" },
-    PROCESSING: { label: "جاري التحليل",        color: "bg-blue-100 text-blue-700 border-blue-200" },
-    COMPLETED:  { label: "النتائج جاهزة ✅",     color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-    CANCELLED:  { label: "ملغى",                 color: "bg-rose-100 text-rose-700 border-rose-200" },
+    PENDING:    { label: "Ù„Ù… ÙŠÙØ®ØªØ± Ù…Ø®ØªØ¨Ø± Ø¨Ø¹Ø¯", color: "bg-slate-100 text-slate-600 border-slate-200" },
+    PROCESSING: { label: "Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù„ÙŠÙ„",        color: "bg-blue-100 text-blue-700 border-blue-200" },
+    COMPLETED:  { label: "Ø§Ù„Ù†ØªØ§Ø¦Ø¬ Ø¬Ø§Ù‡Ø²Ø© âœ…",     color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+    CANCELLED:  { label: "Ù…Ù„ØºÙ‰",                 color: "bg-rose-100 text-rose-700 border-rose-200" },
   };
 
-  // ─────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="w-full pb-32" dir="rtl">
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <motion.header initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
         className="flex items-center gap-4 mb-8">
         <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 shadow-sm border border-blue-200">
           <FileSignature className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-xl font-black text-slate-800">وصفاتي وتحاليلي</h1>
-          <p className="text-xs font-bold text-blue-500">ما أصدرته — للمراجعة فقط</p>
+          <h1 className="text-xl font-black text-slate-800">ÙˆØµÙØ§ØªÙŠ ÙˆØªØ­Ø§Ù„ÙŠÙ„ÙŠ</h1>
+          <p className="text-xs font-bold text-blue-500">Ù…Ø§ Ø£ØµØ¯Ø±ØªÙ‡ â€” Ù„Ù„Ù…Ø±Ø§Ø¬Ø¹Ø© ÙÙ‚Ø·</p>
         </div>
       </motion.header>
 
-      {/* ── Tabs ── */}
+      {/* â”€â”€ Tabs â”€â”€ */}
       <div className="flex gap-2 mb-6 bg-slate-100 p-1.5 rounded-2xl">
         {[
-          { key: "rx", label: "الوصفات الطبية", count: prescriptions.length },
-          { key: "lab", label: "طلبات التحاليل", count: labRequests.length },
+          { key: "rx", label: "Ø§Ù„ÙˆØµÙØ§Øª Ø§Ù„Ø·Ø¨ÙŠØ©", count: prescriptions.length },
+          { key: "lab", label: "Ø·Ù„Ø¨Ø§Øª Ø§Ù„ØªØ­Ø§Ù„ÙŠÙ„", count: labRequests.length },
         ].map(t => (
           <button key={t.key} onClick={() => setTab(t.key as "rx" | "lab")}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all ${
@@ -95,14 +97,14 @@ export default function DoctorPrescriptions() {
       </div>
 
       <AnimatePresence mode="wait">
-        {/* ─── PRESCRIPTIONS ─── */}
+        {/* â”€â”€â”€ PRESCRIPTIONS â”€â”€â”€ */}
         {tab === "rx" && (
           <motion.div key="rx" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             className="space-y-4">
             {prescriptions.length === 0 && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <FileSignature className="w-16 h-16 text-slate-200 mb-4" />
-                <p className="text-slate-400 font-medium">لا توجد وصفات صادرة بعد</p>
+                <p className="text-slate-400 font-medium">Ù„Ø§ ØªÙˆØ¬Ø¯ ÙˆØµÙØ§Øª ØµØ§Ø¯Ø±Ø© Ø¨Ø¹Ø¯</p>
               </div>
             )}
 
@@ -128,11 +130,11 @@ export default function DoctorPrescriptions() {
                     <div className="flex flex-col items-end gap-1">
                       {rx.is_used ? (
                         <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-200 flex items-center gap-1">
-                          <BadgeCheck className="w-3.5 h-3.5" /> أُرسلت للصيدلية
+                          <BadgeCheck className="w-3.5 h-3.5" /> Ø£ÙØ±Ø³Ù„Øª Ù„Ù„ØµÙŠØ¯Ù„ÙŠØ©
                         </span>
                       ) : (
                         <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded-xl border border-blue-200">
-                          بانتظار المريض
+                          Ø¨Ø§Ù†ØªØ¸Ø§Ø± Ø§Ù„Ù…Ø±ÙŠØ¶
                         </span>
                       )}
                       <p className="text-xs text-slate-400 flex items-center gap-1">
@@ -149,7 +151,7 @@ export default function DoctorPrescriptions() {
                         alt="QR" className="w-10 h-10 rounded" />
                       <div>
                         <p className="text-xs font-bold text-slate-600 flex items-center gap-1">
-                          <QrCode className="w-3 h-3" /> رمز التحقق
+                          <QrCode className="w-3 h-3" /> Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚
                         </p>
                         <p className="text-xs font-mono text-slate-400">{rx.qr_token?.substring(0, 18)}...</p>
                       </div>
@@ -161,7 +163,7 @@ export default function DoctorPrescriptions() {
                     <button onClick={() => setExpandedId(isExpanded ? null : rx.id)}
                       className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline mb-2">
                       {isExpanded ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                      {isExpanded ? "إخفاء الأدوية" : "عرض تفاصيل الأدوية"}
+                      {isExpanded ? "Ø¥Ø®ÙØ§Ø¡ Ø§Ù„Ø£Ø¯ÙˆÙŠØ©" : "Ø¹Ø±Ø¶ ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø£Ø¯ÙˆÙŠØ©"}
                     </button>
 
                     <AnimatePresence>
@@ -176,15 +178,15 @@ export default function DoctorPrescriptions() {
                                   <span className="font-bold text-slate-800">{m.name}</span>
                                   <span className="text-slate-500 text-sm">{m.dose}</span>
                                 </div>
-                                <p className="text-xs text-slate-500 mr-6">{m.frequency} — {m.duration}</p>
-                                {m.notes && (<p className="text-xs text-amber-600 mr-6 mt-0.5">⚠ {m.notes}</p>)}
+                                <p className="text-xs text-slate-500 mr-6">{m.frequency} â€” {m.duration}</p>
+                                {m.notes && (<p className="text-xs text-amber-600 mr-6 mt-0.5">âš  {m.notes}</p>)}
                               </div>
                             ))}
                           </div>
                           {rx.doctor_notes && (
                             <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
                               <p className="text-xs text-blue-800 font-medium">
-                                <span className="font-bold">ملاحظاتك: </span>{rx.doctor_notes}
+                                <span className="font-bold">Ù…Ù„Ø§Ø­Ø¸Ø§ØªÙƒ: </span>{rx.doctor_notes}
                               </p>
                             </div>
                           )}
@@ -198,14 +200,14 @@ export default function DoctorPrescriptions() {
           </motion.div>
         )}
 
-        {/* ─── LAB REQUESTS ─── */}
+        {/* â”€â”€â”€ LAB REQUESTS â”€â”€â”€ */}
         {tab === "lab" && (
           <motion.div key="lab" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             className="space-y-4">
             {labRequests.length === 0 && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <CheckCircle2 className="w-16 h-16 text-slate-200 mb-4" />
-                <p className="text-slate-400 font-medium">لا توجد طلبات تحاليل صادرة بعد</p>
+                <p className="text-slate-400 font-medium">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø·Ù„Ø¨Ø§Øª ØªØ­Ø§Ù„ÙŠÙ„ ØµØ§Ø¯Ø±Ø© Ø¨Ø¹Ø¯</p>
               </div>
             )}
 
@@ -241,11 +243,11 @@ export default function DoctorPrescriptions() {
                   {/* Lab assigned */}
                   {lr.lab ? (
                     <div className="mr-2 mb-3 text-xs text-slate-600 flex items-center gap-1.5">
-                      <span className="font-bold">المختبر: </span>{lr.lab.full_name}
+                      <span className="font-bold">Ø§Ù„Ù…Ø®ØªØ¨Ø±: </span>{lr.lab.full_name}
                     </div>
                   ) : (
                     <div className="mr-2 mb-3 text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-xl border border-amber-100 font-medium">
-                      ⏳ المريض لم يختر مختبراً بعد
+                      â³ Ø§Ù„Ù…Ø±ÙŠØ¶ Ù„Ù… ÙŠØ®ØªØ± Ù…Ø®ØªØ¨Ø±Ø§Ù‹ Ø¨Ø¹Ø¯
                     </div>
                   )}
 
@@ -261,8 +263,8 @@ export default function DoctorPrescriptions() {
                   {/* Results preview */}
                   {hasResults && (
                     <div className="mr-2 bg-emerald-50 border border-emerald-100 rounded-xl p-3">
-                      <p className="text-xs font-bold text-emerald-700 mb-1">📋 النتائج متاحة:</p>
-                      <p className="text-xs text-slate-600">{lr.lab_results[0].result_notes || "تم رفع ملف النتائج"}</p>
+                      <p className="text-xs font-bold text-emerald-700 mb-1">ðŸ“‹ Ø§Ù„Ù†ØªØ§Ø¦Ø¬ Ù…ØªØ§Ø­Ø©:</p>
+                      <p className="text-xs text-slate-600">{lr.lab_results[0].result_notes || "ØªÙ… Ø±ÙØ¹ Ù…Ù„Ù Ø§Ù„Ù†ØªØ§Ø¦Ø¬"}</p>
                     </div>
                   )}
                 </motion.div>
