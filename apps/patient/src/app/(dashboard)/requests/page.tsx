@@ -1,4 +1,5 @@
 ﻿"use client";
+import React from 'react';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ const ROUTINE_TESTS = [
   { name: "ØªØ­Ù„ÙŠÙ„ Ø§Ù„Ø¨ÙˆÙ„", code: "UA" },
 ];
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: JSX.Element }> = {
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactElement }> = {
   PENDING:  { label: "Ù‚ÙŠØ¯ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±",     color: "text-amber-600 bg-amber-50 border-amber-200",  icon: <Clock className="w-3.5 h-3.5" /> },
   APPROVED: { label: "Ù…ÙˆØ§ÙÙ‚",            color: "text-emerald-600 bg-emerald-50 border-emerald-200", icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
   REJECTED: { label: "Ù…Ø±ÙÙˆØ¶",           color: "text-rose-600 bg-rose-50 border-rose-200",       icon: <XCircle className="w-3.5 h-3.5" /> },
