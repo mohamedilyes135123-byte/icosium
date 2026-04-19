@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
+
 
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -21,12 +22,12 @@ export default function DoctorDashboardMobile() {
         <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-[18px] bg-gradient-to-tr from-blue-500 to-cyan-400 p-[2px] shadow-sm">
               <div className="w-full h-full bg-white rounded-2xl flex items-center justify-center text-blue-600 font-bold text-lg">
-                ÙŠ
+                ي
               </div>
             </div>
             <div>
-              <p className="text-[10px] font-bold text-blue-600/80 mb-0.5">ØªØ³Ø¬ÙŠÙ„ Ø¯Ø®ÙˆÙ„ ÙƒØ·Ø¨ÙŠØ¨</p>
-              <h1 className="text-sm font-black text-slate-800 leading-none">Ø¯. ÙŠÙˆØ³Ù Ø®Ù„ÙŠÙ„</h1>
+              <p className="text-[10px] font-bold text-blue-600/80 mb-0.5">تسجيل دخول كطبيب</p>
+              <h1 className="text-sm font-black text-slate-800 leading-none">د. يوسف خليل</h1>
             </div>
         </div>
         <div className="flex gap-2">
@@ -50,14 +51,14 @@ export default function DoctorDashboardMobile() {
         <div className="relative z-10 flex flex-col text-white">
           <div className="flex items-center gap-2 mb-4 bg-black/10 w-fit px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
             <div className="w-2 h-2 bg-rose-400 rounded-full animate-pulse"></div>
-            <span className="text-[10px] font-bold">5 ÙÙŠ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±</span>
+            <span className="text-[10px] font-bold">5 في الانتظار</span>
           </div>
-          <h3 className="text-3xl font-black mb-1 drop-shadow-md">Ø­Ø§Ù„Ø§Øª Ø§Ù„Ø·ÙˆØ§Ø±Ø¦</h3>
-          <p className="text-sm text-blue-50 mb-6 font-medium">Ø¹Ù„ÙŠÙƒ Ù…Ø±Ø§Ø¬Ø¹Ø© Ø·Ù„Ø¨Ø§Øª Ø§Ù„Ø§Ø³ØªØ´Ø§Ø±Ø© Ø¹Ù† Ø¨Ø¹Ø¯ ÙÙˆØ±Ø§Ù‹.</p>
+          <h3 className="text-3xl font-black mb-1 drop-shadow-md">حالات الطوارئ</h3>
+          <p className="text-sm text-blue-50 mb-6 font-medium">عليك مراجعة طلبات الاستشارة عن بعد فوراً.</p>
           
           <div className="flex gap-3">
              <Link href="/requests" className="flex-1">
-                <Button className="w-full bg-white text-blue-600 hover:bg-blue-50 rounded-xl h-12 font-black shadow-lg">Ø§Ø³ØªØ¹Ø±Ø§Ø¶ Ø§Ù„Ø­Ø§Ù„Ø§Øª</Button>
+                <Button className="w-full bg-white text-blue-600 hover:bg-blue-50 rounded-xl h-12 font-black shadow-lg">استعراض الحالات</Button>
              </Link>
           </div>
         </div>
@@ -65,7 +66,7 @@ export default function DoctorDashboardMobile() {
 
       {/* Grid Menu Stats */}
       <div className="flex justify-between items-end mb-4 px-1">
-        <h3 className="font-black text-slate-800 text-lg">Ù†Ø¸Ø±Ø© Ø¹Ø§Ù…Ø© (Ø§Ù„ÙŠÙˆÙ…)</h3>
+        <h3 className="font-black text-slate-800 text-lg">نظرة عامة (اليوم)</h3>
       </div>
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
@@ -73,10 +74,10 @@ export default function DoctorDashboardMobile() {
         transition={{ delay: 0.3 }}
         className="grid grid-cols-2 gap-4 mb-8"
       >
-        <QuickStat icon={<Users />} title="Ù…Ø±Ø¶Ù‰ Ø§Ù„ÙŠÙˆÙ…" value="12" color="from-indigo-500 to-blue-400" />
-        <QuickStat icon={<Calendar />} title="Ù…ÙˆØ§Ø¹ÙŠØ¯ Ù‚Ø§Ø¯Ù…Ø©" value="4" color="from-teal-500 to-cyan-400" />
-        <QuickStat icon={<FileText />} title="ÙˆØµÙØ§Øª Ù…ÙƒØªÙ…Ù„Ø©" value="8" color="from-purple-500 to-fuchsia-400" />
-        <QuickStat icon={<Activity />} title="Ù†ØªØ§Ø¦Ø¬ ØªØ­Ø§Ù„ÙŠÙ„" value="2" color="from-rose-500 to-orange-400" notification />
+        <QuickStat icon={<Users />} title="مرضى اليوم" value="12" color="from-indigo-500 to-blue-400" />
+        <QuickStat icon={<Calendar />} title="مواعيد قادمة" value="4" color="from-teal-500 to-cyan-400" />
+        <QuickStat icon={<FileText />} title="وصفات مكتملة" value="8" color="from-purple-500 to-fuchsia-400" />
+        <QuickStat icon={<Activity />} title="نتائج تحاليل" value="2" color="from-rose-500 to-orange-400" notification />
       </motion.div>
 
       {/* Action Scan */}
@@ -92,8 +93,8 @@ export default function DoctorDashboardMobile() {
                   <ScanBarcode className="w-6 h-6" />
                </div>
                <div>
-                  <h4 className="font-bold text-slate-800 text-sm mb-1">Ù…Ø³Ø­ Ø¨Ø·Ø§Ù‚Ø© Ø§Ù„Ù‡ÙˆÙŠØ©</h4>
-                  <p className="text-[10px] text-slate-500 font-medium">Ø³Ø­Ø¨ Ù…Ù„Ù Ø§Ù„Ù…Ø±ÙŠØ¶ Ø§Ù„Ù…ÙˆØ­Ø¯ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ§Ù‹</p>
+                  <h4 className="font-bold text-slate-800 text-sm mb-1">مسح بطاقة الهوية</h4>
+                  <p className="text-[10px] text-slate-500 font-medium">سحب ملف المريض الموحد إلكترونياً</p>
                </div>
             </div>
          </div>

@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
+
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -11,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface PatientSummary {
   id: string;
   full_name: string;
@@ -24,7 +25,7 @@ interface PatientSummary {
   labRequests: any[];
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 export default function DoctorPatients() {
   const supabase = createClient();
   const [patients, setPatients] = useState<PatientSummary[]>([]);
@@ -118,7 +119,7 @@ export default function DoctorPatients() {
     ));
   }, [search, patients]);
 
-  // â”€â”€ UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── UI ──────────────────────────────────────────────────────────────────────
   return (
     <div className="w-full pb-32" dir="rtl">
 
@@ -130,17 +131,17 @@ export default function DoctorPatients() {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-slate-800">Ù…Ù„ÙØ§Øª Ù…Ø±Ø¶Ø§ÙŠ</h1>
-            <p className="text-xs font-bold text-blue-500">{patients.length} Ù…Ø±ÙŠØ¶ ÙÙŠ Ø§Ù„Ù‚Ø§Ø¹Ø¯Ø©</p>
+            <h1 className="text-xl font-black text-slate-800">ملفات مرضاي</h1>
+            <p className="text-xs font-bold text-blue-500">{patients.length} مريض في القاعدة</p>
           </div>
         </div>
         {/* total badges */}
         <div className="flex gap-2">
           <span className="bg-purple-100 text-purple-700 text-xs font-black px-3 py-1.5 rounded-xl border border-purple-200">
-            ðŸ’Š {patients.reduce((s, p) => s + p.prescriptionCount, 0)} ÙˆØµÙØ©
+            💊 {patients.reduce((s, p) => s + p.prescriptionCount, 0)} وصفة
           </span>
           <span className="bg-cyan-100 text-cyan-700 text-xs font-black px-3 py-1.5 rounded-xl border border-cyan-200">
-            ðŸ§ª {patients.reduce((s, p) => s + p.labCount, 0)} ØªØ­Ù„ÙŠÙ„
+            🧪 {patients.reduce((s, p) => s + p.labCount, 0)} تحليل
           </span>
         </div>
       </motion.header>
@@ -151,7 +152,7 @@ export default function DoctorPatients() {
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Ø¨Ø­Ø« Ø¨Ø§Ù„Ø§Ø³Ù… Ø£Ùˆ Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ..."
+          placeholder="بحث بالاسم أو رقم الهاتف..."
           className="w-full h-12 pr-11 pl-4 bg-white/80 backdrop-blur-xl border border-white rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-400 outline-none text-slate-800 font-medium text-sm"
         />
         {search && (
@@ -174,8 +175,8 @@ export default function DoctorPatients() {
       {!loading && filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <Users className="w-16 h-16 text-slate-200 mb-4" />
-          <h3 className="text-slate-600 font-bold mb-1">Ù„Ø§ ØªÙˆØ¬Ø¯ Ù†ØªØ§Ø¦Ø¬</h3>
-          <p className="text-slate-400 text-sm">Ù„Ù… ØªØµØ¯Ø± ÙˆØµÙØ§Øª Ø£Ùˆ ØªØ­Ø§Ù„ÙŠÙ„ Ø¨Ø¹Ø¯ØŒ Ø£Ùˆ Ø§Ù„Ø¨Ø­Ø« Ù„Ø§ ÙŠØ·Ø§Ø¨Ù‚ Ø£ÙŠ Ù…Ø±ÙŠØ¶</p>
+          <h3 className="text-slate-600 font-bold mb-1">لا توجد نتائج</h3>
+          <p className="text-slate-400 text-sm">لم تصدر وصفات أو تحاليل بعد، أو البحث لا يطابق أي مريض</p>
         </div>
       )}
 
@@ -219,10 +220,10 @@ export default function DoctorPatients() {
                   <div className="flex items-center gap-3">
                     <div className="flex flex-col items-end gap-1">
                       <span className="text-xs font-bold text-purple-700 bg-purple-50 px-2 py-1 rounded-lg border border-purple-100">
-                        ðŸ’Š {patient.prescriptionCount} ÙˆØµÙØ©
+                        💊 {patient.prescriptionCount} وصفة
                       </span>
                       <span className="text-xs font-bold text-cyan-700 bg-cyan-50 px-2 py-1 rounded-lg border border-cyan-100">
-                        ðŸ§ª {patient.labCount} ØªØ­Ù„ÙŠÙ„
+                        🧪 {patient.labCount} تحليل
                       </span>
                     </div>
                     {isOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
@@ -245,13 +246,13 @@ export default function DoctorPatients() {
                             onClick={() => setActiveTab("rx")}
                             className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === "rx" ? "bg-white text-blue-700 shadow-sm" : "text-slate-500"}`}
                           >
-                            ðŸ’Š Ø§Ù„ÙˆØµÙØ§Øª ({patient.prescriptionCount})
+                            💊 الوصفات ({patient.prescriptionCount})
                           </button>
                           <button
                             onClick={() => setActiveTab("lab")}
                             className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === "lab" ? "bg-white text-blue-700 shadow-sm" : "text-slate-500"}`}
                           >
-                            ðŸ§ª Ø§Ù„ØªØ­Ø§Ù„ÙŠÙ„ ({patient.labCount})
+                            🧪 التحاليل ({patient.labCount})
                           </button>
                         </div>
 
@@ -259,7 +260,7 @@ export default function DoctorPatients() {
                         {activeTab === "rx" && (
                           <div className="space-y-3">
                             {patient.prescriptions.length === 0 ? (
-                              <p className="text-center text-slate-400 text-sm py-4">Ù„Ø§ ØªÙˆØ¬Ø¯ ÙˆØµÙØ§Øª</p>
+                              <p className="text-center text-slate-400 text-sm py-4">لا توجد وصفات</p>
                             ) : patient.prescriptions.map((rx: any) => (
                               <div key={rx.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
                                 <div className="flex justify-between items-center mb-2">
@@ -269,10 +270,10 @@ export default function DoctorPatients() {
                                   </span>
                                   {rx.is_used ? (
                                     <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                                      <BadgeCheck className="w-3.5 h-3.5" /> ØµÙØ±ÙØª
+                                      <BadgeCheck className="w-3.5 h-3.5" /> صُرفت
                                     </span>
                                   ) : (
-                                    <span className="text-xs font-bold text-amber-700">Ø¨Ø§Ù†ØªØ¸Ø§Ø± Ø§Ù„Ù…Ø±ÙŠØ¶</span>
+                                    <span className="text-xs font-bold text-amber-700">بانتظار المريض</span>
                                   )}
                                 </div>
                                 <div className="flex flex-wrap gap-1.5">
@@ -301,7 +302,7 @@ export default function DoctorPatients() {
                         {activeTab === "lab" && (
                           <div className="space-y-3">
                             {patient.labRequests.length === 0 ? (
-                              <p className="text-center text-slate-400 text-sm py-4">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø·Ù„Ø¨Ø§Øª ØªØ­Ø§Ù„ÙŠÙ„</p>
+                              <p className="text-center text-slate-400 text-sm py-4">لا توجد طلبات تحاليل</p>
                             ) : patient.labRequests.map((lr: any) => (
                               <div key={lr.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
                                 <div className="flex justify-between items-center mb-2">
@@ -314,8 +315,8 @@ export default function DoctorPatients() {
                                     lr.status === "PROCESSING" ? "bg-blue-100 text-blue-700" :
                                     "bg-amber-100 text-amber-700"
                                   }`}>
-                                    {lr.status === "COMPLETED" ? "âœ… Ù…ÙƒØªÙ…Ù„" :
-                                     lr.status === "PROCESSING" ? "ðŸ”¬ Ø¬Ø§Ø±ÙŠ" : "â³ Ø§Ù†ØªØ¸Ø§Ø±"}
+                                    {lr.status === "COMPLETED" ? "✅ مكتمل" :
+                                     lr.status === "PROCESSING" ? "🔬 جاري" : "⏳ انتظار"}
                                   </span>
                                 </div>
                                 <div className="flex flex-wrap gap-1.5 mb-2">
@@ -327,8 +328,8 @@ export default function DoctorPatients() {
                                 </div>
                                 {lr.lab_results?.length > 0 && (
                                   <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-2.5">
-                                    <p className="text-xs text-emerald-700 font-bold">ðŸ“‹ Ø§Ù„Ù†ØªØ§Ø¦Ø¬:</p>
-                                    <p className="text-xs text-slate-600">{lr.lab_results[0].result_notes || "ØªÙ… Ø±ÙØ¹ Ø§Ù„Ù…Ù„Ù"}</p>
+                                    <p className="text-xs text-emerald-700 font-bold">📋 النتائج:</p>
+                                    <p className="text-xs text-slate-600">{lr.lab_results[0].result_notes || "تم رفع الملف"}</p>
                                   </div>
                                 )}
                               </div>

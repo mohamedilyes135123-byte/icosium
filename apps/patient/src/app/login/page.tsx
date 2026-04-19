@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
+
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -29,14 +30,14 @@ interface PatientForm {
 }
 
 const CHRONIC_OPTIONS = [
-  "Ø¯Ø§Ø¡ Ø§Ù„Ø³ÙƒØ±ÙŠ", "Ø§Ø±ØªÙØ§Ø¹ Ø¶ØºØ· Ø§Ù„Ø¯Ù…", "Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ù‚Ù„Ø¨", "Ø§Ù„Ø±Ø¨Ùˆ",
-  "Ø§Ù„Ø³Ø±Ø·Ø§Ù†", "Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„ÙƒÙ„Ù‰ Ø§Ù„Ù…Ø²Ù…Ù†Ø©", "Ù‚ØµÙˆØ± Ø§Ù„ØºØ¯Ø© Ø§Ù„Ø¯Ø±Ù‚ÙŠØ©",
-  "Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ø±Ø¦Ø© Ø§Ù„Ù…Ø²Ù…Ù†Ø© BPCO", "Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ø£Ø¹ØµØ§Ø¨", "Ù„Ø§ ÙŠÙˆØ¬Ø¯",
+  "داء السكري", "ارتفاع ضغط الدم", "أمراض القلب", "الربو",
+  "السرطان", "أمراض الكلى المزمنة", "قصور الغدة الدرقية",
+  "أمراض الرئة المزمنة BPCO", "أمراض الأعصاب", "لا يوجد",
 ];
 
-const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "ØºÙŠØ± Ù…Ø¹Ø±ÙˆÙ"];
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "غير معروف"];
 
-const COMMON_ALLERGIES = ["Ø§Ù„Ø¨Ù†Ø³ÙŠÙ„ÙŠÙ†", "Ø§Ù„Ø³Ù„ÙØ§Ù…ÙŠØ¯", "Ø§Ù„Ø£Ø³Ø¨Ø±ÙŠÙ†", "Ø§Ù„Ø¥ÙŠØ¨ÙˆØ¨Ø±ÙˆÙÙŠÙ†", "Ø§Ù„ÙƒÙˆØ¯Ø§ÙŠÙŠÙ†", "Ù„Ø§ ÙŠÙˆØ¬Ø¯"];
+const COMMON_ALLERGIES = ["البنسيلين", "السلفاميد", "الأسبرين", "الإيبوبروفين", "الكودايين", "لا يوجد"];
 
 export default function PatientLoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -77,25 +78,25 @@ export default function PatientLoginPage() {
     );
   };
 
-  // â”€â”€ Login â”€â”€â”€â”€
+  // ── Login ────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setError(null);
     if (loginPassword === "1" && loginEmail === "1") {
       const { error: err } = await supabase.auth.signInWithPassword({ email: "patient@3inaya.com", password: "123456" });
-      if (err) { setError("Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ø®ØªØ¨Ø§Ø± ØºÙŠØ± Ù…ØªØ§Ø­Ø©"); setLoading(false); return; }
+      if (err) { setError("بيانات اختبار غير متاحة"); setLoading(false); return; }
       document.cookie = `testing_bypass=patient; path=/; max-age=86400`;
       window.location.href = "/dashboard"; return;
     }
     const { data, error: err } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
-    if (err) { setError("ÙØ´Ù„ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„. ØªØ­Ù‚Ù‚ Ù…Ù† Ø¨ÙŠØ§Ù†Ø§ØªÙƒ."); setLoading(false); return; }
+    if (err) { setError("فشل تسجيل الدخول. تحقق من بياناتك."); setLoading(false); return; }
     if (data?.user?.user_metadata?.role === "patient") router.push("/dashboard");
-    else { setError("Ù‡Ø°Ù‡ Ø§Ù„Ø¨ÙˆØ§Ø¨Ø© Ù…Ø®ØµØµØ© Ù„Ù„Ù…Ø±Ø¶Ù‰ ÙÙ‚Ø·."); setLoading(false); }
+    else { setError("هذه البوابة مخصصة للمرضى فقط."); setLoading(false); }
   };
 
-  // â”€â”€ Signup â”€â”€â”€
+  // ── Signup ───
   const handleSignup = async () => {
-    if (!form.acceptTerms) { setError("ÙŠØ¬Ø¨ Ø§Ù„Ù…ÙˆØ§ÙÙ‚Ø© Ø¹Ù„Ù‰ Ø§Ù„Ø´Ø±ÙˆØ·."); return; }
+    if (!form.acceptTerms) { setError("يجب الموافقة على الشروط."); return; }
     setLoading(true); setError(null);
     const { error: err } = await supabase.auth.signUp({
       email: form.email, password: form.password,
@@ -117,7 +118,7 @@ export default function PatientLoginPage() {
       }},
     });
     if (err) { setError(err.message); setLoading(false); return; }
-    setSuccessMsg("ðŸŽ‰ ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ Ù…Ù„ÙÙƒ Ø§Ù„Ø·Ø¨ÙŠ! ØªØ­Ù‚Ù‚ Ù…Ù† Ø¨Ø±ÙŠØ¯Ùƒ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ Ø«Ù… Ø³Ø¬Ù‘Ù„ Ø§Ù„Ø¯Ø®ÙˆÙ„.");
+    setSuccessMsg("🎉 تم إنشاء ملفك الطبي! تحقق من بريدك الإلكتروني ثم سجّل الدخول.");
     setIsLogin(true); setStep(1); setLoading(false);
   };
 
@@ -125,13 +126,13 @@ export default function PatientLoginPage() {
     setError(null);
     if (step === 1) {
       if (!form.fullNameAr || !form.email || !form.password || !form.phone) {
-        setError("Ø§Ù„Ø±Ø¬Ø§Ø¡ Ù…Ù„Ø¡ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ø§Ù„Ø¥Ù„Ø²Ø§Ù…ÙŠØ©: Ø§Ù„Ø§Ø³Ù…ØŒ Ø§Ù„Ø¨Ø±ÙŠØ¯ØŒ ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±ØŒ Ø§Ù„Ù‡Ø§ØªÙ");
+        setError("الرجاء ملء الحقول الإلزامية: الاسم، البريد، كلمة المرور، الهاتف");
         return;
       }
-      if (form.password.length < 6) { setError("ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± 6 Ø£Ø­Ø±Ù Ø¹Ù„Ù‰ Ø§Ù„Ø£Ù‚Ù„."); return; }
+      if (form.password.length < 6) { setError("كلمة المرور 6 أحرف على الأقل."); return; }
     }
     if (step === 2 && form.chronicDiseases.length === 0) {
-      setError("ÙŠØ±Ø¬Ù‰ ØªØ­Ø¯ÙŠØ¯ Ø­Ø§Ù„ØªÙƒ Ø§Ù„ØµØ­ÙŠØ© â€” Ø§Ø®ØªØ± 'Ù„Ø§ ÙŠÙˆØ¬Ø¯' Ø¥Ø°Ø§ ÙƒÙ†Øª Ø¨ØµØ­Ø© Ø¬ÙŠØ¯Ø©.");
+      setError("يرجى تحديد حالتك الصحية — اختر 'لا يوجد' إذا كنت بصحة جيدة.");
       return;
     }
     setStep(s => Math.min(3, s + 1) as Step);
@@ -154,18 +155,18 @@ export default function PatientLoginPage() {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 shadow-2xl shadow-emerald-500/40 mb-4">
             <Heart className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-black text-slate-900">Ø¹Ù†Ø§ÙŠØ©</h1>
-          <p className="text-emerald-600 font-semibold text-sm mt-1">Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ù…Ø±Ø¶Ù‰ â€” Ø·Ø¨ÙŠØ¨Ùƒ ÙÙŠ Ø¨ÙŠØªÙƒ</p>
+          <h1 className="text-3xl font-black text-slate-900">عناية</h1>
+          <p className="text-emerald-600 font-semibold text-sm mt-1">بوابة المرضى — طبيبك في بيتك</p>
           <p className="text-slate-400 text-xs mt-1">
             <Shield className="inline w-3.5 h-3.5 text-emerald-500 mx-1" />
-            Ø¨ÙŠØ§Ù†Ø§ØªÙƒ Ù…Ø´ÙØ±Ø© ÙˆÙ…Ø­Ù…ÙŠØ© Ø¨Ø§Ù„ÙƒØ§Ù…Ù„
+            بياناتك مشفرة ومحمية بالكامل
           </p>
         </div>
 
         <div className="bg-white/85 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 overflow-hidden">
           {/* Tabs */}
           <div className="flex border-b border-slate-100">
-            {["ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„", "ÙØªØ­ Ù…Ù„Ù Ø¬Ø¯ÙŠØ¯"].map((label, idx) => (
+            {["تسجيل الدخول", "فتح ملف جديد"].map((label, idx) => (
               <button key={label} onClick={() => { setIsLogin(idx === 0); setError(null); setStep(1); }}
                 className={`flex-1 py-4 text-sm font-bold transition-colors ${
                   isLogin === (idx === 0) ? "text-emerald-700 border-b-2 border-emerald-500 bg-emerald-50/50" : "text-slate-500 hover:text-slate-700"
@@ -186,25 +187,25 @@ export default function PatientLoginPage() {
               </div>
             )}
 
-            {/* â”€â”€ LOGIN â”€â”€ */}
+            {/* ── LOGIN ── */}
             {isLogin && (
               <form onSubmit={handleLogin} className="space-y-4">
-                <Field label="Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ" icon={<Mail className="w-4 h-4" />}>
+                <Field label="البريد الإلكتروني" icon={<Mail className="w-4 h-4" />}>
                   <input value={loginEmail} onChange={e => setLoginEmail(e.target.value)} type="email" placeholder="patient@example.com" className={cls} required />
                 </Field>
-                <Field label="ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±" icon={<Lock className="w-4 h-4" />}>
-                  <input value={loginPassword} onChange={e => setLoginPassword(e.target.value)} type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" className={cls} required />
+                <Field label="كلمة المرور" icon={<Lock className="w-4 h-4" />}>
+                  <input value={loginPassword} onChange={e => setLoginPassword(e.target.value)} type="password" placeholder="••••••••" className={cls} required />
                 </Field>
-                <button type="button" className="text-xs text-emerald-500 hover:underline w-full text-right">Ù†Ø³ÙŠØª ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±ØŸ</button>
+                <button type="button" className="text-xs text-emerald-500 hover:underline w-full text-right">نسيت كلمة المرور؟</button>
                 <button type="submit" disabled={loading}
                   className="w-full h-12 rounded-xl font-bold bg-gradient-to-l from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all mt-2">
-                  {loading ? "Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù‚Ù‚..." : "Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø¥Ù„Ù‰ Ù…Ù„ÙÙŠ Ø§Ù„Ø·Ø¨ÙŠ â†’"}
+                  {loading ? "جاري التحقق..." : "الدخول إلى ملفي الطبي →"}
                 </button>
-                <p className="text-center text-xs text-slate-400 mt-4">Ù…Ø­Ù…ÙŠ Ø¨ØªØ´ÙÙŠØ± AES-256 Â· Supabase Auth</p>
+                <p className="text-center text-xs text-slate-400 mt-4">محمي بتشفير AES-256 · Supabase Auth</p>
               </form>
             )}
 
-            {/* â”€â”€ SIGNUP â”€â”€ */}
+            {/* ── SIGNUP ── */}
             {!isLogin && (
               <div>
                 {/* Step indicators */}
@@ -225,54 +226,54 @@ export default function PatientLoginPage() {
 
                 {/* Step title */}
                 <div className="text-center mb-5">
-                  {step === 1 && <><h2 className="font-black text-slate-800 text-lg">Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ø£Ø³Ø§Ø³ÙŠØ©</h2><p className="text-slate-400 text-xs mt-1">Ø¨ÙŠØ§Ù†Ø§ØªÙƒ Ø§Ù„Ø´Ø®ØµÙŠØ© Ù„ÙØªØ­ Ù…Ù„ÙÙƒ Ø§Ù„Ø·Ø¨ÙŠ</p></>}
-                  {step === 2 && <><h2 className="font-black text-slate-800 text-lg">Ø§Ù„Ø³Ø¬Ù„ Ø§Ù„Ø·Ø¨ÙŠ</h2><p className="text-slate-400 text-xs mt-1">Ù…Ø¹Ù„ÙˆÙ…Ø§Øª ØµØ­ÙŠØ© Ø¶Ø±ÙˆØ±ÙŠØ© Ù„Ù„Ø·Ø¨ÙŠØ¨<span className="text-rose-500 mr-1">*</span></p></>}
-                  {step === 3 && <><h2 className="font-black text-slate-800 text-lg">Ø§Ù„ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ù†Ù‡Ø§Ø¦ÙŠ</h2><p className="text-slate-400 text-xs mt-1">Ø¢Ø®Ø± Ø®Ø·ÙˆØ© Ù„ØªÙØ¹ÙŠÙ„ Ù…Ù„ÙÙƒ Ø§Ù„Ø·Ø¨ÙŠ Ø§Ù„Ø±Ù‚Ù…ÙŠ</p></>}
+                  {step === 1 && <><h2 className="font-black text-slate-800 text-lg">المعلومات الأساسية</h2><p className="text-slate-400 text-xs mt-1">بياناتك الشخصية لفتح ملفك الطبي</p></>}
+                  {step === 2 && <><h2 className="font-black text-slate-800 text-lg">السجل الطبي</h2><p className="text-slate-400 text-xs mt-1">معلومات صحية ضرورية للطبيب<span className="text-rose-500 mr-1">*</span></p></>}
+                  {step === 3 && <><h2 className="font-black text-slate-800 text-lg">التأكيد النهائي</h2><p className="text-slate-400 text-xs mt-1">آخر خطوة لتفعيل ملفك الطبي الرقمي</p></>}
                 </div>
 
-                {/* â”€â”€â”€ STEP 1: Personal info â”€â”€â”€ */}
+                {/* ─── STEP 1: Personal info ─── */}
                 {step === 1 && (
                   <div className="space-y-4">
-                    <Field label="Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„ Ø¨Ø§Ù„Ø¹Ø±Ø¨ÙŠØ© *" icon={<User className="w-4 h-4" />}>
-                      <input value={form.fullNameAr} onChange={e => set("fullNameAr")(e.target.value)} placeholder="Ø£Ø­Ù…Ø¯ Ø¨Ù† Ø¹Ù„ÙŠ" className={cls} />
+                    <Field label="الاسم الكامل بالعربية *" icon={<User className="w-4 h-4" />}>
+                      <input value={form.fullNameAr} onChange={e => set("fullNameAr")(e.target.value)} placeholder="أحمد بن علي" className={cls} />
                     </Field>
-                    <Field label="Ø§Ù„Ø§Ø³Ù… Ø¨Ø§Ù„ÙØ±Ù†Ø³ÙŠØ©" icon={<Globe className="w-4 h-4" />}>
+                    <Field label="الاسم بالفرنسية" icon={<Globe className="w-4 h-4" />}>
                       <input value={form.fullNameFr} onChange={e => set("fullNameFr")(e.target.value)} placeholder="Ahmed Ben Ali" className={cls} />
                     </Field>
                     <div className="grid grid-cols-2 gap-3">
-                      <Field label="Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ *" icon={<Mail className="w-4 h-4" />}>
+                      <Field label="البريد الإلكتروني *" icon={<Mail className="w-4 h-4" />}>
                         <input value={form.email} onChange={e => set("email")(e.target.value)} type="email" placeholder="patient@example.com" className={cls} />
                       </Field>
-                      <Field label="ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± *" icon={<Lock className="w-4 h-4" />}>
-                        <input value={form.password} onChange={e => set("password")(e.target.value)} type="password" placeholder="6+ Ø£Ø­Ø±Ù" className={cls} />
+                      <Field label="كلمة المرور *" icon={<Lock className="w-4 h-4" />}>
+                        <input value={form.password} onChange={e => set("password")(e.target.value)} type="password" placeholder="6+ أحرف" className={cls} />
                       </Field>
                     </div>
-                    <Field label="Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ *" icon={<Phone className="w-4 h-4" />}>
+                    <Field label="رقم الهاتف *" icon={<Phone className="w-4 h-4" />}>
                       <input value={form.phone} onChange={e => set("phone")(e.target.value)} type="tel" placeholder="+213 6XX XX XX XX" className={cls} />
                     </Field>
                     <div className="grid grid-cols-2 gap-3">
-                      <Field label="ØªØ§Ø±ÙŠØ® Ø§Ù„Ù…ÙŠÙ„Ø§Ø¯" icon={<Calendar className="w-4 h-4" />}>
+                      <Field label="تاريخ الميلاد" icon={<Calendar className="w-4 h-4" />}>
                         <input value={form.dateOfBirth} onChange={e => set("dateOfBirth")(e.target.value)} type="date" className={cls} />
                       </Field>
-                      <Field label="Ø±Ù‚Ù… Ø¨Ø·Ø§Ù‚Ø© Ø§Ù„ØªØ¹Ø±ÙŠÙ" icon={<CreditCard className="w-4 h-4" />}>
-                        <input value={form.nationalId} onChange={e => set("nationalId")(e.target.value)} placeholder="18 Ø±Ù‚Ù…" className={cls} />
+                      <Field label="رقم بطاقة التعريف" icon={<CreditCard className="w-4 h-4" />}>
+                        <input value={form.nationalId} onChange={e => set("nationalId")(e.target.value)} placeholder="18 رقم" className={cls} />
                       </Field>
                     </div>
-                    <Field label="Ø±Ù‚Ù… Ø§Ù„Ø¶Ù…Ø§Ù† Ø§Ù„Ø§Ø¬ØªÙ…Ø§Ø¹ÙŠ" icon={<Shield className="w-4 h-4" />}>
-                      <input value={form.socialSecurity} onChange={e => set("socialSecurity")(e.target.value)} placeholder="Ø§Ø®ØªÙŠØ§Ø±ÙŠ â€” Ù„Ù„Ù…Ø¤Ù…Ù†ÙŠÙ† Ø§Ø¬ØªÙ…Ø§Ø¹ÙŠØ§Ù‹" className={cls} />
+                    <Field label="رقم الضمان الاجتماعي" icon={<Shield className="w-4 h-4" />}>
+                      <input value={form.socialSecurity} onChange={e => set("socialSecurity")(e.target.value)} placeholder="اختياري — للمؤمنين اجتماعياً" className={cls} />
                     </Field>
-                    <Field label="Ø§Ù„Ø¹Ù†ÙˆØ§Ù†" icon={<Activity className="w-4 h-4" />}>
-                      <input value={form.address} onChange={e => set("address")(e.target.value)} placeholder="Ø§Ù„ÙˆÙ„Ø§ÙŠØ©ØŒ Ø§Ù„Ø¨Ù„Ø¯ÙŠØ©ØŒ Ø§Ù„Ø­ÙŠ..." className={cls} />
+                    <Field label="العنوان" icon={<Activity className="w-4 h-4" />}>
+                      <input value={form.address} onChange={e => set("address")(e.target.value)} placeholder="الولاية، البلدية، الحي..." className={cls} />
                     </Field>
                   </div>
                 )}
 
-                {/* â”€â”€â”€ STEP 2: Medical History â”€â”€â”€ */}
+                {/* ─── STEP 2: Medical History ─── */}
                 {step === 2 && (
                   <div className="space-y-5">
                     {/* Blood group */}
                     <div>
-                      <label className="text-sm font-bold text-slate-600 mb-2 block">ÙØµÙŠÙ„Ø© Ø§Ù„Ø¯Ù…</label>
+                      <label className="text-sm font-bold text-slate-600 mb-2 block">فصيلة الدم</label>
                       <div className="flex flex-wrap gap-2">
                         {BLOOD_GROUPS.map(bg => (
                           <button key={bg} type="button" onClick={() => set("bloodGroup")(bg)}
@@ -287,7 +288,7 @@ export default function PatientLoginPage() {
                     <div>
                       <label className="text-sm font-bold text-slate-800 mb-2 block flex items-center gap-2">
                         <Activity className="w-4 h-4 text-emerald-600" />
-                        Ø§Ù„Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ù…Ø²Ù…Ù†Ø© <span className="text-rose-500">*</span>
+                        الأمراض المزمنة <span className="text-rose-500">*</span>
                       </label>
                       <div className="grid grid-cols-2 gap-2">
                         {CHRONIC_OPTIONS.map(d => (
@@ -304,19 +305,19 @@ export default function PatientLoginPage() {
 
                     {/* Surgeries */}
                     <div>
-                      <label className="text-sm font-bold text-slate-600 mb-1.5 block">Ø§Ù„Ø¹Ù…Ù„ÙŠØ§Øª Ø§Ù„Ø¬Ø±Ø§Ø­ÙŠØ© Ø§Ù„Ø³Ø§Ø¨Ù‚Ø©</label>
+                      <label className="text-sm font-bold text-slate-600 mb-1.5 block">العمليات الجراحية السابقة</label>
                       <textarea value={form.surgeries} onChange={e => set("surgeries")(e.target.value)}
-                        placeholder="Ù…Ø«Ø§Ù„: Ø§Ø³ØªØ¦ØµØ§Ù„ Ø§Ù„Ø²Ø§Ø¦Ø¯Ø© 2018ØŒ Ø¹Ù…Ù„ÙŠØ© Ø§Ù„Ù‚Ù„Ø¨ 2022..." rows={2}
+                        placeholder="مثال: استئصال الزائدة 2018، عملية القلب 2022..." rows={2}
                         className="w-full px-4 py-3 bg-white/70 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 outline-none text-sm text-slate-700 resize-none" />
                     </div>
 
                     {/* Family history */}
                     <div>
                       <label className="text-sm font-bold text-slate-600 mb-1.5 block flex items-center gap-2">
-                        <Shield className="w-4 h-4" /> Ø§Ù„Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„ÙˆØ±Ø§Ø«ÙŠØ© / Ø§Ù„Ø¹Ø§Ø¦Ù„ÙŠØ©
+                        <Shield className="w-4 h-4" /> الأمراض الوراثية / العائلية
                       </label>
                       <textarea value={form.familyHistory} onChange={e => set("familyHistory")(e.target.value)}
-                        placeholder="Ù…Ø«Ø§Ù„: Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ù‚Ù„Ø¨ ÙÙŠ Ø§Ù„Ø¹Ø§Ø¦Ù„Ø©ØŒ Ø¯Ø§Ø¡ Ø§Ù„Ø³ÙƒØ±ÙŠ..." rows={2}
+                        placeholder="مثال: أمراض القلب في العائلة، داء السكري..." rows={2}
                         className="w-full px-4 py-3 bg-white/70 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 outline-none text-sm text-slate-700 resize-none" />
                     </div>
 
@@ -324,7 +325,7 @@ export default function PatientLoginPage() {
                     <div>
                       <label className="text-sm font-bold text-slate-800 mb-2 block flex items-center gap-2">
                         <AlertTriangle className="w-4 h-4 text-amber-500" />
-                        Ø­Ø³Ø§Ø³ÙŠØ© Ø§Ù„Ø£Ø¯ÙˆÙŠØ©
+                        حساسية الأدوية
                       </label>
                       <div className="flex flex-wrap gap-2 mb-2">
                         {COMMON_ALLERGIES.map(al => (
@@ -338,28 +339,28 @@ export default function PatientLoginPage() {
 
                     {/* Food allergies */}
                     <div>
-                      <label className="text-sm font-bold text-slate-600 mb-1.5 block">Ø­Ø³Ø§Ø³ÙŠØ© Ø§Ù„Ø£Ø·Ø¹Ù…Ø©</label>
+                      <label className="text-sm font-bold text-slate-600 mb-1.5 block">حساسية الأطعمة</label>
                       <input value={form.foodAllergies} onChange={e => set("foodAllergies")(e.target.value)}
-                        placeholder="Ù…Ø«Ø§Ù„: Ø§Ù„ÙÙˆÙ„ Ø§Ù„Ø³ÙˆØ¯Ø§Ù†ÙŠØŒ Ù„Ø­Ù… Ø§Ù„Ø¨Ø­Ø±..." className={cls} />
+                        placeholder="مثال: الفول السوداني، لحم البحر..." className={cls} />
                     </div>
                   </div>
                 )}
 
-                {/* â”€â”€â”€ STEP 3: Confirmation â”€â”€â”€ */}
+                {/* ─── STEP 3: Confirmation ─── */}
                 {step === 3 && (
                   <div className="space-y-5">
                     {/* Summary */}
                     <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-sm">
-                      <p className="font-black text-emerald-800 mb-3">ðŸ“‹ Ù…Ù„Ø®Øµ Ù…Ù„ÙÙƒ Ø§Ù„Ø·Ø¨ÙŠ</p>
+                      <p className="font-black text-emerald-800 mb-3">📋 ملخص ملفك الطبي</p>
                       <div className="space-y-1.5 text-slate-700">
-                        <p><span className="font-bold">Ø§Ù„Ø§Ø³Ù…:</span> {form.fullNameAr}</p>
-                        <p><span className="font-bold">Ø§Ù„Ù‡Ø§ØªÙ:</span> {form.phone}</p>
-                        {form.bloodGroup && <p><span className="font-bold">ÙØµÙŠÙ„Ø© Ø§Ù„Ø¯Ù…:</span> {form.bloodGroup}</p>}
+                        <p><span className="font-bold">الاسم:</span> {form.fullNameAr}</p>
+                        <p><span className="font-bold">الهاتف:</span> {form.phone}</p>
+                        {form.bloodGroup && <p><span className="font-bold">فصيلة الدم:</span> {form.bloodGroup}</p>}
                         {form.chronicDiseases.length > 0 && (
-                          <p><span className="font-bold">Ø§Ù„Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ù…Ø²Ù…Ù†Ø©:</span> {form.chronicDiseases.join("ØŒ ")}</p>
+                          <p><span className="font-bold">الأمراض المزمنة:</span> {form.chronicDiseases.join("، ")}</p>
                         )}
                         {form.drugAllergies.length > 0 && (
-                          <p><span className="font-bold text-amber-700">Ø­Ø³Ø§Ø³ÙŠØ© Ø§Ù„Ø£Ø¯ÙˆÙŠØ©:</span> {form.drugAllergies.join("ØŒ ")}</p>
+                          <p><span className="font-bold text-amber-700">حساسية الأدوية:</span> {form.drugAllergies.join("، ")}</p>
                         )}
                       </div>
                     </div>
@@ -369,8 +370,8 @@ export default function PatientLoginPage() {
                       <input type="checkbox" checked={form.hadPhysicalExam} onChange={e => set("hadPhysicalExam")(e.target.checked)}
                         className="mt-1 w-4 h-4 accent-emerald-600 flex-shrink-0" />
                       <div>
-                        <p className="text-sm font-bold text-slate-800">Ù„Ù‚Ø¯ Ø£Ø¬Ø±ÙŠØª ÙØ­ØµØ§Ù‹ Ø·Ø¨ÙŠØ§Ù‹ Ø­Ø¶ÙˆØ±ÙŠØ§Ù‹ Ù…Ø³Ø¨Ù‚Ø§Ù‹</p>
-                        <p className="text-xs text-slate-500 mt-0.5">Ù‡Ø°Ø§ ÙŠÙ…Ù†Ø­ Ø§Ù„Ø·Ø¨ÙŠØ¨ ØµÙ„Ø§Ø­ÙŠØ© ØªØ¬Ø¯ÙŠØ¯ ÙˆØµÙØªÙƒ Ø¹Ù† Ø¨ÙØ¹Ø¯ Ø£Ø³Ø±Ø¹</p>
+                        <p className="text-sm font-bold text-slate-800">لقد أجريت فحصاً طبياً حضورياً مسبقاً</p>
+                        <p className="text-xs text-slate-500 mt-0.5">هذا يمنح الطبيب صلاحية تجديد وصفتك عن بُعد أسرع</p>
                       </div>
                     </label>
 
@@ -379,16 +380,16 @@ export default function PatientLoginPage() {
                       <input type="checkbox" checked={form.acceptTerms} onChange={e => set("acceptTerms")(e.target.checked)}
                         className="mt-1 w-4 h-4 accent-emerald-600 flex-shrink-0" />
                       <p className="text-xs text-slate-600 leading-relaxed">
-                        Ø£Ù‚Ø± Ø¨Ø£Ù† Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ù…ÙØ¯Ø®Ù„Ø© ØµØ­ÙŠØ­Ø© ÙˆØ£ØªØ­Ù…Ù„ Ø§Ù„Ù…Ø³Ø¤ÙˆÙ„ÙŠØ© Ø¹Ù†Ù‡Ø§. Ø£ÙˆØ§ÙÙ‚ Ø¹Ù„Ù‰ Ø£Ù† <strong>Ù…Ù†ØµØ© Ø¹Ù†Ø§ÙŠØ©</strong> Ù‡ÙŠ ÙˆØ³ÙŠØ· ØªÙˆØ§ØµÙ„ Ø·Ø¨ÙŠ ÙÙ‚Ø·ØŒ ÙˆÙ„Ø§ ØªÙØ¹ÙˆÙ‘Ø¶ Ø§Ù„Ø·Ø¨ÙŠØ¨ ÙÙŠ Ù‚Ø±Ø§Ø±Ø§ØªÙ‡ Ø§Ù„Ø·Ø¨ÙŠØ©. Ø§Ù„Ù…Ù†ØµØ© Ù…Ø±Ø®ØµØ© Ù…Ù† <strong>ÙˆØ²Ø§Ø±Ø© Ø§Ù„ØµØ­Ø© Ø§Ù„Ø¬Ø²Ø§Ø¦Ø±ÙŠØ©</strong>.
+                        أقر بأن المعلومات المُدخلة صحيحة وأتحمل المسؤولية عنها. أوافق على أن <strong>منصة عناية</strong> هي وسيط تواصل طبي فقط، ولا تُعوّض الطبيب في قراراته الطبية. المنصة مرخصة من <strong>وزارة الصحة الجزائرية</strong>.
                       </p>
                     </label>
 
                     {/* Quick stats */}
                     <div className="grid grid-cols-3 gap-2">
                       {[
-                        { icon: "ðŸ”", label: "Ø¨ÙŠØ§Ù†Ø§Øª Ù…Ø´ÙØ±Ø©" },
-                        { icon: "ðŸ‘¨â€âš•ï¸", label: "Ø£Ø·Ø¨Ø§Ø¡ Ù…Ø¹ØªÙ…Ø¯ÙˆÙ†" },
-                        { icon: "ðŸŒŸ", label: "24/7 Ù…ØªØ§Ø­" },
+                        { icon: "🔐", label: "بيانات مشفرة" },
+                        { icon: "👨‍⚕️", label: "أطباء معتمدون" },
+                        { icon: "🌟", label: "24/7 متاح" },
                       ].map(f => (
                         <div key={f.label} className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 text-center">
                           <div className="text-lg mb-1">{f.icon}</div>
@@ -404,28 +405,28 @@ export default function PatientLoginPage() {
                   {step > 1 && (
                     <button type="button" onClick={() => { setError(null); setStep(s => (s - 1) as Step); }}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50">
-                      <ChevronRight className="w-4 h-4" /> Ø§Ù„Ø³Ø§Ø¨Ù‚
+                      <ChevronRight className="w-4 h-4" /> السابق
                     </button>
                   )}
                   {step < 3 ? (
                     <button type="button" onClick={nextStep}
                       className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-l from-emerald-600 to-teal-500 text-white text-sm font-bold shadow-lg">
-                      Ø§Ù„ØªØ§Ù„ÙŠ <ChevronLeft className="w-4 h-4" />
+                      التالي <ChevronLeft className="w-4 h-4" />
                     </button>
                   ) : (
                     <button type="button" onClick={handleSignup} disabled={loading || !form.acceptTerms}
                       className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-l from-emerald-600 to-teal-500 text-white text-sm font-bold shadow-lg disabled:opacity-50">
                       <CheckCircle className="w-4 h-4" />
-                      {loading ? "Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡..." : "ÙØªØ­ Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø·Ø¨ÙŠ"}
+                      {loading ? "جاري الإنشاء..." : "فتح الملف الطبي"}
                     </button>
                   )}
                 </div>
-                {step === 2 && <p className="text-center text-xs text-slate-400 mt-3">Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ø·Ø¨ÙŠØ© ØªÙØ­ÙØ¸ Ø¨Ø´ÙƒÙ„ Ù…Ø´ÙØ± ÙˆÙ„Ø§ ØªÙØ´Ø§Ø±Ùƒ Ø¥Ù„Ø§ Ù…Ø¹ Ø·Ø¨ÙŠØ¨Ùƒ</p>}
+                {step === 2 && <p className="text-center text-xs text-slate-400 mt-3">المعلومات الطبية تُحفظ بشكل مشفر ولا تُشارك إلا مع طبيبك</p>}
               </div>
             )}
           </div>
         </div>
-        <p className="text-center text-xs text-slate-400 mt-5">Ù…Ù†ØµØ© Ø¹Ù†Ø§ÙŠØ© Â© {new Date().getFullYear()} â€” Ù…Ø±Ø®ØµØ© Ù…Ù† ÙˆØ²Ø§Ø±Ø© Ø§Ù„ØµØ­Ø©</p>
+        <p className="text-center text-xs text-slate-400 mt-5">منصة عناية © {new Date().getFullYear()} — مرخصة من وزارة الصحة</p>
       </div>
     </div>
   );

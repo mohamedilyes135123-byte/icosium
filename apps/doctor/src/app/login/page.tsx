@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
+
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -12,53 +13,53 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ────────────────────────────────────────────────────────────────────
 type Step = 1 | 2 | 3;
 
 interface SignupFormData {
-  // Step 1 â€” Required
+  // Step 1 — Required
   fullNameAr: string;
   fullNameFr: string;
   email: string;
   password: string;
   phone: string;
-  // Step 2 â€” Optional / Professional
+  // Step 2 — Optional / Professional
   dateOfBirth: string;
   nationalId: string;
   specialty: string;
   licenseNumber: string;
   workplaceAddress: string;
   yearsOfExperience: string;
-  // Step 3 â€” Optional / Payment & Agreements
+  // Step 3 — Optional / Payment & Agreements
   ccp: string;
   acceptTerms: boolean;
   acceptPlatformRules: boolean;
 }
 
 const SPECIALTIES = [
-  "Ø·Ø¨ Ø¹Ø§Ù…",
-  "Ø·Ø¨ Ø§Ù„Ø£Ø·ÙØ§Ù„",
-  "Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ù‚Ù„Ø¨ ÙˆØ§Ù„Ø£ÙˆØ¹ÙŠØ© Ø§Ù„Ø¯Ù…ÙˆÙŠØ©",
-  "Ø·Ø¨ Ø§Ù„Ø¬Ù‡Ø§Ø² Ø§Ù„Ù‡Ø¶Ù…ÙŠ",
-  "Ø·Ø¨ Ø§Ù„Ø£Ø¹ØµØ§Ø¨",
-  "Ø·Ø¨ Ø§Ù„Ø¹ÙŠÙˆÙ†",
-  "Ø·Ø¨ Ø§Ù„Ø£Ù†Ù ÙˆØ§Ù„Ø£Ø°Ù† ÙˆØ§Ù„Ø­Ù†Ø¬Ø±Ø©",
-  "Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ø¬Ù„Ø¯",
-  "Ø·Ø¨ Ø§Ù„Ø¹Ø¸Ø§Ù… ÙˆØ§Ù„Ù…ÙØ§ØµÙ„",
-  "Ø§Ù„Ø·Ø¨ Ø§Ù„Ù†ÙØ³ÙŠ",
-  "Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ù†Ø³Ø§Ø¡ ÙˆØ§Ù„ØªÙˆÙ„ÙŠØ¯",
-  "Ø·Ø¨ Ø§Ù„Ø·ÙˆØ§Ø±Ø¦",
-  "Ø§Ù„Ø¬Ø±Ø§Ø­Ø© Ø§Ù„Ø¹Ø§Ù…Ø©",
-  "Ø·Ø¨ Ø§Ù„Ø£Ø³Ù†Ø§Ù†",
-  "Ø¹Ù„Ù… Ø§Ù„Ø£Ø´Ø¹Ø©",
-  "Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„ÙƒÙ„Ù‰",
-  "Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ø±Ø¦Ø©",
-  "Ø§Ù„ØºØ¯Ø¯ Ø§Ù„ØµÙ…Ø§Ø¡",
-  "Ø·Ø¨ Ø§Ù„Ø£ÙˆØ±Ø§Ù…",
-  "Ø£Ø®Ø±Ù‰",
+  "طب عام",
+  "طب الأطفال",
+  "أمراض القلب والأوعية الدموية",
+  "طب الجهاز الهضمي",
+  "طب الأعصاب",
+  "طب العيون",
+  "طب الأنف والأذن والحنجرة",
+  "أمراض الجلد",
+  "طب العظام والمفاصل",
+  "الطب النفسي",
+  "أمراض النساء والتوليد",
+  "طب الطوارئ",
+  "الجراحة العامة",
+  "طب الأسنان",
+  "علم الأشعة",
+  "أمراض الكلى",
+  "أمراض الرئة",
+  "الغدد الصماء",
+  "طب الأورام",
+  "أخرى",
 ];
 
-// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function InputField({
   icon, label, placeholder, value, onChange, type = "text", required = false, children
@@ -76,7 +77,7 @@ function InputField({
     <div className="space-y-1.5">
       <label className="block text-sm font-semibold text-slate-600 text-right">
         {label} {required && <span className="text-rose-500">*</span>}
-        {!required && <span className="text-slate-400 text-xs font-normal mr-1">(Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</span>}
+        {!required && <span className="text-slate-400 text-xs font-normal mr-1">(اختياري)</span>}
       </label>
       <div className="relative">
         {icon && (
@@ -108,7 +109,7 @@ function SelectField({ label, value, onChange, required = false, options }: {
     <div className="space-y-1.5">
       <label className="block text-sm font-semibold text-slate-600 text-right">
         {label} {required && <span className="text-rose-500">*</span>}
-        {!required && <span className="text-slate-400 text-xs font-normal mr-1">(Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</span>}
+        {!required && <span className="text-slate-400 text-xs font-normal mr-1">(اختياري)</span>}
       </label>
       <select
         value={value}
@@ -118,14 +119,14 @@ function SelectField({ label, value, onChange, required = false, options }: {
           focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all 
           text-right text-slate-800 text-sm appearance-none cursor-pointer"
       >
-        <option value="">-- Ø§Ø®ØªØ± Ø§Ù„ØªØ®ØµØµ --</option>
+        <option value="">-- اختر التخصص --</option>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
     </div>
   );
 }
 
-// â”€â”€â”€ Step Indicators â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step Indicators ──────────────────────────────────────────────────────────
 function StepIndicator({ step, current }: { step: number; current: Step }) {
   const isCompleted = current > step;
   const isActive = current === step;
@@ -139,7 +140,7 @@ function StepIndicator({ step, current }: { step: number; current: Step }) {
   );
 }
 
-// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [step, setStep] = useState<Step>(1);
@@ -165,7 +166,7 @@ export default function LoginPage() {
   const set = (field: keyof SignupFormData) => (value: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  // â”€â”€ Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Login ──────────────────────────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -178,7 +179,7 @@ export default function LoginPage() {
         password: "123456",
       });
       if (authError) {
-        setError("Ù„Ù… ÙŠØªÙ… Ø±ÙØ¹ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª (Seed). Ø¬Ø±Ø¨ Ø¥Ø¯Ø®Ø§Ù„Ù‡Ø§ ÙŠØ¯ÙˆÙŠØ§Ù‹.");
+        setError("لم يتم رفع البيانات (Seed). جرب إدخالها يدوياً.");
         setLoading(false);
         return;
       }
@@ -193,7 +194,7 @@ export default function LoginPage() {
     });
 
     if (authError) {
-      setError("ÙØ´Ù„ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„. ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ø¨Ø±ÙŠØ¯ ÙˆÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±.");
+      setError("فشل تسجيل الدخول. تأكد من البريد وكلمة المرور.");
       setLoading(false);
       return;
     }
@@ -202,15 +203,15 @@ export default function LoginPage() {
     if (userRole === "doctor") {
       router.push("/dashboard");
     } else {
-      setError("ÙŠØ±Ø¬Ù‰ Ø§Ù„ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù…Ù† Ø§Ù„Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ù…Ø®ØµØµØ© Ù„Ø¯ÙˆØ±Ùƒ.");
+      setError("يرجى التأكد من الدخول من البوابة المخصصة لدورك.");
       setLoading(false);
     }
   };
 
-  // â”€â”€ Signup final submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Signup final submit ────────────────────────────────────────────────────
   const handleSignup = async () => {
     if (!form.acceptTerms || !form.acceptPlatformRules) {
-      setError("ÙŠØ¬Ø¨ Ø§Ù„Ù…ÙˆØ§ÙÙ‚Ø© Ø¹Ù„Ù‰ Ø§Ù„Ø´Ø±ÙˆØ· Ù„Ø¥ØªÙ…Ø§Ù… Ø§Ù„ØªØ³Ø¬ÙŠÙ„.");
+      setError("يجب الموافقة على الشروط لإتمام التسجيل.");
       return;
     }
     setLoading(true);
@@ -243,21 +244,21 @@ export default function LoginPage() {
       return;
     }
 
-    setSuccessMsg("ðŸŽ‰ ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨Ùƒ Ø¨Ù†Ø¬Ø§Ø­! Ù‚Ù… Ø¨ØªØ£ÙƒÙŠØ¯ Ø¨Ø±ÙŠØ¯Ùƒ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ Ø«Ù… Ø³Ø¬Ù‘Ù„ Ø§Ù„Ø¯Ø®ÙˆÙ„.");
+    setSuccessMsg("🎉 تم إنشاء حسابك بنجاح! قم بتأكيد بريدك الإلكتروني ثم سجّل الدخول.");
     setIsLogin(true);
     setStep(1);
     setLoading(false);
   };
 
-  // â”€â”€ Step navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Step navigation ────────────────────────────────────────────────────────
   const nextStep = () => {
     if (step === 1) {
       if (!form.fullNameAr || !form.email || !form.password || !form.phone) {
-        setError("ÙŠØ±Ø¬Ù‰ Ù…Ù„Ø¡ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ø§Ù„Ø¥Ù„Ø²Ø§Ù…ÙŠØ© (Ø§Ù„Ø§Ø³Ù…ØŒ Ø§Ù„Ø¥ÙŠÙ…ÙŠÙ„ØŒ ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±ØŒ Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ).");
+        setError("يرجى ملء جميع الحقول الإلزامية (الاسم، الإيميل، كلمة المرور، رقم الهاتف).");
         return;
       }
       if (form.password.length < 6) {
-        setError("ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± ÙŠØ¬Ø¨ Ø£Ù† ØªÙƒÙˆÙ† 6 Ø£Ø­Ø±Ù Ø¹Ù„Ù‰ Ø§Ù„Ø£Ù‚Ù„.");
+        setError("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
         return;
       }
     }
@@ -270,7 +271,7 @@ export default function LoginPage() {
     setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
   };
 
-  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" dir="rtl">
       {/* Animated background */}
@@ -286,15 +287,15 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600 to-cyan-500 shadow-2xl shadow-blue-500/40 mb-4">
             <Stethoscope className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Ø¹Ù†Ø§ÙŠØ©</h1>
-          <p className="text-blue-600 font-semibold text-sm mt-1">Ø·Ø¨ÙŠØ¨Ùƒ ÙÙŠ Ø¨ÙŠØªÙƒ â€” Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ø£Ø·Ø¨Ø§Ø¡</p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">عناية</h1>
+          <p className="text-blue-600 font-semibold text-sm mt-1">طبيبك في بيتك — بوابة الأطباء</p>
           <p className="text-slate-400 text-xs mt-1">
-            Ù…Ù†ØµØ© Ù…Ø±Ø®ØµØ© Ù…Ù† ÙˆØ²Ø§Ø±Ø© Ø§Ù„ØµØ­Ø© Ø§Ù„Ø¬Ø²Ø§Ø¦Ø±ÙŠØ©
+            منصة مرخصة من وزارة الصحة الجزائرية
             <BadgeCheck className="inline-block w-3.5 h-3.5 text-blue-500 mx-1" />
           </p>
         </div>
 
-        {/* â”€â”€ PANEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── PANEL ─────────────────────────────────────────────────── */}
         <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-slate-200/60 border border-white/60 overflow-hidden">
 
           {/* Toggle tabs */}
@@ -303,13 +304,13 @@ export default function LoginPage() {
               onClick={() => { setIsLogin(true); setError(null); setStep(1); }}
               className={`flex-1 py-4 text-sm font-bold transition-colors ${isLogin ? "text-blue-700 border-b-2 border-blue-600 bg-blue-50/50" : "text-slate-500 hover:text-slate-700"}`}
             >
-              ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„
+              تسجيل الدخول
             </button>
             <button
               onClick={() => { setIsLogin(false); setError(null); setStep(1); }}
               className={`flex-1 py-4 text-sm font-bold transition-colors ${!isLogin ? "text-blue-700 border-b-2 border-blue-600 bg-blue-50/50" : "text-slate-500 hover:text-slate-700"}`}
             >
-              Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø¬Ø¯ÙŠØ¯
+              إنشاء حساب جديد
             </button>
           </div>
 
@@ -328,12 +329,12 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* â”€â”€ LOGIN FORM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* ── LOGIN FORM ─────────────────────────────────────────── */}
             {isLogin && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <InputField
                   icon={<Mail className="w-4 h-4" />}
-                  label="Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ"
+                  label="البريد الإلكتروني"
                   placeholder="doctor@example.com"
                   value={loginEmail}
                   onChange={setLoginEmail}
@@ -342,33 +343,33 @@ export default function LoginPage() {
                 />
                 <InputField
                   icon={<Lock className="w-4 h-4" />}
-                  label="ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±"
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                  label="كلمة المرور"
+                  placeholder="••••••••"
                   value={loginPassword}
                   onChange={setLoginPassword}
                   type="password"
                   required
                 />
                 <button type="button" className="text-xs text-blue-500 hover:underline w-full text-right mt-1">
-                  Ù†Ø³ÙŠØª ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±ØŸ
+                  نسيت كلمة المرور؟
                 </button>
                 <Button
                   type="submit"
                   disabled={loading}
                   className="w-full h-12 rounded-xl text-base font-bold bg-gradient-to-l from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-lg shadow-blue-500/30 mt-2"
                 >
-                  {loading ? "Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù‚Ù‚..." : "Ø¯Ø®ÙˆÙ„ Ø§Ù„Ø¹ÙŠØ§Ø¯Ø© Ø§Ù„Ø±Ù‚Ù…ÙŠØ© â†’"}
+                  {loading ? "جاري التحقق..." : "دخول العيادة الرقمية →"}
                 </Button>
                 <p className="text-center text-xs text-slate-400 mt-4">
-                  Ù…Ø­Ù…ÙŠ Ø¨ØªØ´ÙÙŠØ± AES-256 Â· Supabase Auth
+                  محمي بتشفير AES-256 · Supabase Auth
                 </p>
               </form>
             )}
 
-            {/* â”€â”€ SIGNUP FLOW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* ── SIGNUP FLOW ────────────────────────────────────────── */}
             {!isLogin && (
               <div>
-                {/* Step indicator â€” RTL: Step 1 right, Step 3 left */}
+                {/* Step indicator — RTL: Step 1 right, Step 3 left */}
                 <div className="flex flex-row-reverse items-center justify-center gap-3 mb-7">
                   <StepIndicator step={1} current={step} />
                   <div className={`h-0.5 w-12 rounded transition-all ${step > 1 ? "bg-blue-500" : "bg-slate-200"}`} />
@@ -380,40 +381,40 @@ export default function LoginPage() {
                 {/* Step titles */}
                 <div className="text-center mb-5">
                   {step === 1 && <>
-                    <h2 className="font-bold text-slate-800 text-lg">Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ø£Ø³Ø§Ø³ÙŠØ©</h2>
-                    <p className="text-slate-500 text-xs mt-1">Ø§Ù„Ø­Ù‚ÙˆÙ„ Ø§Ù„Ù…Ø·Ù„ÙˆØ¨Ø© Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨Ùƒ</p>
+                    <h2 className="font-bold text-slate-800 text-lg">المعلومات الأساسية</h2>
+                    <p className="text-slate-500 text-xs mt-1">الحقول المطلوبة لإنشاء حسابك</p>
                   </>}
                   {step === 2 && <>
-                    <h2 className="font-bold text-slate-800 text-lg">Ø§Ù„Ù…Ù„Ù Ø§Ù„Ù…Ù‡Ù†ÙŠ</h2>
-                    <p className="text-slate-500 text-xs mt-1">Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø¥Ø¶Ø§ÙÙŠØ© Ù„ØªØ¹Ø²ÙŠØ² Ø¸Ù‡ÙˆØ±Ùƒ ÙˆÙ…ØµØ¯Ø§Ù‚ÙŠØªÙƒ <span className="text-blue-500">(Ø§Ø®ØªÙŠØ§Ø±ÙŠØ©)</span></p>
+                    <h2 className="font-bold text-slate-800 text-lg">الملف المهني</h2>
+                    <p className="text-slate-500 text-xs mt-1">معلومات إضافية لتعزيز ظهورك ومصداقيتك <span className="text-blue-500">(اختيارية)</span></p>
                   </>}
                   {step === 3 && <>
-                    <h2 className="font-bold text-slate-800 text-lg">Ø§Ù„ØªØ£ÙƒÙŠØ¯ ÙˆØ§Ù„Ø´Ø±ÙˆØ·</h2>
-                    <p className="text-slate-500 text-xs mt-1">Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ø¯ÙØ¹ ÙˆØ§Ù„Ù…ÙˆØ§ÙÙ‚Ø© Ø¹Ù„Ù‰ Ø¨Ù†ÙˆØ¯ Ø§Ù„Ù…Ù†ØµØ©</p>
+                    <h2 className="font-bold text-slate-800 text-lg">التأكيد والشروط</h2>
+                    <p className="text-slate-500 text-xs mt-1">معلومات الدفع والموافقة على بنود المنصة</p>
                   </>}
                 </div>
 
-                {/* â”€â”€ STEP 1 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+                {/* ── STEP 1 ─────────────────────────────────────────── */}
                 {step === 1 && (
                   <div className="space-y-4">
                     <InputField
                       icon={<User className="w-4 h-4" />}
-                      label="Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„ Ø¨Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©"
-                      placeholder="Ø¯. Ù…Ø­Ù…Ø¯ Ø¨Ù† Ø¹Ù„ÙŠ"
+                      label="الاسم الكامل بالعربية"
+                      placeholder="د. محمد بن علي"
                       value={form.fullNameAr}
                       onChange={set("fullNameAr")}
                       required
                     />
                     <InputField
                       icon={<Globe className="w-4 h-4" />}
-                      label="Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„ Ø¨Ø§Ù„ÙØ±Ù†Ø³ÙŠØ©"
+                      label="الاسم الكامل بالفرنسية"
                       placeholder="Dr. Mohamed Ben Ali"
                       value={form.fullNameFr}
                       onChange={set("fullNameFr")}
                     />
                     <InputField
                       icon={<Mail className="w-4 h-4" />}
-                      label="Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ"
+                      label="البريد الإلكتروني"
                       placeholder="doctor@example.com"
                       value={form.email}
                       onChange={set("email")}
@@ -422,8 +423,8 @@ export default function LoginPage() {
                     />
                     <InputField
                       icon={<Lock className="w-4 h-4" />}
-                      label="ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±"
-                      placeholder="6 Ø£Ø­Ø±Ù Ø¹Ù„Ù‰ Ø§Ù„Ø£Ù‚Ù„"
+                      label="كلمة المرور"
+                      placeholder="6 أحرف على الأقل"
                       value={form.password}
                       onChange={set("password")}
                       type="password"
@@ -431,7 +432,7 @@ export default function LoginPage() {
                     />
                     <InputField
                       icon={<Phone className="w-4 h-4" />}
-                      label="Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ"
+                      label="رقم الهاتف"
                       placeholder="+213 6XX XX XX XX"
                       value={form.phone}
                       onChange={set("phone")}
@@ -441,25 +442,25 @@ export default function LoginPage() {
                   </div>
                 )}
 
-                {/* â”€â”€ STEP 2 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+                {/* ── STEP 2 ─────────────────────────────────────────── */}
                 {step === 2 && (
                   <div className="space-y-4">
                     <SelectField
-                      label="Ø§Ù„ØªØ®ØµØµ Ø§Ù„Ø·Ø¨ÙŠ"
+                      label="التخصص الطبي"
                       value={form.specialty}
                       onChange={set("specialty")}
                       options={SPECIALTIES}
                     />
                     <InputField
                       icon={<Award className="w-4 h-4" />}
-                      label="Ø±Ù‚Ù… Ø§Ù„ØªØ³Ø¬ÙŠÙ„ ÙÙŠ Ù†Ù‚Ø§Ø¨Ø© Ø§Ù„Ø£Ø·Ø¨Ø§Ø¡"
+                      label="رقم التسجيل في نقابة الأطباء"
                       placeholder="ONMC-XXXXX"
                       value={form.licenseNumber}
                       onChange={set("licenseNumber")}
                     />
                     <InputField
                       icon={<Calendar className="w-4 h-4" />}
-                      label="ØªØ§Ø±ÙŠØ® Ø§Ù„Ù…ÙŠÙ„Ø§Ø¯"
+                      label="تاريخ الميلاد"
                       placeholder="YYYY-MM-DD"
                       value={form.dateOfBirth}
                       onChange={set("dateOfBirth")}
@@ -467,22 +468,22 @@ export default function LoginPage() {
                     />
                     <InputField
                       icon={<CreditCard className="w-4 h-4" />}
-                      label="Ø±Ù‚Ù… Ø¨Ø·Ø§Ù‚Ø© Ø§Ù„ØªØ¹Ø±ÙŠÙ Ø§Ù„ÙˆØ·Ù†ÙŠØ©"
+                      label="رقم بطاقة التعريف الوطنية"
                       placeholder="XXXXXXXXXX"
                       value={form.nationalId}
                       onChange={set("nationalId")}
                     />
                     <InputField
                       icon={<Building2 className="w-4 h-4" />}
-                      label="Ù…ÙƒØ§Ù† Ø§Ù„Ø¹Ù…Ù„ / Ø§Ù„Ø¹ÙŠØ§Ø¯Ø©"
-                      placeholder="Ø¹ÙŠØ§Ø¯Ø© Ø¯ÙƒØªÙˆØ± ...ØŒ Ø´Ø§Ø±Ø¹ ..."
+                      label="مكان العمل / العيادة"
+                      placeholder="عيادة دكتور ...، شارع ..."
                       value={form.workplaceAddress}
                       onChange={set("workplaceAddress")}
                     />
                     <InputField
                       icon={<Stethoscope className="w-4 h-4" />}
-                      label="Ø³Ù†ÙˆØ§Øª Ø§Ù„Ø®Ø¨Ø±Ø©"
-                      placeholder="Ø¹Ø¯Ø¯ Ø³Ù†ÙˆØ§Øª Ø§Ù„Ø®Ø¨Ø±Ø©"
+                      label="سنوات الخبرة"
+                      placeholder="عدد سنوات الخبرة"
                       value={form.yearsOfExperience}
                       onChange={set("yearsOfExperience")}
                       type="number"
@@ -491,38 +492,38 @@ export default function LoginPage() {
                     {/* Document upload hint */}
                     <div className="rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/40 p-4 flex flex-col items-center gap-2 text-center">
                       <Upload className="w-6 h-6 text-blue-400" />
-                      <p className="text-xs text-slate-600 font-semibold">Ø±ÙØ¹ Ø´Ù‡Ø§Ø¯Ø© Ø§Ù„Ø¯ÙƒØªÙˆØ±Ø§Ù‡ / Ø´Ù‡Ø§Ø¯Ø© Ø§Ù„Ø¹Ù…Ù„</p>
+                      <p className="text-xs text-slate-600 font-semibold">رفع شهادة الدكتوراه / شهادة العمل</p>
                       <p className="text-xs text-slate-400">
-                        Ø§Ø®ØªÙŠØ§Ø±ÙŠ Ø§Ù„Ø¢Ù† â€” ÙŠÙ…ÙƒÙ† Ø¥Ø¶Ø§ÙØªÙ‡Ø§ Ù„Ø§Ø­Ù‚Ø§Ù‹ Ù…Ù† Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ù„ØªÙØ¹ÙŠÙ„ Ø§Ù„ÙˆØµÙØ© Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ© Ø§Ù„ÙƒØ§Ù…Ù„Ø©
+                        اختياري الآن — يمكن إضافتها لاحقاً من الإعدادات لتفعيل الوصفة الإلكترونية الكاملة
                       </p>
                       <button
                         type="button"
                         className="mt-1 text-xs bg-blue-100 text-blue-700 font-bold px-4 py-2 rounded-xl hover:bg-blue-200 transition-colors"
                       >
-                        Ø±ÙØ¹ Ø§Ù„Ù…Ù„ÙØ§Øª (Ù‚Ø±ÙŠØ¨Ø§Ù‹)
+                        رفع الملفات (قريباً)
                       </button>
                     </div>
                   </div>
                 )}
 
-                {/* â”€â”€ STEP 3 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+                {/* ── STEP 3 ─────────────────────────────────────────── */}
                 {step === 3 && (
                   <div className="space-y-5">
                     <InputField
                       icon={<CreditCard className="w-4 h-4" />}
-                      label="Ø±Ù‚Ù… Ø­Ø³Ø§Ø¨ CCP / Ø¨Ø±ÙŠØ¯ Ù…ÙˆØ¨"
-                      placeholder="Ø±Ù‚Ù… CCP Ø£Ùˆ Ø¨Ø±ÙŠØ¯ Ù…ÙˆØ¨ Ù„Ù„Ù…Ø¯ÙÙˆØ¹Ø§Øª"
+                      label="رقم حساب CCP / بريد موب"
+                      placeholder="رقم CCP أو بريد موب للمدفوعات"
                       value={form.ccp}
                       onChange={set("ccp")}
                     />
 
                     {/* Info box */}
                     <div className="bg-blue-50 rounded-2xl p-4 text-xs text-slate-600 text-right space-y-1.5 border border-blue-100">
-                      <p className="font-bold text-blue-800 text-sm">â„¹ï¸ ÙƒÙŠÙ ØªØ¹Ù…Ù„ Ø§Ù„Ù…Ù†ØµØ©ØŸ</p>
-                      <p>â€¢ Ø§Ù„Ù…Ø±ÙŠØ¶ ÙŠØ¯ÙØ¹ Ù„Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Ø§Ù„ÙˆØµÙØ© Ø£Ùˆ Ù†ØªØ§Ø¦Ø¬ Ø§Ù„ØªØ­Ø§Ù„ÙŠÙ„</p>
-                      <p>â€¢ Ø§Ù„Ù…Ù†ØµØ© ØªØ­ØµÙ„ Ø¹Ù„Ù‰ Ø¹Ù…ÙˆÙ„Ø© Ø­Ø³Ø¨ Ø¨Ø§Ù‚ØªÙƒ</p>
-                      <p>â€¢ ÙŠÙØ´ØªØ±Ø· Ø±Ù‚Ù… CCP Ù„Ø§Ø³ØªÙ„Ø§Ù… Ù…Ø¯ÙÙˆØ¹Ø§ØªÙƒ</p>
-                      <p className="text-slate-400 mt-2">ÙŠÙ…ÙƒÙ† Ø¥Ø¶Ø§ÙØ© Ø±Ù‚Ù… Ø§Ù„Ø­Ø³Ø§Ø¨ Ù„Ø§Ø­Ù‚Ø§Ù‹ Ù…Ù† Ø¥Ø¹Ø¯Ø§Ø¯Ø§ØªÙƒ</p>
+                      <p className="font-bold text-blue-800 text-sm">ℹ️ كيف تعمل المنصة؟</p>
+                      <p>• المريض يدفع للحصول على الوصفة أو نتائج التحاليل</p>
+                      <p>• المنصة تحصل على عمولة حسب باقتك</p>
+                      <p>• يُشترط رقم CCP لاستلام مدفوعاتك</p>
+                      <p className="text-slate-400 mt-2">يمكن إضافة رقم الحساب لاحقاً من إعداداتك</p>
                     </div>
 
                     {/* Terms checkboxes */}
@@ -535,7 +536,7 @@ export default function LoginPage() {
                           className="mt-1 w-4 h-4 rounded accent-blue-600 flex-shrink-0"
                         />
                         <span className="text-xs text-slate-700 leading-relaxed">
-                          Ø£Ù†Ø§ <strong>Ø§Ù„Ù…ØµØ±Ø­</strong> Ù…Ø³Ø¤ÙˆÙ„ Ø´Ø®ØµÙŠØ§Ù‹ Ø¹Ù† ØµØ­Ø© Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ù…ÙØ¯Ø®Ù„Ø©ØŒ ÙˆØ£Ù‚Ø±Ù‘ Ø¨Ø£Ù† <strong>Ù…Ù†ØµØ© Ø¹Ù†Ø§ÙŠØ©</strong> Ù‡ÙŠ ÙˆØ³ÙŠØ· ØªÙˆØ§ØµÙ„ Ø·Ø¨ÙŠ ÙˆÙ„Ø§ ØªÙØ¹ÙˆÙ‘Ø¶ Ø§Ù„Ø·Ø¨ÙŠØ¨ ÙÙŠ Ù‚Ø±Ø§Ø±Ø§ØªÙ‡ Ø§Ù„Ø·Ø¨ÙŠØ©.
+                          أنا <strong>المصرح</strong> مسؤول شخصياً عن صحة المعلومات المُدخلة، وأقرّ بأن <strong>منصة عناية</strong> هي وسيط تواصل طبي ولا تُعوّض الطبيب في قراراته الطبية.
                         </span>
                       </label>
                       <label className="flex items-start gap-3 cursor-pointer group">
@@ -546,7 +547,7 @@ export default function LoginPage() {
                           className="mt-1 w-4 h-4 rounded accent-blue-600 flex-shrink-0"
                         />
                         <span className="text-xs text-slate-700 leading-relaxed">
-                          Ø£ÙˆØ§ÙÙ‚ Ø¹Ù„Ù‰ Ø´Ø±ÙˆØ· ÙˆØ£Ø­ÙƒØ§Ù… Ø§Ù„Ù…Ù†ØµØ© ÙˆØªØ³Ø¹ÙŠØ±Ø§Øª Ø§Ù„Ø®Ø¯Ù…Ø§Øª. Ø£Ù‚Ø±Ù‘ Ø¨Ø£Ù† <strong>Ù…Ù†ØµØ© Ø¹Ù†Ø§ÙŠØ©</strong> Ù…Ø±Ø®ØµØ© Ù…Ù† <strong>ÙˆØ²Ø§Ø±Ø© Ø§Ù„ØµØ­Ø© Ø§Ù„Ø¬Ø²Ø§Ø¦Ø±ÙŠØ©</strong> ÙˆØ£Ø¹Ù…Ù„ ÙÙŠ Ø¥Ø·Ø§Ø±Ù‡Ø§ Ø§Ù„Ù‚Ø§Ù†ÙˆÙ†ÙŠ.
+                          أوافق على شروط وأحكام المنصة وتسعيرات الخدمات. أقرّ بأن <strong>منصة عناية</strong> مرخصة من <strong>وزارة الصحة الجزائرية</strong> وأعمل في إطارها القانوني.
                         </span>
                       </label>
                     </div>
@@ -554,9 +555,9 @@ export default function LoginPage() {
                     {/* Feature summary */}
                     <div className="grid grid-cols-3 gap-2 mt-2">
                       {[
-                        { icon: "ðŸ¤–", label: "Ø°ÙƒØ§Ø¡ Ø§ØµØ·Ù†Ø§Ø¹ÙŠ" },
-                        { icon: "ðŸ–‹ï¸", label: "ØªÙˆÙ‚ÙŠØ¹ Ø¹Ù† Ø¨ÙØ¹Ø¯" },
-                        { icon: "ðŸ“‹", label: "ÙˆØµÙØ© Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ©" },
+                        { icon: "🤖", label: "ذكاء اصطناعي" },
+                        { icon: "🖋️", label: "توقيع عن بُعد" },
+                        { icon: "📋", label: "وصفة إلكترونية" },
                       ].map(({ icon, label }) => (
                         <div key={label} className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-2.5 text-center border border-blue-100">
                           <div className="text-lg mb-1">{icon}</div>
@@ -576,7 +577,7 @@ export default function LoginPage() {
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-colors"
                     >
                       <ChevronRight className="w-4 h-4" />
-                      Ø§Ù„Ø³Ø§Ø¨Ù‚
+                      السابق
                     </button>
                   )}
                   {step < 3 ? (
@@ -585,7 +586,7 @@ export default function LoginPage() {
                       onClick={nextStep}
                       className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white text-sm font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
                     >
-                      Ø§Ù„ØªØ§Ù„ÙŠ
+                      التالي
                       <ChevronLeft className="w-4 h-4" />
                     </button>
                   ) : (
@@ -595,10 +596,10 @@ export default function LoginPage() {
                       disabled={loading || !form.acceptTerms || !form.acceptPlatformRules}
                       className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white text-sm font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {loading ? "Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡..." : (
+                      {loading ? "جاري الإنشاء..." : (
                         <>
                           <CheckCircle className="w-4 h-4" />
-                          Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨
+                          إنشاء الحساب
                         </>
                       )}
                     </button>
@@ -608,7 +609,7 @@ export default function LoginPage() {
                 {/* Step 2 skip hint */}
                 {step === 2 && (
                   <p className="text-center text-xs text-slate-400 mt-3">
-                    ÙŠÙ…ÙƒÙ†Ùƒ ØªØ®Ø·ÙŠ Ù‡Ø°Ù‡ Ø§Ù„Ø®Ø·ÙˆØ© ÙˆØ¥ÙƒÙ…Ø§Ù„Ù‡Ø§ Ù„Ø§Ø­Ù‚Ø§Ù‹ Ù…Ù† Ù…Ù„ÙÙƒ Ø§Ù„Ø´Ø®ØµÙŠ
+                    يمكنك تخطي هذه الخطوة وإكمالها لاحقاً من ملفك الشخصي
                   </p>
                 )}
               </div>
@@ -618,7 +619,7 @@ export default function LoginPage() {
 
         {/* Footer note */}
         <p className="text-center text-xs text-slate-400 mt-5">
-          Ù…Ø­Ù…ÙŠ Ø¨ØªØ´ÙÙŠØ± AES-256 Â· Supabase Auth Â· Ù…Ù†ØµØ© Ø¹Ù†Ø§ÙŠØ© Â© {new Date().getFullYear()}
+          محمي بتشفير AES-256 · Supabase Auth · منصة عناية © {new Date().getFullYear()}
         </p>
       </div>
     </div>

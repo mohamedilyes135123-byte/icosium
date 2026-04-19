@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
+
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -44,22 +45,22 @@ export default function DoctorDirectory() {
     router.push(`/requests?doctor=${doctorId}`);
   };
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─────────────────────────────────────────────────────────────
   return (
     <div className="w-full pb-32" dir="rtl">
 
-      {/* â”€â”€ Header â”€â”€ */}
+      {/* ── Header ── */}
       <motion.header initial={{ opacity: 0, y: -15 }} animate={{ opacity: 1, y: 0 }}
         className="mb-6 bg-white/60 backdrop-blur-md p-5 rounded-3xl shadow-sm border border-white">
-        <h1 className="text-2xl font-black text-slate-800 mb-1">Ø§Ø¨Ø­Ø« Ø¹Ù† Ø·Ø¨ÙŠØ¨Ùƒ</h1>
+        <h1 className="text-2xl font-black text-slate-800 mb-1">ابحث عن طبيبك</h1>
         <p className="text-slate-500 text-sm mb-4">
-          Ø§Ø®ØªØ± Ø·Ø¨ÙŠØ¨Ùƒ ÙˆØ£Ø±Ø³Ù„ Ø·Ù„Ø¨Ùƒ Ù…Ø¨Ø§Ø´Ø±Ø© â€” Ø£Ù†Øª Ù…Ù† ÙŠØªØ­ÙƒÙ… ÙÙŠ Ø±Ø­Ù„ØªÙƒ Ø§Ù„Ø·Ø¨ÙŠØ©
+          اختر طبيبك وأرسل طلبك مباشرة — أنت من يتحكم في رحلتك الطبية
         </p>
 
         <div className="relative">
           <input
             type="text"
-            placeholder="Ø§Ø¨Ø­Ø« Ø¨Ø§Ø³Ù… Ø§Ù„Ø·Ø¨ÙŠØ¨ØŒ Ø§Ù„ØªØ®ØµØµØŒ Ø§Ù„Ù…Ù†Ø·Ù‚Ø©..."
+            placeholder="ابحث باسم الطبيب، التخصص، المنطقة..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full h-12 pr-4 pl-12 rounded-2xl border border-slate-200 bg-white/80 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all text-sm font-medium text-slate-700"
@@ -68,7 +69,7 @@ export default function DoctorDirectory() {
         </div>
       </motion.header>
 
-      {/* â”€â”€ Doctors List â”€â”€ */}
+      {/* ── Doctors List ── */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
@@ -78,7 +79,7 @@ export default function DoctorDirectory() {
           <AnimatePresence>
             {filtered.map((doc, i) => {
               const initials = doc.full_name
-                ?.split(" ").map((n: string) => n[0]).slice(0, 2).join("") || "ØŸ";
+                ?.split(" ").map((n: string) => n[0]).slice(0, 2).join("") || "؟";
               const isApproved = doc.approval_status === "approved" && doc.verified;
 
               return (
@@ -108,11 +109,11 @@ export default function DoctorDirectory() {
                             </div>
                             {isApproved ? (
                               <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 shrink-0 mr-2">
-                                âœ… Ù…Ø¹ØªÙ…Ø¯
+                                ✅ معتمد
                               </span>
                             ) : (
                               <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200 shrink-0 mr-2">
-                                â³ Ù‚ÙŠØ¯ Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©
+                                ⏳ قيد المراجعة
                               </span>
                             )}
                           </div>
@@ -141,7 +142,7 @@ export default function DoctorDirectory() {
                                   : "bg-slate-100 text-slate-400 cursor-not-allowed"
                               }`}>
                               <Send className="w-4 h-4 rtl:-scale-x-100" />
-                              Ø¥Ø±Ø³Ø§Ù„ Ø·Ù„Ø¨ Ù„Ù‡Ø°Ø§ Ø§Ù„Ø·Ø¨ÙŠØ¨
+                              إرسال طلب لهذا الطبيب
                             </Button>
                           </div>
                         </div>
@@ -157,7 +158,7 @@ export default function DoctorDirectory() {
                 className="text-center py-20 bg-white/40 rounded-3xl border border-slate-200 border-dashed">
                 <Stethoscope className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                 <p className="text-slate-500 font-medium">
-                  {search ? "Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø£Ø·Ø¨Ø§Ø¡ ÙŠØ·Ø§Ø¨Ù‚ÙˆÙ† Ø¨Ø­Ø«Ùƒ" : "Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø£Ø·Ø¨Ø§Ø¡ Ù…Ø³Ø¬Ù„ÙˆÙ† Ø­Ø§Ù„ÙŠØ§Ù‹"}
+                  {search ? "لا يوجد أطباء يطابقون بحثك" : "لا يوجد أطباء مسجلون حالياً"}
                 </p>
               </motion.div>
             )}

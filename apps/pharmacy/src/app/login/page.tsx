@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
+
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -33,7 +34,7 @@ export default function LoginPage() {
         password: '123456',
       });
       if (authError) {
-         setError("Ù„Ù… ÙŠØªÙ… Ø±ÙØ¹ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª (Seed) Ø¥Ù„Ù‰ Ù‚ÙˆØ§Ø¹Ø¯ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø¨Ø¹Ø¯. Ø¬Ø±Ø¨ Ø¥Ø¯Ø®Ø§Ù„Ù‡Ø§.");
+         setError("لم يتم رفع البيانات (Seed) إلى قواعد البيانات بعد. جرب إدخالها.");
          setLoading(false);
          return;
       }
@@ -50,7 +51,7 @@ export default function LoginPage() {
       });
 
       if (authError) {
-        setError("ÙØ´Ù„ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„. ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ø¨Ø±ÙŠØ¯ ÙˆÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±.");
+        setError("فشل تسجيل الدخول. تأكد من البريد وكلمة المرور.");
         setLoading(false);
         return;
       }
@@ -59,7 +60,7 @@ export default function LoginPage() {
       if (userRole === role) {
         router.push(`/dashboard`);
       } else {
-         setError("ÙŠØ±Ø¬Ù‰ Ø§Ù„ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù…Ù† Ø§Ù„Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ù…Ø®ØµØµØ© Ù„Ùƒ.");
+         setError("يرجى التأكد من الدخول من البوابة المخصصة لك.");
          setLoading(false);
       }
     } else {
@@ -81,7 +82,7 @@ export default function LoginPage() {
         return;
       }
       
-      setSuccessMsg("ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨ Ø¨Ù†Ø¬Ø§Ø­! ÙŠÙ…ÙƒÙ†Ùƒ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø§Ù„Ø¢Ù†.");
+      setSuccessMsg("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.");
       setIsLogin(true);
       setLoading(false);
     }
@@ -96,8 +97,8 @@ export default function LoginPage() {
           <div className="w-16 h-16 bg-gradient-to-tr from-orange-500 to-amber-400 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-orange-500/30 mb-4 element-glow">
              <Activity className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-black text-slate-800">{isLogin ? "Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„ØµÙŠØ¯Ù„ÙŠØ§Øª" : "Ø·Ù„Ø¨ Ø§Ù†Ø¶Ù…Ø§Ù… ØµÙŠØ¯Ù„ÙŠØ©"}</h1>
-          <p className="text-slate-500 text-sm mt-1">Ù†Ø¸Ø§Ù… ØµØ±Ù Ø§Ù„ÙˆØµÙØ§Øª Ø§Ù„Ù…Ø³ØªÙ‚Ù„</p>
+          <h1 className="text-2xl font-black text-slate-800">{isLogin ? "بوابة الصيدليات" : "طلب انضمام صيدلية"}</h1>
+          <p className="text-slate-500 text-sm mt-1">نظام صرف الوصفات المستقل</p>
         </div>
 
         {successMsg && (
@@ -119,7 +120,7 @@ export default function LoginPage() {
                 type="text" 
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Ø§Ø³Ù… Ø§Ù„ØµÙŠØ¯Ù„ÙŠØ©" 
+                placeholder="اسم الصيدلية" 
                 className="w-full h-12 px-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-right"
                 required={!isLogin} 
               />
@@ -131,7 +132,7 @@ export default function LoginPage() {
               type="text" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ Ø£Ùˆ Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ù„Ù„Ø®Ø§Ø¯Ù…" 
+              placeholder="البريد الإلكتروني أو اسم المستخدم للخادم" 
               className="w-full h-12 pl-4 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-left dir-ltr"
               required 
             />
@@ -143,24 +144,24 @@ export default function LoginPage() {
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±" 
+              placeholder="كلمة المرور" 
               className="w-full h-12 pl-4 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-left dir-ltr"
               required 
             />
           </div>
 
           <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-lg font-bold shadow-lg shadow-brand-500/20 mt-4">
-            {loading ? "Ø¬Ø§Ø±ÙŠ Ø§Ù„Ù…Ø¹Ø§Ù„Ø¬Ø©..." : (isLogin ? "ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø¯Ø®ÙˆÙ„" : "Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨")}
+            {loading ? "جاري المعالجة..." : (isLogin ? "تأكيد الدخول" : "إنشاء الحساب")}
           </Button>
         </form>
 
         <div className="mt-6 text-center">
           <button onClick={() => setIsLogin(!isLogin)} type="button" className="text-sm font-bold text-brand-600 hover:text-brand-500 transition-colors">
-            {isLogin ? "Ù„ÙŠØ³ Ù„Ø¯ÙŠÙƒ Ø­Ø³Ø§Ø¨ØŸ Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø¬Ø¯ÙŠØ¯" : "Ù„Ø¯ÙŠÙƒ Ø­Ø³Ø§Ø¨ Ø¨Ø§Ù„ÙØ¹Ù„ØŸ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„"}
+            {isLogin ? "ليس لديك حساب؟ إنشاء حساب جديد" : "لديك حساب بالفعل؟ تسجيل الدخول"}
           </button>
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-8">Ø§Ù„ÙˆØµÙˆÙ„ Ù„Ù„Ù…Ù†ØµØ§Øª Ù…Ø­Ù…ÙŠ Ø¨ØªØ´ÙÙŠØ± Supabase AES-256</p>
+        <p className="text-center text-xs text-slate-400 mt-8">الوصول للمنصات محمي بتشفير Supabase AES-256</p>
       </div>
     </div>
   );

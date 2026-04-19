@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
+
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -13,10 +14,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  PENDING:    { label: "Ù‚ÙŠØ¯ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±",  color: "bg-amber-100 text-amber-700 border-amber-200" },
-  PROCESSING: { label: "Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ø¶ÙŠØ±", color: "bg-blue-100 text-blue-700 border-blue-200" },
-  COMPLETED:  { label: "Ø¬Ø§Ù‡Ø² Ù„Ù„Ø§Ø³ØªÙ„Ø§Ù…", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  CANCELLED:  { label: "Ù…Ù„ØºÙ‰",          color: "bg-slate-100 text-slate-500 border-slate-200" },
+  PENDING:    { label: "قيد الانتظار",  color: "bg-amber-100 text-amber-700 border-amber-200" },
+  PROCESSING: { label: "جاري التحضير", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  COMPLETED:  { label: "جاهز للاستلام", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  CANCELLED:  { label: "ملغى",          color: "bg-slate-100 text-slate-500 border-slate-200" },
 };
 
 export default function PharmacyPrescriptions() {
@@ -26,12 +27,12 @@ export default function PharmacyPrescriptions() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // â”€â”€ Get current user â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Get current user ──────────────────────────────────────────
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
   }, [supabase]);
 
-  // â”€â”€ Fetch pharmacy orders (ONLY sent to THIS pharmacy by patient) â”€â”€
+  // ── Fetch pharmacy orders (ONLY sent to THIS pharmacy by patient) ──
   const fetchOrders = useCallback(async () => {
     if (!currentUser) return;
     const { data } = await supabase
@@ -59,44 +60,44 @@ export default function PharmacyPrescriptions() {
     return () => { supabase.removeChannel(channel); };
   }, [supabase, fetchOrders]);
 
-  // â”€â”€ Update order status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Update order status ───────────────────────────────────────
   const updateStatus = async (orderId: string, status: string) => {
     setUpdatingId(orderId);
     await supabase.from("pharmacy_orders").update({ status }).eq("id", orderId);
     setUpdatingId(null);
   };
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─────────────────────────────────────────────────────────────
   return (
     <div className="pb-32 w-full" dir="rtl">
 
-      {/* â”€â”€ Header â”€â”€ */}
+      {/* ── Header ── */}
       <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
         className="mb-8 pb-6 border-b border-purple-100/50">
         <h1 className="text-3xl font-extrabold text-slate-800 mb-2 tracking-tight">
-          ÙˆØµÙØ§ØªÙŠ Ù…Ù† Ø§Ù„Ù…Ø±Ø¶Ù‰
+          وصفاتي من المرضى
         </h1>
         <p className="text-slate-500">
-          ØªØ¸Ù‡Ø± Ù‡Ù†Ø§ ÙÙ‚Ø· Ø§Ù„ÙˆØµÙØ§Øª Ø§Ù„ØªÙŠ Ø£Ø±Ø³Ù„Ù‡Ø§ Ø§Ù„Ù…Ø±Ø¶Ù‰ Ù…Ø¨Ø§Ø´Ø±Ø© Ø¥Ù„Ù‰ ØµÙŠØ¯Ù„ÙŠØªÙƒ.
+          تظهر هنا فقط الوصفات التي أرسلها المرضى مباشرة إلى صيدليتك.
         </p>
       </motion.header>
 
-      {/* â”€â”€ RBAC Notice â”€â”€ */}
+      {/* ── RBAC Notice ── */}
       <div className="bg-amber-50/50 border border-amber-200 rounded-2xl p-4 mb-8 flex items-start gap-4 shadow-sm">
         <div className="bg-white p-2 rounded-full text-amber-500 border border-amber-100 shrink-0">
           <ShieldAlert className="w-5 h-5" />
         </div>
         <div>
-          <h4 className="font-bold text-amber-900">ØµÙ„Ø§Ø­ÙŠØ§ØªÙƒ ÙƒØµÙŠØ¯Ù„ÙŠ (RBAC)</h4>
+          <h4 className="font-bold text-amber-900">صلاحياتك كصيدلي (RBAC)</h4>
           <p className="text-sm text-slate-600 mt-1">
-            âœ… ÙŠÙ…ÙƒÙ†Ùƒ ØªØ­Ø¯ÙŠØ« Ø­Ø§Ù„Ø© Ø§Ù„Ø·Ù„Ø¨ (Ù‚ÙŠØ¯ Ø§Ù„ØªØ­Ø¶ÙŠØ± / Ø¬Ø§Ù‡Ø²).<br />
-            âŒ Ù„Ø§ ÙŠÙ…ÙƒÙ†Ùƒ ØªØ¹Ø¯ÙŠÙ„ Ù…Ø­ØªÙˆÙ‰ Ø§Ù„ÙˆØµÙØ© Ø£Ùˆ Ø§Ù„Ø£Ø¯ÙˆÙŠØ© Ø¨Ø£ÙŠ Ø´ÙƒÙ„.<br />
-            ðŸ” Ù„Ø§ ØªØ±Ù‰ ÙˆØµÙØ§Øª Ù…Ø±Ø¶Ù‰ Ø¢Ø®Ø±ÙŠÙ† â€” ÙÙ‚Ø· Ù…Ø§ Ø£ÙØ±Ø³Ù„ Ø¥Ù„ÙŠÙƒ.
+            ✅ يمكنك تحديث حالة الطلب (قيد التحضير / جاهز).<br />
+            ❌ لا يمكنك تعديل محتوى الوصفة أو الأدوية بأي شكل.<br />
+            🔐 لا ترى وصفات مرضى آخرين — فقط ما أُرسل إليك.
           </p>
         </div>
       </div>
 
-      {/* â”€â”€ Orders Grid â”€â”€ */}
+      {/* ── Orders Grid ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
           {orders.map((order) => {
@@ -124,7 +125,7 @@ export default function PharmacyPrescriptions() {
                       <div>
                         <CardTitle className="text-slate-800 text-base font-bold flex items-center gap-2">
                           <User className="w-4 h-4 text-purple-500" />
-                          {order.patient?.full_name || "Ù…Ø±ÙŠØ¶"}
+                          {order.patient?.full_name || "مريض"}
                         </CardTitle>
                         {order.patient?.phone && (
                           <p className="text-xs text-slate-400 mt-0.5">{order.patient.phone}</p>
@@ -161,7 +162,7 @@ export default function PharmacyPrescriptions() {
                         />
                         <div>
                           <p className="text-xs font-bold text-purple-700 mb-1 flex items-center gap-1">
-                            <QrCode className="w-3.5 h-3.5" /> Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚
+                            <QrCode className="w-3.5 h-3.5" /> رمز التحقق
                           </p>
                           <p className="text-xs font-mono text-purple-600 break-all leading-relaxed">
                             {rx.qr_token?.substring(0, 20)}...
@@ -170,13 +171,13 @@ export default function PharmacyPrescriptions() {
                       </div>
                     )}
 
-                    {/* Medications (READ ONLY â€” pharmacy cannot edit) */}
+                    {/* Medications (READ ONLY — pharmacy cannot edit) */}
                     <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-4 flex-1 shadow-inner">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-slate-500 text-xs font-bold">Ù…Ø­ØªÙˆÙ‰ Ø§Ù„ÙˆØµÙØ© (Ù„Ù„Ù‚Ø±Ø§Ø¡Ø© ÙÙ‚Ø·)</h4>
+                        <h4 className="text-slate-500 text-xs font-bold">محتوى الوصفة (للقراءة فقط)</h4>
                         <button onClick={() => setExpandedId(isExpanded ? null : order.id)}
                           className="text-xs text-purple-600 font-bold hover:underline">
-                          {isExpanded ? "Ø¥Ø®ÙØ§Ø¡" : "Ø¹Ø±Ø¶ Ø§Ù„ÙƒÙ„"}
+                          {isExpanded ? "إخفاء" : "عرض الكل"}
                         </button>
                       </div>
 
@@ -185,13 +186,13 @@ export default function PharmacyPrescriptions() {
                           {(isExpanded ? rx.medications : rx.medications.slice(0, 2)).map((med: any, i: number) => (
                             <div key={i} className="bg-white rounded-xl p-2.5 border border-slate-200">
                               <p className="font-bold text-slate-800 text-sm">{med.name} <span className="text-slate-500 font-medium">{med.dose}</span></p>
-                              <p className="text-xs text-slate-500 mt-0.5">{med.frequency} â€” {med.duration}</p>
-                              {med.notes && <p className="text-xs text-amber-600 mt-0.5">âš ï¸ {med.notes}</p>}
+                              <p className="text-xs text-slate-500 mt-0.5">{med.frequency} — {med.duration}</p>
+                              {med.notes && <p className="text-xs text-amber-600 mt-0.5">⚠️ {med.notes}</p>}
                             </div>
                           ))}
                           {!isExpanded && rx.medications.length > 2 && (
                             <p className="text-xs text-center text-slate-400 font-medium">
-                              + {rx.medications.length - 2} Ø£Ø¯ÙˆÙŠØ© Ø£Ø®Ø±Ù‰
+                              + {rx.medications.length - 2} أدوية أخرى
                             </p>
                           )}
                         </div>
@@ -200,7 +201,7 @@ export default function PharmacyPrescriptions() {
                       {rx?.doctor_notes && (
                         <div className="mt-3 pt-3 border-t border-slate-200">
                           <p className="text-xs text-slate-500">
-                            <span className="font-bold">Ù…Ù„Ø§Ø­Ø¸Ø© Ø§Ù„Ø·Ø¨ÙŠØ¨: </span>{rx.doctor_notes}
+                            <span className="font-bold">ملاحظة الطبيب: </span>{rx.doctor_notes}
                           </p>
                         </div>
                       )}
@@ -213,7 +214,7 @@ export default function PharmacyPrescriptions() {
                         disabled={updatingId === order.id}
                         className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 h-11 rounded-2xl text-white font-bold shadow-sm flex items-center justify-center gap-2 mb-2">
                         <Package className="w-4 h-4" />
-                        {updatingId === order.id ? "..." : "Ø¨Ø¯Ø¡ Ø§Ù„ØªØ­Ø¶ÙŠØ±"}
+                        {updatingId === order.id ? "..." : "بدء التحضير"}
                       </Button>
                     )}
                     {order.status === "PROCESSING" && (
@@ -222,12 +223,12 @@ export default function PharmacyPrescriptions() {
                         disabled={updatingId === order.id}
                         className="w-full bg-gradient-to-r from-emerald-500 to-green-400 hover:from-emerald-600 hover:to-green-500 h-11 rounded-2xl text-white font-bold shadow-sm flex items-center justify-center gap-2 mb-2">
                         <CheckCircle2 className="w-4 h-4" />
-                        {updatingId === order.id ? "..." : "Ø¬Ø§Ù‡Ø² Ù„Ù„Ø§Ø³ØªÙ„Ø§Ù… âœ…"}
+                        {updatingId === order.id ? "..." : "جاهز للاستلام ✅"}
                       </Button>
                     )}
                     {order.status === "COMPLETED" && (
                       <div className="flex items-center justify-center gap-2 py-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-700 font-bold text-sm">
-                        <CheckCircle2 className="w-4 h-4" /> ØªÙ… Ø§Ù„ØªØ³Ù„ÙŠÙ… Ø¨Ù†Ø¬Ø§Ø­
+                        <CheckCircle2 className="w-4 h-4" /> تم التسليم بنجاح
                       </div>
                     )}
                   </CardContent>
@@ -239,8 +240,8 @@ export default function PharmacyPrescriptions() {
           {orders.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/40 border border-white rounded-3xl shadow-sm text-slate-400">
               <Pill className="w-16 h-16 mb-4 text-purple-200" />
-              <h3 className="text-lg font-bold text-slate-600">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø·Ù„Ø¨Ø§Øª Ø­Ø§Ù„ÙŠØ§Ù‹</h3>
-              <p className="text-sm">Ø³ØªØ¸Ù‡Ø± Ù‡Ù†Ø§ Ø§Ù„ÙˆØµÙØ§Øª Ø§Ù„ØªÙŠ ÙŠØ±Ø³Ù„Ù‡Ø§ Ø§Ù„Ù…Ø±Ø¶Ù‰ Ø¥Ù„Ù‰ ØµÙŠØ¯Ù„ÙŠØªÙƒ Ù…Ø¨Ø§Ø´Ø±Ø©.</p>
+              <h3 className="text-lg font-bold text-slate-600">لا توجد طلبات حالياً</h3>
+              <p className="text-sm">ستظهر هنا الوصفات التي يرسلها المرضى إلى صيدليتك مباشرة.</p>
             </div>
           )}
         </AnimatePresence>
