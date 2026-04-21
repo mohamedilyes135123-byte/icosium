@@ -5,9 +5,9 @@ const config: CapacitorConfig = {
   appName: '3inaya-patient',
   webDir: 'out',
   server: {
-    url: 'https://icosium-lssk.vercel.app',
+    url: 'https://3inaya-patient.vercel.app',
     cleartext: true,
-    allowNavigation: ['icosium-lssk.vercel.app']
+    allowNavigation: ['3inaya-patient.vercel.app']
   }
 };
 
