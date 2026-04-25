@@ -162,7 +162,9 @@ export default function PatientLoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-block relative mb-4">
-            <img src="/logo.png" alt="عناية" className="w-24 h-24 object-contain relative z-10 logo-float drop-shadow-lg" />
+            <div className="w-28 h-28 rounded-3xl bg-white/90 border border-emerald-100 shadow-xl shadow-emerald-500/10 flex items-center justify-center relative z-10 logo-float backdrop-blur-sm">
+              <img src="/logo.png" alt="عناية" className="w-20 h-20 object-contain drop-shadow-md" />
+            </div>
             <div className="absolute inset-[-12px] z-0 glow-pulse rounded-full blur-2xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-green-300" />
           </div>
           <h1 className="text-3xl font-black text-slate-900">عناية</h1>
