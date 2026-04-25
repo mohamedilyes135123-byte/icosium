@@ -281,11 +281,21 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/40 to-white" />
       </div>
 
+      {/* Glow keyframes */}
+      <style>{`
+        @keyframes logoFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes glowPulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.15); } }
+        @keyframes glowColorShift { 0% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(40deg); } 100% { filter: hue-rotate(0deg); } }
+        .logo-float { animation: logoFloat 4s ease-in-out infinite; }
+        .glow-pulse { animation: glowPulse 3s ease-in-out infinite, glowColorShift 6s ease-in-out infinite; }
+      `}</style>
+
       <div className="relative z-10 w-full max-w-lg">
         {/* Logo header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600 to-cyan-500 shadow-2xl shadow-blue-500/40 mb-4">
-            <Stethoscope className="w-10 h-10 text-white" />
+          <div className="inline-block relative mb-4">
+            <img src="/logo.png" alt="عناية" className="w-24 h-24 object-contain relative z-10 logo-float drop-shadow-lg" />
+            <div className="absolute inset-[-12px] z-0 glow-pulse rounded-full blur-2xl bg-gradient-to-tr from-blue-400 via-cyan-400 to-sky-300" />
           </div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">عناية</h1>
           <p className="text-blue-600 font-semibold text-sm mt-1">طبيبك في بيتك — بوابة الأطباء</p>

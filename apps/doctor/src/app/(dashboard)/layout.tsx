@@ -32,9 +32,7 @@ export default function DoctorLayout({
       {/* Bright Glass Sidebar */}
       <aside className="w-72 border-r rtl:border-l rtl:border-r-0 border-blue-100 flex flex-col z-20 h-screen bg-white/40 backdrop-blur-3xl shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div className="p-6 flex items-center gap-3 text-slate-800 font-bold text-xl border-b border-blue-100 bg-white/50">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 border border-white">
-             <Stethoscope className="w-6 h-6 text-white" />
-          </div>
+          <img src="/logo.png" alt="عناية" className="w-10 h-10 object-contain" />
           <span className="tracking-wide">منصة الطبيب</span>
         </div>
         

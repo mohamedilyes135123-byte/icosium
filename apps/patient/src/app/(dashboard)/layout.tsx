@@ -33,9 +33,7 @@ export default function PatientLayout({
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex w-72 border-r rtl:border-l rtl:border-r-0 border-emerald-100 flex-col bg-white/40 backdrop-blur-3xl">
           <div className="p-6 flex items-center gap-3 text-slate-800 font-bold text-xl border-b border-emerald-100">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-green-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-               <HeartPulse className="w-6 h-6 text-white" />
-            </div>
+            <img src="/logo.png" alt="عناية" className="w-10 h-10 object-contain" />
             <span>عناية للمرضى</span>
           </div>
           
