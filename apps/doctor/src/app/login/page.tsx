@@ -294,10 +294,10 @@ export default function LoginPage() {
         {/* Logo header */}
         <div className="text-center mb-8">
           <div className="inline-block relative mb-4">
-            <div className="w-28 h-28 rounded-2xl bg-white border border--100 shadow-xl flex items-center justify-center relative z-10 logo-float">
+            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-blue-400 via-cyan-400 to-sky-300 opacity-60" />
+            <div className="w-28 h-28 rounded-2xl bg-white border border-blue-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
               <img src="/logo.png" alt="عناية" className="w-24 h-24 object-contain drop-shadow-sm" />
             </div>
-            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl  opacity-60" />
           </div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">عناية</h1>
           <p className="text-blue-600 font-semibold text-sm mt-1">طبيبك في بيتك — بوابة الأطباء</p>

@@ -113,7 +113,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-2xl border border-white relative z-10">
         <div className="flex flex-col items-center mb-8">
           <div className="relative mb-4">
-            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-orange-400 via-amber-400 to-yellow-300 opacity-60" />
+            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-300 opacity-60" />
             <div className="w-28 h-28 rounded-2xl bg-white border border-amber-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
               <img src="/logo.png" alt="عناية" className="w-24 h-24 object-contain drop-shadow-sm" />
             </div>
