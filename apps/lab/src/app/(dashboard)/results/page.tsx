@@ -21,6 +21,14 @@ export default function LabResultsHistory() {
     supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
   }, [supabase]);
 
+  const ensureAbsoluteUrl = (url: string) => {
+    if (!url) return "#";
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("mailto:") || url.startsWith("tel:")) {
+      return url;
+    }
+    return `https://${url}`;
+  };
+
   const fetchResults = useCallback(async () => {
     if (!currentUser) return;
     const { data } = await supabase
@@ -135,7 +143,7 @@ export default function LabResultsHistory() {
 
                   {/* File link */}
                   {result.file_url && (
-                    <a href={result.file_url} target="_blank" rel="noopener noreferrer"
+                    <a href={ensureAbsoluteUrl(result.file_url)} target="_blank" rel="noopener noreferrer"
                       className="flex items-center gap-2 w-full justify-center py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-2xl transition-colors">
                       <Download className="w-4 h-4" /> عرض ملف النتائج
                     </a>

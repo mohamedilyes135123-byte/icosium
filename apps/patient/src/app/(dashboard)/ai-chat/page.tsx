@@ -1,6 +1,7 @@
 "use client";
+export const dynamic = "force-dynamic";
 
-export const dynamic = 'force-dynamic';
+
 
 import { useChat } from '@ai-sdk/react';
 import { useState, useRef, useEffect } from "react";
@@ -166,3 +167,4 @@ export default function PatientAIChat() {
     </div>
   );
 }
+

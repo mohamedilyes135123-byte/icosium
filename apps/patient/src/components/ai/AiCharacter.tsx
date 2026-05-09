@@ -1,4 +1,4 @@
-﻿
+
 export function AiCharacter({ className = "" }: { className?: string }) {
   return (
     <div className={`relative flex items-center justify-center ${className}`}>

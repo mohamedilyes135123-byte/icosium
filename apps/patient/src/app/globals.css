@@ -1,68 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #f0fdfa;
-  --color-brand-100: #ccfbf1;
-  --color-brand-200: #99f6e4;
-  --color-brand-300: #5eead4;
-  --color-brand-400: #2dd4bf;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --color-brand-800: #115e59;
-  --color-brand-900: #134e4a;
+  /* ── Primary Green Palette ── */
+  --color-primary-50:  #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
 
-  --font-sans: "Inter", "Cairo", sans-serif;
-  
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  --radius-3xl: 2rem;
-}
+  /* ── Accent Gold ── */
+  --color-accent-100: #fef9c3;
+  --color-accent-300: #fde047;
+  --color-accent-500: #eab308;
+  --color-accent-700: #a16207;
 
-/* Glassmorphism & custom utility classes */
-@layer utilities {
-  .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm;
-  }
-  
-  .glass-dark {
-    @apply bg-slate-900/80 backdrop-blur-md border border-slate-700/50 shadow-lg;
-  }
-
-  .glow {
-    box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
-  }
-  
-  .glow-hover:hover {
-    box-shadow: 0 0 25px rgba(20, 184, 166, 0.5);
-    @apply transform -translate-y-1 transition-all duration-300;
-  }
+  --font-sans: "Cairo", "Segoe UI", sans-serif;
+  --radius-pill: 999px;
+  --radius-card: 1.25rem;
+  --radius-icon: 0.875rem;
 }
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --bg-page:    #f4faf6;
+  --bg-card:    #ffffff;
+  --green-main: #2eb567;
+  --green-dark: #1e8a4c;
+  --green-light:#d1fae5;
+  --gold:       #f5a623;
+  --text-main:  #1a2e1f;
+  --text-muted: #6b7a6e;
 }
+
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--text-main);
+  background: var(--bg-page);
   font-family: var(--font-sans);
-  direction: ltr; /* We can toggle this to rtl for Arabic later if we build a switcher */
+  direction: rtl;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #b7dfc7; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--green-main); }
+
+/* ── Pill Button ── */
+.btn-pill-green {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2eb567, #1e8a4c);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.85rem 2rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(46,181,103,0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+.btn-pill-green:hover  { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(46,181,103,0.45); }
+.btn-pill-green:active { transform: translateY(0); }
+
+.btn-pill-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.85rem 2rem;
+  border-radius: 999px;
+  border: 1.5px solid #d1d5db;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+.btn-pill-outline:hover { border-color: var(--green-main); background: #f0fdf4; }
+
+/* ── Icon Chip ── */
+.icon-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.75rem;
+  background: #fff;
+  border-radius: var(--radius-card);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #e8f5ec;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+.icon-chip:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+.icon-chip-img {
+  width: 56px; height: 56px;
+  border-radius: var(--radius-icon);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+.icon-chip-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+}
+
+/* ── Health Card ── */
+.health-card {
+  background: #fff;
+  border-radius: var(--radius-card);
+  border: 1px solid #e8f5ec;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── Alert Banner ── */
+.alert-banner {
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  border-radius: 0.875rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+/* ── Bottom Nav ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #fff;
+  border-top: 1px solid #e8f5ec;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.6rem 0.5rem;
+  z-index: 50;
+}
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-decoration: none;
+  color: #9ca3af;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 52px;
+  transition: color 0.15s;
+}
+.bottom-nav-item.active { color: var(--green-main); }
+.bottom-nav-item .nav-icon-wrap {
+  width: 36px; height: 36px;
+  border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+}
+.bottom-nav-item.active .nav-icon-wrap {
+  background: #dcfce7;
+}
+
+/* ── Section Title ── */
+.section-title {
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Gradient Header ── */
+.green-header {
+  background: linear-gradient(160deg, #2eb567 0%, #1e8a4c 100%);
+  border-radius: 0 0 1.75rem 1.75rem;
+  padding: 1.5rem 1.25rem 2.5rem;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.green-header::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -30px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 50%;
+}
+.green-header::before {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 100px; height: 100px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
 }

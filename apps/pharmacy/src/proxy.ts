@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -36,11 +36,11 @@ export async function middleware(request: NextRequest) {
 
   // QUICK DEBUG BYPASS
   const bypassRole = request.cookies.get('testing_bypass')?.value;
-  if (bypassRole === 'lab') {
+  if (bypassRole === 'pharmacy') {
     return supabaseResponse;
   }
 
-  // Protect Lab Portal
+  // Protect Pharmacy Portal
   const isPublicPath = path === '/login' || path === '/unauthorized' || path.startsWith('/api/');
   
   if (!isPublicPath) {
@@ -51,7 +51,7 @@ export async function middleware(request: NextRequest) {
     }
 
     const role = user.user_metadata?.role;
-    if (role !== 'lab') {
+    if (role !== 'pharmacy') {
        const url = request.nextUrl.clone()
        url.pathname = '/unauthorized'
        return NextResponse.redirect(url)
@@ -66,3 +66,4 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
+
