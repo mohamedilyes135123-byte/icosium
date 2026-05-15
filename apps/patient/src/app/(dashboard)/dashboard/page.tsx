@@ -4,8 +4,35 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+// ── Types ──────────────────────────────────────────────────────────────────────
+type MetricType = "blood_sugar" | "blood_pressure" | "weight" | "oximetry" | "heart_rate";
+interface Vital { type: MetricType; value1: number; value2?: number; created_at: string; }
+
+const METRICS = [
+  { id: "blood_pressure" as MetricType, emoji: "💓", label: "ضغط الدم",      unit: "mmHg",  bg: "#fff1f2", color: "#e11d48" },
+  { id: "blood_sugar"    as MetricType, emoji: "🍬", label: "سكر الدم",      unit: "mg/dL", bg: "#fffbeb", color: "#d97706" },
+  { id: "heart_rate"     as MetricType, emoji: "❤️", label: "نبضات القلب",   unit: "bpm",   bg: "#fef2f2", color: "#dc2626" },
+  { id: "oximetry"       as MetricType, emoji: "💨", label: "تشبع الأكسجين", unit: "%",     bg: "#ecfeff", color: "#0891b2" },
+  { id: "weight"         as MetricType, emoji: "⚖️", label: "الوزن",          unit: "kg",    bg: "#eff6ff", color: "#2563eb" },
+];
+
+function getStatus(type: MetricType, v1: number): "normal" | "high" | "low" {
+  if (type === "blood_sugar")    return v1 < 70 ? "low" : v1 > 126 ? "high" : "normal";
+  if (type === "blood_pressure") return v1 < 90 ? "low" : v1 > 140 ? "high" : "normal";
+  if (type === "heart_rate")     return v1 < 60 ? "low" : v1 > 100 ? "high" : "normal";
+  if (type === "oximetry")       return v1 < 95 ? "low" : "normal";
+  return "normal";
+}
+
+const STATUS_LABEL: Record<string, string> = { normal: "✅ طبيعي", high: "⬆️ مرتفع", low: "⬇️ منخفض" };
+const STATUS_BG:    Record<string, string> = { normal: "#dcfce7",   high: "#fee2e2",   low: "#fef9c3"   };
+const STATUS_CLR:   Record<string, string> = { normal: "#15803d",   high: "#dc2626",   low: "#92400e"   };
+
 export default function PatientDashboard() {
   const [profile, setProfile] = useState<any>(null);
+  const [todayVitals, setTodayVitals] = useState<Record<MetricType, Vital | null>>({
+    blood_pressure: null, blood_sugar: null, heart_rate: null, oximetry: null, weight: null,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,15 +40,40 @@ export default function PatientDashboard() {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const [{ data: prof }, { data: vitals }] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        supabase.from("vitals")
+          .select("*")
+          .eq("patient_id", user.id)
+          .gte("created_at", today.toISOString())
+          .order("created_at", { ascending: false }),
+      ]);
+
       setProfile(prof);
+
+      // Keep only the latest reading per type today
+      const map: Record<MetricType, Vital | null> = {
+        blood_pressure: null, blood_sugar: null, heart_rate: null, oximetry: null, weight: null,
+      };
+      (vitals || []).forEach((v: any) => {
+        if (!map[v.type as MetricType]) map[v.type as MetricType] = v;
+      });
+      setTodayVitals(map);
       setLoading(false);
     };
     load();
   }, []);
 
+  const loggedCount = METRICS.filter(m => todayVitals[m.id] !== null).length;
+  const allLogged   = loggedCount === METRICS.length;
+
   return (
     <div dir="rtl" className="pb-24">
+
       {/* ── Soft Curved Green Header ── */}
       <div className="premium-header">
         <div className="header-content">
@@ -31,7 +83,9 @@ export default function PatientDashboard() {
           </div>
           <div className="text-right">
             <p className="hero-greet">مرحباً بك 👋</p>
-            <h1 className="hero-name">{loading ? "..." : profile?.full_name?.split(" ")[0] || "مريض"} — عناية</h1>
+            <h1 className="hero-name">
+              {loading ? "..." : profile?.full_name?.split(" ")[0] || "مريض"} — عناية
+            </h1>
           </div>
         </div>
         <div className="wave-bottom">
@@ -42,88 +96,133 @@ export default function PatientDashboard() {
       </div>
 
       <div className="px-5 mt-[-10px] relative z-10">
-        
-        {/* ── Yellow Alert Banner ── */}
+
+        {/* ── Banner ── */}
         <div className="premium-alert">
-          <span className="text-xl">⚠️</span>
+          <span className="text-xl">📊</span>
           <span className="alert-text">
-            {loading ? "جاري التحديث..." : "لديك موعد طبي غداً الساعة 10:00 صباحاً"}
+            {loading ? "جاري التحديث..." : allLogged
+              ? "✅ رائع! سجّلت جميع قياساتك اليوم"
+              : `لم تسجّل بعد ${METRICS.length - loggedCount} قياس لهذا اليوم`}
           </span>
         </div>
 
-        {/* ── Sticker-style Service Cards ── */}
+        {/* ── Quick Service Icons ── */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <a href="/requests" className="premium-card service-card">
-            <div className="sticker-icon bg-green-100 shadow-green-200/50">
-              <span className="text-3xl filter drop-shadow-sm">🩺</span>
-            </div>
-            <span className="service-label">استشارة</span>
-          </a>
-          <a href="/requests" className="premium-card service-card">
-            <div className="sticker-icon bg-yellow-100 shadow-yellow-200/50">
-              <span className="text-3xl filter drop-shadow-sm">📋</span>
-            </div>
-            <span className="service-label">طلباتي</span>
-          </a>
-          <a href="/results" className="premium-card service-card">
-            <div className="sticker-icon bg-green-100 shadow-green-200/50">
-              <span className="text-3xl filter drop-shadow-sm">📅</span>
-            </div>
-            <span className="service-label">مواعيدي</span>
-          </a>
+          {[
+            { href: "/requests", emoji: "🩺", label: "استشارة", bg: "#dcfce7" },
+            { href: "/requests", emoji: "📋", label: "طلباتي",  bg: "#fef9c3" },
+            { href: "/results",  emoji: "📅", label: "مواعيدي", bg: "#dcfce7" },
+          ].map(a => (
+            <a key={a.label} href={a.href} className="premium-card service-card">
+              <div className="sticker-icon" style={{ background: a.bg }}>
+                <span style={{ fontSize: "2rem" }}>{a.emoji}</span>
+              </div>
+              <span className="service-label">{a.label}</span>
+            </a>
+          ))}
         </div>
 
-        {/* ── Floating Metric Cards ── */}
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="section-title">مؤشرات الصحة</h2>
-          <span className="text-green-600 text-xs font-bold bg-green-100 px-2 py-1 rounded-full">تحديث الان</span>
+        {/* ── Section Header ── */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+          <a href="/vitals" style={{
+            fontSize: "0.75rem", fontWeight: 700, padding: "4px 14px",
+            borderRadius: 999, background: "#dcfce7", color: "#15803d", textDecoration: "none"
+          }}>+ تسجيل قياس</a>
+          <h2 className="section-title">📈 قياساتي اليوم</h2>
         </div>
-        
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="premium-card metric-card">
-            <div className="metric-header">
-              <span className="text-red-500 font-bold text-lg">78 bpm</span>
-              <span className="text-sm text-gray-500 font-semibold">معدل القلب</span>
-            </div>
-            <div className="sticker-icon bg-red-50 shadow-red-100 self-end mt-2 animate-pulse-slow">
-              <span className="text-4xl filter drop-shadow-md">❤️</span>
-            </div>
+
+        {/* ── Vitals Grid ── */}
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          {METRICS.map(m => {
+            const vital  = todayVitals[m.id];
+            const status = vital ? getStatus(m.id, vital.value1) : null;
+            return (
+              <a key={m.id} href="/vitals" className="premium-card"
+                 style={{ padding: "1.1rem", textDecoration: "none" }}>
+                {/* Top row */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <span style={{ fontSize: "1.9rem", lineHeight: 1 }}>{m.emoji}</span>
+                  {status && (
+                    <span style={{
+                      fontSize: "0.58rem", fontWeight: 900, padding: "2px 7px", borderRadius: 999,
+                      background: STATUS_BG[status], color: STATUS_CLR[status],
+                    }}>
+                      {STATUS_LABEL[status]}
+                    </span>
+                  )}
+                </div>
+
+                {/* Value */}
+                <div style={{ marginTop: "0.65rem" }}>
+                  {vital ? (
+                    <p style={{ margin: 0, lineHeight: 1, fontSize: "1.45rem", fontWeight: 900, color: m.color }}>
+                      {vital.value1}{vital.value2 != null ? `/${vital.value2}` : ""}
+                      <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "#9ca3af", marginRight: 3 }}>
+                        {m.unit}
+                      </span>
+                    </p>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: "1.1rem", fontWeight: 900, color: "#e5e7eb" }}>—</p>
+                  )}
+                  <p style={{ fontSize: "0.7rem", fontWeight: 700, color: "#6b7280", marginTop: 4 }}>{m.label}</p>
+                </div>
+
+                {/* CTA badge when not logged */}
+                {!vital && (
+                  <div style={{
+                    marginTop: "0.5rem", fontSize: "0.62rem", fontWeight: 700,
+                    color: "#16a34a", background: "#f0fdf4",
+                    borderRadius: 999, padding: "3px 0", textAlign: "center",
+                  }}>
+                    اضغط للتسجيل
+                  </div>
+                )}
+              </a>
+            );
+          })}
+        </div>
+
+        {/* ── Progress Bar ── */}
+        <div style={{
+          background: "#fff", borderRadius: "1.5rem", padding: "1rem 1.25rem",
+          marginBottom: "1.5rem", border: "1px solid #dcfce7",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#16a34a" }}>
+              {loggedCount}/{METRICS.length} قياسات مسجّلة
+            </span>
+            <span style={{ fontSize: "0.75rem", fontWeight: 900, color: "#374151" }}>قياسات اليوم</span>
           </div>
-
-          <div className="premium-card metric-card">
-            <div className="metric-header">
-              <span className="text-yellow-600 font-bold text-lg">جيدة</span>
-              <span className="text-sm text-gray-500 font-semibold">الحالة النفسية</span>
-            </div>
-            <div className="sticker-icon bg-yellow-50 shadow-yellow-100 self-end mt-2 hover:-translate-y-1 transition-transform">
-              <span className="text-4xl filter drop-shadow-md">😊</span>
-            </div>
+          <div style={{ height: 8, background: "#f0fdf4", borderRadius: 999, overflow: "hidden" }}>
+            <div style={{
+              height: "100%", borderRadius: 999,
+              background: "linear-gradient(90deg, #22c55e, #16a34a)",
+              width: `${(loggedCount / METRICS.length) * 100}%`,
+              transition: "width 0.5s ease",
+            }} />
           </div>
         </div>
 
-        {/* ── Clean Input / CTA ── */}
-        <a href="/requests" className="premium-btn w-full mb-3 shadow-lg shadow-green-600/30">
-          <span className="text-white text-lg font-black">🚀 دخول البوابة الطبية</span>
+        {/* ── CTA Buttons ── */}
+        <a href="/vitals" className="premium-btn w-full mb-3"
+           style={{ marginBottom: "0.75rem", boxShadow: "0 6px 20px rgba(22,163,74,0.3)" }}>
+          <span style={{ color: "white", fontSize: "1.05rem", fontWeight: 900 }}>📈 تسجيل القياسات اليومية</span>
         </a>
-        <div className="premium-input-box">
-           <span className="text-gray-400 font-semibold text-sm">أو ابحث عن طبيب، عيادة، دواء...</span>
-        </div>
+        <a href="/requests" className="premium-btn w-full"
+           style={{ background: "white", border: "2px solid #16a34a", boxShadow: "none" }}>
+          <span style={{ color: "#16a34a", fontSize: "1.05rem", fontWeight: 900 }}>🩺 ابدأ استشارة جديدة</span>
+        </a>
+
       </div>
 
-      {/* ── iOS Style Bottom Nav ── */}
+      {/* ── Bottom Nav ── */}
       <div className="premium-bottom-nav">
-        <a href="/" className="nav-item active">
-          <div className="nav-icon"><span className="text-2xl">🏠</span></div>
-        </a>
-        <a href="/requests" className="nav-item">
-          <div className="nav-icon"><span className="text-2xl">💬</span></div>
-        </a>
-        <a href="/results" className="nav-item">
-          <div className="nav-icon"><span className="text-2xl">💓</span></div>
-        </a>
-        <a href="/profile" className="nav-item">
-          <div className="nav-icon"><span className="text-2xl">👤</span></div>
-        </a>
+        <a href="/"        className="nav-item active"><div className="nav-icon"><span className="text-2xl">🏠</span></div></a>
+        <a href="/requests" className="nav-item">      <div className="nav-icon"><span className="text-2xl">💬</span></div></a>
+        <a href="/vitals"   className="nav-item">      <div className="nav-icon"><span className="text-2xl">💓</span></div></a>
+        <a href="/profile"  className="nav-item">      <div className="nav-icon"><span className="text-2xl">👤</span></div></a>
       </div>
     </div>
   );
