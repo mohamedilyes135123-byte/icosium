@@ -1,6 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -9,11 +10,11 @@ type MetricType = "blood_sugar" | "blood_pressure" | "weight" | "oximetry" | "he
 interface Vital { type: MetricType; value1: number; value2?: number; created_at: string; }
 
 const METRICS = [
-  { id: "blood_pressure" as MetricType, emoji: "💓", label: "ضغط الدم",      unit: "mmHg",  bg: "#fff1f2", color: "#e11d48" },
-  { id: "blood_sugar"    as MetricType, emoji: "🍬", label: "سكر الدم",      unit: "mg/dL", bg: "#fffbeb", color: "#d97706" },
-  { id: "heart_rate"     as MetricType, emoji: "❤️", label: "نبضات القلب",   unit: "bpm",   bg: "#fef2f2", color: "#dc2626" },
-  { id: "oximetry"       as MetricType, emoji: "💨", label: "تشبع الأكسجين", unit: "%",     bg: "#ecfeff", color: "#0891b2" },
-  { id: "weight"         as MetricType, emoji: "⚖️", label: "الوزن",          unit: "kg",    bg: "#eff6ff", color: "#2563eb" },
+  { id: "blood_pressure" as MetricType, img: "/icon_blood_pressure.png", label: "ضغط الدم",      unit: "mmHg",  bg: "#fff1f2", color: "#e11d48" },
+  { id: "blood_sugar"    as MetricType, img: "/icon_blood_sugar.png",    label: "سكر الدم",      unit: "mg/dL", bg: "#fffbeb", color: "#d97706" },
+  { id: "heart_rate"     as MetricType, img: "/icon_heart_rate.png",     label: "نبضات القلب",   unit: "bpm",   bg: "#fef2f2", color: "#dc2626" },
+  { id: "oximetry"       as MetricType, img: "/icon_oximetry.png",       label: "تشبع الأكسجين", unit: "%",     bg: "#ecfeff", color: "#0891b2" },
+  { id: "weight"         as MetricType, img: "/icon_weight.png",         label: "الوزن",          unit: "kg",    bg: "#eff6ff", color: "#2563eb" },
 ];
 
 function getStatus(type: MetricType, v1: number): "normal" | "high" | "low" {
@@ -110,13 +111,13 @@ export default function PatientDashboard() {
         {/* ── Quick Service Icons ── */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { href: "/requests", emoji: "🩺", label: "استشارة", bg: "#dcfce7" },
-            { href: "/requests", emoji: "📋", label: "طلباتي",  bg: "#fef9c3" },
-            { href: "/results",  emoji: "📅", label: "مواعيدي", bg: "#dcfce7" },
+            { href: "/requests", img: "/icon_stethoscope.png", label: "استشارة", bg: "#dcfce7" },
+            { href: "/requests", img: "/icon_clipboard.png",   label: "طلباتي",  bg: "#fef9c3" },
+            { href: "/results",  img: "/icon_calendar.png",    label: "مواعيدي", bg: "#dcfce7" },
           ].map(a => (
             <a key={a.label} href={a.href} className="premium-card service-card">
-              <div className="sticker-icon" style={{ background: a.bg }}>
-                <span style={{ fontSize: "2rem" }}>{a.emoji}</span>
+              <div className="sticker-icon" style={{ background: a.bg, overflow: "hidden" }}>
+                <Image src={a.img} alt={a.label} width={48} height={48} style={{ objectFit: "contain" }} />
               </div>
               <span className="service-label">{a.label}</span>
             </a>
@@ -142,7 +143,7 @@ export default function PatientDashboard() {
                  style={{ padding: "1.1rem", textDecoration: "none" }}>
                 {/* Top row */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <span style={{ fontSize: "1.9rem", lineHeight: 1 }}>{m.emoji}</span>
+                  <Image src={m.img} alt={m.label} width={44} height={44} style={{ objectFit: "contain" }} />
                   {status && (
                     <span style={{
                       fontSize: "0.58rem", fontWeight: 900, padding: "2px 7px", borderRadius: 999,
