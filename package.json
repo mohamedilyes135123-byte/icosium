@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/admin",
+    "apps/doctor",
+    "apps/lab",
+    "apps/patient",
+    "apps/pharmacy"
   ],
   "scripts": {
     "dev": "next dev",
@@ -12,6 +16,8 @@
     "dev:lab": "npm run dev -w apps/lab",
     "dev:patient": "npm run dev -w apps/patient",
     "dev:pharmacy": "npm run dev -w apps/pharmacy",
+    "dev:mobile-patient": "npm run start -w apps/mobile-patient -- --port 8085 --lan",
+    "dev:mobile-doctor": "npm run start -w apps/mobile-doctor -- --port 8086 --lan",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -33,6 +39,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@expo/ngrok": "^4.1.3",
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

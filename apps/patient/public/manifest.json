@@ -1,0 +1,39 @@
+{
+  "name": "عناية - بوابة المريض",
+  "short_name": "عناية",
+  "description": "منصة عناية الطبية - بوابة المريض",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0fdf4",
+  "theme_color": "#16a34a",
+  "orientation": "portrait",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["medical", "health"],
+  "shortcuts": [
+    {
+      "name": "طلباتي",
+      "url": "/requests",
+      "description": "طلباتي الطبية"
+    },
+    {
+      "name": "نتائج التحاليل",
+      "url": "/results",
+      "description": "نتائج التحاليل"
+    }
+  ]
+}
