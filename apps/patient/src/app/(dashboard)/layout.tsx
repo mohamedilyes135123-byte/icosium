@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Home, HeartPulse, User, LogOut, Search, Activity, Sparkles, Thermometer, ClipboardList } from "lucide-react";
@@ -74,7 +75,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
 
           <nav style={{ flex: 1, padding: "24px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
             {sideNav.map(item => (
-              <a key={item.href} href={item.href} style={{
+              <Link key={item.href} href={item.href} prefetch={true} style={{
                 display: "flex", alignItems: "center", gap: 12, padding: "12px 16px",
                 borderRadius: 999, fontSize: 14, fontWeight: 700, textDecoration: "none",
                 transition: "all 0.15s",
@@ -82,7 +83,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                 color: isActive(item.href) ? "#fff" : "#6b7280",
               }}>
                 {item.icon}<span>{item.label}</span>
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -110,10 +111,10 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
           {mobileNav.map(item => {
             const active = isActive(item.href);
             return (
-              <a key={item.href} href={item.href} className={`bottom-nav-item${active ? " active" : ""}`}>
+              <Link key={item.href} href={item.href} prefetch={true} className={`bottom-nav-item${active ? " active" : ""}`}>
                 <span className="nav-icon-wrap">{item.icon}</span>
                 <span>{item.label}</span>
-              </a>
+              </Link>
             );
           })}
         </nav>

@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -139,12 +140,12 @@ export default function PatientDashboard() {
             const vital  = todayVitals[m.id];
             const status = vital ? getStatus(m.id, vital.value1) : null;
             return (
-              <a key={m.id} href="/vitals" className="premium-card"
+              <Link key={m.id} href="/vitals" prefetch={true} className="premium-card"
                  style={{ padding: "1.25rem", textDecoration: "none", border: "none",
                           boxShadow: "0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(22,163,74,0.10)" }}>
                 {/* Top row */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <Image src={m.img} alt={m.label} width={72} height={72} style={{ objectFit: "contain" }} />
+                  <Image src={m.img} alt={m.label} width={72} height={72} style={{ objectFit: "contain" }} priority />
                   {status && (
                     <span style={{
                       fontSize: "0.58rem", fontWeight: 900, padding: "2px 7px", borderRadius: 999,
@@ -180,7 +181,7 @@ export default function PatientDashboard() {
                     اضغط للتسجيل
                   </div>
                 )}
-              </a>
+              </Link>
             );
           })}
         </div>
@@ -208,23 +209,23 @@ export default function PatientDashboard() {
         </div>
 
         {/* ── CTA Buttons ── */}
-        <a href="/vitals" className="premium-btn w-full mb-3"
-           style={{ marginBottom: "0.75rem", boxShadow: "0 6px 20px rgba(22,163,74,0.3)" }}>
+        <Link href="/vitals" prefetch={true} className="premium-btn w-full mb-3 block text-center"
+           style={{ marginBottom: "0.75rem", boxShadow: "0 6px 20px rgba(22,163,74,0.3)", textDecoration: "none" }}>
           <span style={{ color: "white", fontSize: "1.05rem", fontWeight: 900 }}>📈 تسجيل القياسات اليومية</span>
-        </a>
-        <a href="/requests" className="premium-btn w-full"
-           style={{ background: "white", border: "2px solid #16a34a", boxShadow: "none" }}>
+        </Link>
+        <Link href="/requests" prefetch={true} className="premium-btn w-full block text-center"
+           style={{ background: "white", border: "2px solid #16a34a", boxShadow: "none", textDecoration: "none" }}>
           <span style={{ color: "#16a34a", fontSize: "1.05rem", fontWeight: 900 }}>🩺 ابدأ استشارة جديدة</span>
-        </a>
+        </Link>
 
       </div>
 
       {/* ── Bottom Nav ── */}
       <div className="premium-bottom-nav">
-        <a href="/"        className="nav-item active"><div className="nav-icon"><span className="text-2xl">🏠</span></div></a>
-        <a href="/requests" className="nav-item">      <div className="nav-icon"><span className="text-2xl">💬</span></div></a>
-        <a href="/vitals"   className="nav-item">      <div className="nav-icon"><span className="text-2xl">💓</span></div></a>
-        <a href="/profile"  className="nav-item">      <div className="nav-icon"><span className="text-2xl">👤</span></div></a>
+        <Link href="/dashboard" prefetch={true} className="nav-item active"><div className="nav-icon"><span className="text-2xl">🏠</span></div></Link>
+        <Link href="/requests" prefetch={true} className="nav-item">      <div className="nav-icon"><span className="text-2xl">💬</span></div></Link>
+        <Link href="/vitals" prefetch={true} className="nav-item">      <div className="nav-icon"><span className="text-2xl">💓</span></div></Link>
+        <Link href="/profile" prefetch={true} className="nav-item">      <div className="nav-icon"><span className="text-2xl">👤</span></div></Link>
       </div>
     </div>
   );
