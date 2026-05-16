@@ -284,12 +284,16 @@ export default function PatientVitals() {
       <AnimatePresence>
         {showAddForm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-end"
             onClick={() => setShowAddForm(false)}>
             <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25 }}
-              className="w-full bg-white rounded-t-[2rem] p-6 max-h-[80vh] overflow-y-auto"
+              className="w-full bg-white rounded-t-[2rem] flex flex-col"
+              style={{ maxHeight: "85vh" }}
               onClick={e => e.stopPropagation()}>
+
+              {/* Scrollable content */}
+              <div className="overflow-y-auto flex-1 p-6 pb-2">
 
               <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
               <h3 className="font-black text-slate-800 text-lg mb-5 text-center">
@@ -341,13 +345,17 @@ export default function PatientVitals() {
                   className="w-full h-10 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-400 outline-none text-sm" />
               </div>
 
-              <div className="flex gap-3">
+              </div>
+
+              {/* ── Sticky action buttons — always visible ── */}
+              <div className="flex gap-3 px-6 py-4 border-t border-slate-100 bg-white"
+                   style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))", flexShrink: 0 }}>
                 <button onClick={saveMeasurement} disabled={saving || !val1}
-                  className="flex-1 h-12 rounded-2xl bg-gradient-to-l from-rose-500 to-pink-400 text-white font-bold shadow-lg disabled:opacity-50">
+                  className="flex-1 h-14 rounded-2xl bg-gradient-to-l from-emerald-500 to-green-400 text-white font-black text-base shadow-lg shadow-emerald-500/30 disabled:opacity-50 transition-transform active:scale-95">
                   {saving ? "جاري الحفظ..." : "✅ تسجيل القياس"}
                 </button>
                 <button onClick={() => setShowAddForm(false)}
-                  className="h-12 px-5 rounded-2xl border border-slate-200 bg-white text-slate-600 font-bold">
+                  className="h-14 px-6 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 font-bold transition-transform active:scale-95">
                   إلغاء
                 </button>
               </div>
