@@ -55,7 +55,8 @@ export default function DoctorSettings() {
 
       if (prof) {
         setProfile(prof);
-        setFullNameAr(prof.full_name || user.user_metadata?.full_name_ar || "");
+        const fixEnc = (s: string) => { try { return s ? decodeURIComponent(escape(s)) : s; } catch { return s; } };
+        setFullNameAr(fixEnc(prof.full_name) || fixEnc(user.user_metadata?.full_name_ar) || "");
         setFullNameFr(user.user_metadata?.full_name_fr || "");
         setPhone(prof.phone || "");
         setSpecialty(prof.specialty || user.user_metadata?.specialty || "");
@@ -129,9 +130,9 @@ export default function DoctorSettings() {
         </div>
       </motion.header>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Left sidebar — navigation */}
-        <div className="w-56 flex-shrink-0">
+        <div className="w-full lg:w-64 flex-shrink-0">
           {/* Doctor card */}
           <div className="bg-gradient-to-br from-blue-600 to-cyan-500 rounded-3xl p-5 mb-4 text-white shadow-xl shadow-blue-500/20">
             <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white font-black text-2xl mb-3 border border-white/30">
@@ -153,12 +154,12 @@ export default function DoctorSettings() {
           </div>
 
           {/* Nav */}
-          <nav className="space-y-1">
+          <nav className="flex lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 hide-scrollbar">
             {sections.map(s => (
               <button
                 key={s.id}
                 onClick={() => setActiveSection(s.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-right ${
+                className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start gap-2 lg:gap-3 px-4 py-3 rounded-2xl text-xs lg:text-sm font-bold transition-all ${
                   activeSection === s.id
                     ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
                     : "text-slate-600 hover:bg-slate-100"
