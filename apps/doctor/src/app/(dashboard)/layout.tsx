@@ -29,8 +29,8 @@ export default function DoctorLayout({
          <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-cyan-100 rounded-full mix-blend-multiply filter blur-[150px] opacity-30"></div>
       </div>
 
-      {/* Bright Glass Sidebar */}
-      <aside className="w-72 border-r rtl:border-l rtl:border-r-0 border-blue-100 flex flex-col z-20 h-screen bg-white/40 backdrop-blur-3xl shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+      {/* Bright Glass Sidebar (Desktop) */}
+      <aside className="hidden md:flex w-72 border-r rtl:border-l rtl:border-r-0 border-blue-100 flex-col z-20 h-screen bg-white/40 backdrop-blur-3xl shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div className="p-6 flex items-center gap-3 text-slate-800 font-bold text-xl border-b border-blue-100 bg-white/50">
           <img src="/logo.png" alt="عناية" className="w-10 h-10 object-contain" />
           <span className="tracking-wide">منصة الطبيب</span>
@@ -62,7 +62,7 @@ export default function DoctorLayout({
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative z-10 overflow-hidden text-right">
+      <main className="flex-1 flex flex-col relative z-10 overflow-hidden text-right pb-24 md:pb-0">
          <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
@@ -78,7 +78,29 @@ export default function DoctorLayout({
             </motion.div>
           </AnimatePresence>
       </main>
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-blue-100 z-50 flex justify-around items-center px-2 py-3" style={{ paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
+        <MobileNavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5"/>} label="الرئيسية" current={pathname} />
+        <MobileNavItem href="/requests" icon={<Calendar className="w-5 h-5"/>} label="الطلبات" current={pathname} />
+        <Link href="/prescriptions/new" className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full text-white shadow-lg shadow-blue-500/30 -mt-8 border-4 border-slate-50">
+          <PlusCircle className="w-6 h-6" />
+        </Link>
+        <MobileNavItem href="/patients" icon={<Users className="w-5 h-5"/>} label="المرضى" current={pathname} />
+        <MobileNavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label="الإعدادات" current={pathname} />
+      </nav>
     </div>
+  );
+}
+
+function MobileNavItem({ href, icon, label, current }: { href: string; icon: React.ReactNode; label: string, current: string }) {
+  const isActive = current === href || (href !== '/dashboard' && current.startsWith(href));
+  return (
+    <Link href={href} prefetch={true} className={`flex flex-col items-center gap-1 min-w-[60px] ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>
+      <div className={`p-1.5 rounded-xl ${isActive ? 'bg-blue-50' : ''}`}>
+        {icon}
+      </div>
+      <span className="text-[10px] font-bold">{label}</span>
+    </Link>
   );
 }
 
