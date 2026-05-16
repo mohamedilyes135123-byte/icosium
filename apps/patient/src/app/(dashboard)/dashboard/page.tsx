@@ -140,10 +140,10 @@ export default function PatientDashboard() {
             const status = vital ? getStatus(m.id, vital.value1) : null;
             return (
               <a key={m.id} href="/vitals" className="premium-card"
-                 style={{ padding: "1.1rem", textDecoration: "none" }}>
+                 style={{ padding: "1.25rem", textDecoration: "none" }}>
                 {/* Top row */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <Image src={m.img} alt={m.label} width={44} height={44} style={{ objectFit: "contain" }} />
+                  <Image src={m.img} alt={m.label} width={72} height={72} style={{ objectFit: "contain" }} />
                   {status && (
                     <span style={{
                       fontSize: "0.58rem", fontWeight: 900, padding: "2px 7px", borderRadius: 999,
