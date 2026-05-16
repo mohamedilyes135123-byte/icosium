@@ -114,23 +114,23 @@ export default function PatientDashboard() {
           {[
             { href: "/requests", img: "/icon_stethoscope.png", label: "استشارة", bg: "#dcfce7" },
             { href: "/requests", img: "/icon_clipboard.png",   label: "طلباتي",  bg: "#fef9c3" },
-            { href: "/results",  img: "/icon_calendar.png",    label: "مواعيدي", bg: "#dcfce7" },
+            { href: "/appointments", img: "/icon_calendar.png", label: "مواعيدي", bg: "#dcfce7" },
           ].map(a => (
-            <a key={a.label} href={a.href} className="premium-card service-card">
+            <Link key={a.label} href={a.href} prefetch={true} className="premium-card service-card">
               <div className="sticker-icon" style={{ background: a.bg, overflow: "hidden" }}>
                 <Image src={a.img} alt={a.label} width={48} height={48} style={{ objectFit: "contain" }} />
               </div>
               <span className="service-label">{a.label}</span>
-            </a>
+            </Link>
           ))}
         </div>
 
         {/* ── Section Header ── */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-          <a href="/vitals" style={{
+          <Link href="/vitals" prefetch={true} style={{
             fontSize: "0.75rem", fontWeight: 700, padding: "4px 14px",
             borderRadius: 999, background: "#dcfce7", color: "#15803d", textDecoration: "none"
-          }}>+ تسجيل قياس</a>
+          }}>+ تسجيل قياس</Link>
           <h2 className="section-title">📈 قياساتي اليوم</h2>
         </div>
 
