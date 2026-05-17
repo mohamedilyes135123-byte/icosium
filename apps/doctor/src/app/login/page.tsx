@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
 
@@ -179,7 +179,7 @@ export default function LoginPage() {
         password: "123456",
       });
       if (authError) {
-        setError("┘ä┘à ┘è╪¬┘à ╪▒┘ü╪╣ ╪º┘ä╪¿┘è╪º┘å╪º╪¬ (Seed). ╪¼╪▒╪¿ ╪Ñ╪»╪«╪º┘ä┘ç╪º ┘è╪»┘ê┘è╪º┘ï.");
+        setError("لم يتم رفع البيانات (Seed). جرب إدخالها يدوياً.");
         setLoading(false);
         return;
       }
@@ -194,16 +194,37 @@ export default function LoginPage() {
     });
 
     if (authError) {
-      setError("┘ü╪┤┘ä ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä. ╪¬╪ú┘â╪» ┘à┘å ╪º┘ä╪¿╪▒┘è╪» ┘ê┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒.");
+      setError("فشل تسجيل الدخول. تأكد من البريد وكلمة المرور.");
       setLoading(false);
       return;
     }
 
-    const userRole = data?.user?.user_metadata?.role;
+    // Check approval status from profiles
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("approval_status, role")
+      .eq("id", data.user.id)
+      .single();
+
+    if (profile?.approval_status === "rejected") {
+      await supabase.auth.signOut();
+      setError("❌ تم رفض حسابك من قبل الإدارة. يرجى التواصل مع الدعم.");
+      setLoading(false);
+      return;
+    }
+
+    if (profile?.approval_status === "pending") {
+      setError("⏳ حسابك قيد المراجعة. انتظر اعتماد الإدارة للوصول إلى المنصة.");
+      setLoading(false);
+      return;
+    }
+
+    const userRole = data?.user?.user_metadata?.role || profile?.role;
     if (userRole === "doctor") {
       router.push("/dashboard");
     } else {
-      setError("┘è╪▒╪¼┘ë ╪º┘ä╪¬╪ú┘â╪» ┘à┘å ╪º┘ä╪»╪«┘ê┘ä ┘à┘å ╪º┘ä╪¿┘ê╪º╪¿╪⌐ ╪º┘ä┘à╪«╪╡╪╡╪⌐ ┘ä╪»┘ê╪▒┘â.");
+      await supabase.auth.signOut();
+      setError("يرجى التأكد من الدخول من البوابة المخصصة لدورك.");
       setLoading(false);
     }
   };
