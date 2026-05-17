@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -33,24 +33,24 @@ export default function PatientLayout({
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex w-72 border-r rtl:border-l rtl:border-r-0 border-emerald-100 flex-col bg-white/40 backdrop-blur-3xl">
           <div className="p-6 flex items-center gap-3 text-slate-800 font-bold text-xl border-b border-emerald-100">
-            <img src="/logo.png" alt="╪╣┘å╪º┘è╪⌐" className="w-10 h-10 object-contain" />
-            <span>╪╣┘å╪º┘è╪⌐ ┘ä┘ä┘à╪▒╪╢┘ë</span>
+            <img src="/logo.png" alt="عناية" className="w-10 h-10 object-contain" />
+            <span>عناية للمرضى</span>
           </div>
           
           <nav className="flex-1 px-4 py-6 space-y-2">
-            <DesktopNavItem href="/dashboard" icon={<Home className="w-5 h-5"/>} label="╪º┘ä╪▒╪ª┘è╪│┘è╪⌐" current={pathname} />
-            <DesktopNavItem href="/ai-chat" icon={<Sparkles className="w-5 h-5"/>} label="╪º┘ä┘à╪│╪º╪╣╪» ╪º┘ä╪░┘â┘è" current={pathname} />
-            <DesktopNavItem href="/doctors" icon={<Search className="w-5 h-5"/>} label="╪º┘ä╪¿╪¡╪½ ╪╣┘å ╪╖╪¿┘è╪¿" current={pathname} />
-            <DesktopNavItem href="/requests" icon={<Activity className="w-5 h-5"/>} label="╪╖┘ä╪¿╪º╪¬┘è ╪º┘ä╪╖╪¿┘è╪⌐" current={pathname} />
-            <DesktopNavItem href="/results" icon={<Star className="w-5 h-5"/>} label="┘å╪¬╪º╪ª╪¼┘è ┘ê╪╖┘ä╪¿╪º╪¬┘è" current={pathname} />
-            <DesktopNavItem href="/vitals" icon={<Thermometer className="w-5 h-5"/>} label="┘é┘è╪º╪│╪º╪¬┘è ╪º┘ä┘è┘ê┘à┘è╪⌐" current={pathname} />
-            <DesktopNavItem href="/profile" icon={<User className="w-5 h-5"/>} label="╪º┘ä┘à┘ä┘ü ╪º┘ä╪╡╪¡┘è" current={pathname} />
+            <DesktopNavItem href="/dashboard" icon={<Home className="w-5 h-5"/>} label="الرئيسية" current={pathname} />
+            <DesktopNavItem href="/ai-chat" icon={<Sparkles className="w-5 h-5"/>} label="المساعد الذكي" current={pathname} />
+            <DesktopNavItem href="/doctors" icon={<Search className="w-5 h-5"/>} label="البحث عن طبيب" current={pathname} />
+            <DesktopNavItem href="/requests" icon={<Activity className="w-5 h-5"/>} label="طلباتي الطبية" current={pathname} />
+            <DesktopNavItem href="/results" icon={<Star className="w-5 h-5"/>} label="نتائجي وطلباتي" current={pathname} />
+            <DesktopNavItem href="/vitals" icon={<Thermometer className="w-5 h-5"/>} label="قياساتي اليومية" current={pathname} />
+            <DesktopNavItem href="/profile" icon={<User className="w-5 h-5"/>} label="الملف الصحي" current={pathname} />
           </nav>
 
           <div className="p-4 border-t border-emerald-100">
             <button onClick={handleLogout} className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors text-sm font-bold border border-rose-100">
               <LogOut className="w-4 h-4"/>
-              ╪¬╪│╪¼┘è┘ä ╪º┘ä╪«╪▒┘ê╪¼
+              تسجيل الخروج
             </button>
           </div>
         </aside>
@@ -74,13 +74,13 @@ export default function PatientLayout({
         </main>
       </div>
 
-      {/* Mobile Navigation (Bottom Bar) ΓÇö 5 items */}
+      {/* Mobile Navigation (Bottom Bar) — 5 items */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-2xl border-t border-emerald-100 px-2 py-3 flex justify-between items-center z-50">
-         <MobileNavItem href="/dashboard" icon={<Home className="w-5 h-5"/>} label="╪º┘ä╪▒╪ª┘è╪│┘è╪⌐" active={pathname === '/dashboard'} />
-         <MobileNavItem href="/vitals" icon={<Thermometer className="w-5 h-5"/>} label="┘é┘è╪º╪│╪º╪¬" active={pathname.startsWith('/vitals')} />
-         <MobileNavItem href="/requests" icon={<Activity className="w-5 h-5"/>} label="╪╖┘ä╪¿╪º╪¬┘è" active={pathname.startsWith('/requests')} />
-         <MobileNavItem href="/results" icon={<Star className="w-5 h-5"/>} label="┘å╪¬╪º╪ª╪¼┘è" active={pathname.startsWith('/results')} />
-         <MobileNavItem href="/profile" icon={<User className="w-5 h-5"/>} label="┘à┘ä┘ü┘è" active={pathname === '/profile'} />
+         <MobileNavItem href="/dashboard" icon={<Home className="w-5 h-5"/>} label="الرئيسية" active={pathname === '/dashboard'} />
+         <MobileNavItem href="/vitals" icon={<Thermometer className="w-5 h-5"/>} label="قياسات" active={pathname.startsWith('/vitals')} />
+         <MobileNavItem href="/requests" icon={<Activity className="w-5 h-5"/>} label="طلباتي" active={pathname.startsWith('/requests')} />
+         <MobileNavItem href="/results" icon={<Star className="w-5 h-5"/>} label="نتائجي" active={pathname.startsWith('/results')} />
+         <MobileNavItem href="/profile" icon={<User className="w-5 h-5"/>} label="ملفي" active={pathname === '/profile'} />
       </nav>
     </div>
   );

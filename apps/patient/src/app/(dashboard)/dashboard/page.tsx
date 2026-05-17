@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
 
@@ -68,12 +68,12 @@ export default function PatientDashboard() {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "╪╡╪¿╪º╪¡ ╪º┘ä╪«┘è╪▒ ΓÿÇ∩╕Å" : hour < 17 ? "┘à╪│╪º╪í ╪º┘ä╪«┘è╪▒ ≡ƒîñ∩╕Å" : "┘à╪│╪º╪í ╪º┘ä┘å┘ê╪▒ ≡ƒîÖ";
-  const firstName = profile?.full_name?.split(" ")[0] || "┘à╪▒┘è╪╢";
+  const greeting = hour < 12 ? "صباح الخير ☀️" : hour < 17 ? "مساء الخير 🌤️" : "مساء النور 🌙";
+  const firstName = profile?.full_name?.split(" ")[0] || "مريض";
 
   const vitalLabel: Record<string, string> = {
-    blood_sugar: "╪│┘â╪▒ ╪º┘ä╪»┘à", blood_pressure: "╪╢╪║╪╖ ╪º┘ä╪»┘à",
-    weight: "╪º┘ä┘ê╪▓┘å", oximetry: "╪¬╪┤╪¿╪╣ OΓéé",
+    blood_sugar: "سكر الدم", blood_pressure: "ضغط الدم",
+    weight: "الوزن", oximetry: "تشبع O₂",
   };
   const vitalUnit: Record<string, string> = {
     blood_sugar: "mg/dL", blood_pressure: "mmHg", weight: "kg", oximetry: "%",
@@ -82,7 +82,7 @@ export default function PatientDashboard() {
   return (
     <div className="w-full pb-32" dir="rtl">
 
-      {/* ΓöÇΓöÇ Header ΓöÇΓöÇ */}
+      {/* ── Header ── */}
       <motion.header initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
         className="flex justify-between items-center mb-7">
         <div className="flex items-center gap-3">
@@ -104,7 +104,7 @@ export default function PatientDashboard() {
         </Link>
       </motion.header>
 
-      {/* ΓöÇΓöÇ Hero Card ΓöÇΓöÇ */}
+      {/* ── Hero Card ── */}
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
         className="relative rounded-3xl mb-7 overflow-hidden bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white shadow-2xl shadow-emerald-500/20">
@@ -114,28 +114,28 @@ export default function PatientDashboard() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2 h-2 bg-emerald-300 rounded-full animate-pulse" />
-            <span className="text-xs font-bold text-emerald-200">┘à┘å╪╡╪⌐ ╪╣┘å╪º┘è╪⌐ ΓÇö ╪▒╪╣╪º┘è╪¬┘â ┘ü┘è ┘è╪»┘â</span>
+            <span className="text-xs font-bold text-emerald-200">منصة عناية — رعايتك في يدك</span>
           </div>
-          <h2 className="text-xl font-black mb-1">┘à┘ä┘ü┘â ╪º┘ä╪╡╪¡┘è ┘à╪¡┘à┘è ┘ê╪ó┘à┘å</h2>
+          <h2 className="text-xl font-black mb-1">ملفك الصحي محمي وآمن</h2>
           <p className="text-sm text-emerald-100/80 mb-5 leading-snug">
-            ┘â┘ä ╪╖┘ä╪¿╪º╪¬┘â╪î ┘ê╪╡┘ü╪º╪¬┘â╪î ┘ê┘å╪¬╪º╪ª╪¼ ╪¬╪¡╪º┘ä┘è┘ä┘â ┘ü┘è ┘à┘â╪º┘å ┘ê╪º╪¡╪».
+            كل طلباتك، وصفاتك، ونتائج تحاليلك في مكان واحد.
           </p>
           <Link href="/requests"
             className="inline-flex items-center gap-2 text-sm font-bold bg-white/15 hover:bg-white/25 transition-all px-5 py-2.5 rounded-2xl border border-white/20">
-            ╪╖┘ä╪¿ ╪º╪│╪¬╪┤╪º╪▒╪⌐ ╪╖╪¿┘è╪⌐
+            طلب استشارة طبية
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
           </Link>
         </div>
       </motion.div>
 
-      {/* ΓöÇΓöÇ Stats row ΓöÇΓöÇ */}
+      {/* ── Stats row ── */}
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
         className="grid grid-cols-3 gap-3 mb-7">
         {[
-          { label: "╪╖┘ä╪¿╪º╪¬┘è", value: stats.requests, icon: <Activity className="w-5 h-5" />, href: "/requests", color: "text-blue-600 bg-blue-50" },
-          { label: "┘ê╪╡┘ü╪º╪¬┘è", value: stats.prescriptions, icon: <Pill className="w-5 h-5" />, href: "/results", color: "text-purple-600 bg-purple-50" },
-          { label: "╪¬╪¡╪º┘ä┘è┘ä┘è", value: stats.labResults, icon: <FlaskConical className="w-5 h-5" />, href: "/results", color: "text-cyan-600 bg-cyan-50" },
+          { label: "طلباتي", value: stats.requests, icon: <Activity className="w-5 h-5" />, href: "/requests", color: "text-blue-600 bg-blue-50" },
+          { label: "وصفاتي", value: stats.prescriptions, icon: <Pill className="w-5 h-5" />, href: "/results", color: "text-purple-600 bg-purple-50" },
+          { label: "تحاليلي", value: stats.labResults, icon: <FlaskConical className="w-5 h-5" />, href: "/results", color: "text-cyan-600 bg-cyan-50" },
         ].map((s, i) => (
           <Link key={s.label} href={s.href}>
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.25 + i * 0.05 } }}
@@ -143,14 +143,14 @@ export default function PatientDashboard() {
               <div className={`w-9 h-9 mx-auto rounded-xl flex items-center justify-center mb-2 ${s.color}`}>
                 {s.icon}
               </div>
-              <p className="text-2xl font-black text-slate-800">{loading ? "ΓÇö" : s.value}</p>
+              <p className="text-2xl font-black text-slate-800">{loading ? "—" : s.value}</p>
               <p className="text-[10px] text-slate-400 font-bold mt-0.5">{s.label}</p>
             </motion.div>
           </Link>
         ))}
       </motion.div>
 
-      {/* ΓöÇΓöÇ Latest vital reading ΓöÇΓöÇ */}
+      {/* ── Latest vital reading ── */}
       {latestVital && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
           <Link href="/vitals">
@@ -159,7 +159,7 @@ export default function PatientDashboard() {
                 <Thermometer className="w-6 h-6" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-slate-400 mb-0.5">╪ó╪«╪▒ ┘é┘è╪º╪│ ΓÇö {vitalLabel[latestVital.type]}</p>
+                <p className="text-xs font-bold text-slate-400 mb-0.5">آخر قياس — {vitalLabel[latestVital.type]}</p>
                 <p className="text-2xl font-black text-slate-800">
                   {latestVital.value1}
                   {latestVital.value2 && <span className="text-slate-400 text-lg"> / {latestVital.value2}</span>}
@@ -172,12 +172,12 @@ export default function PatientDashboard() {
         </motion.div>
       )}
 
-      {/* ΓöÇΓöÇ Recent Activity ΓöÇΓöÇ */}
+      {/* ── Recent Activity ── */}
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.35 }}>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-black text-slate-800">╪ó╪«╪▒ ╪º┘ä┘å╪┤╪º╪╖╪º╪¬</h3>
+          <h3 className="font-black text-slate-800">آخر النشاطات</h3>
           <Link href="/requests" className="text-emerald-600 text-xs font-bold bg-emerald-50 px-3 py-1 rounded-lg">
-            ╪╣╪▒╪╢ ╪º┘ä┘â┘ä
+            عرض الكل
           </Link>
         </div>
 
@@ -190,10 +190,10 @@ export default function PatientDashboard() {
         {!loading && recentActivity.length === 0 && (
           <div className="flex flex-col items-center py-12 bg-white/60 border border-white rounded-2xl">
             <Activity className="w-12 h-12 text-slate-200 mb-3" />
-            <p className="text-slate-500 font-bold text-sm">┘ä╪º ┘è┘ê╪¼╪» ┘å╪┤╪º╪╖ ╪¿╪╣╪»</p>
+            <p className="text-slate-500 font-bold text-sm">لا يوجد نشاط بعد</p>
             <Link href="/requests"
               className="mt-3 px-5 py-2 bg-emerald-500 text-white text-xs font-bold rounded-xl">
-              ╪º╪¿╪»╪ú ╪¿╪╖┘ä╪¿ ╪º╪│╪¬╪┤╪º╪▒╪⌐
+              ابدأ بطلب استشارة
             </Link>
           </div>
         )}
@@ -217,10 +217,10 @@ export default function PatientDashboard() {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-slate-800 text-sm truncate">
                   {item._kind === "prescription"
-                    ? `┘ê╪╡┘ü╪⌐ ΓÇö ${item.doctor?.full_name || "╪╖╪¿┘è╪¿"}`
+                    ? `وصفة — ${item.doctor?.full_name || "طبيب"}`
                     : item._kind === "lab"
-                    ? "┘å╪¬╪º╪ª╪¼ ╪¬╪¡╪º┘ä┘è┘ä ╪¼╪º┘ç╪▓╪⌐"
-                    : item.symptoms?.slice(0, 40) || "╪╖┘ä╪¿ ╪╖╪¿┘è ╪¼╪»┘è╪»"}
+                    ? "نتائج تحاليل جاهزة"
+                    : item.symptoms?.slice(0, 40) || "طلب طبي جديد"}
                 </p>
                 <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
                   <Clock className="w-3 h-3" />
@@ -236,10 +236,10 @@ export default function PatientDashboard() {
                   ? "bg-rose-100 text-rose-700"
                   : "bg-amber-100 text-amber-700"
               }`}>
-                {item._kind === "lab" ? "Γ£à ╪¼╪º┘ç╪▓╪⌐" :
-                 item._kind === "prescription" ? "≡ƒÆè ┘ê╪╡┘ü╪⌐" :
-                 item.status === "APPROVED" ? "Γ£à ┘à┘é╪¿┘ê┘ä" :
-                 item.status === "REJECTED" ? "Γ¥î ┘à╪▒┘ü┘ê╪╢" : "ΓÅ│ ╪º┘å╪¬╪╕╪º╪▒"}
+                {item._kind === "lab" ? "✅ جاهزة" :
+                 item._kind === "prescription" ? "💊 وصفة" :
+                 item.status === "APPROVED" ? "✅ مقبول" :
+                 item.status === "REJECTED" ? "❌ مرفوض" : "⏳ انتظار"}
               </span>
             </motion.div>
           ))}

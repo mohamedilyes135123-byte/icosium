@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
 
@@ -26,11 +26,11 @@ const STATUS_STYLE: Record<AuditStatus, string> = {
 };
 
 const ACTION_CATEGORIES: Record<string, string[]> = {
-  "╪¡╪│╪º╪¿╪º╪¬":     ["ACCOUNT_APPROVED","ACCOUNT_REJECTED","ACCOUNT_BANNED","ACCOUNT_UNBANNED"],
-  "╪»╪«┘ê┘ä":       ["USER_LOGIN","USER_LOGOUT","LOGIN_FAILED","MFA_VERIFIED"],
-  "┘ê╪╡┘ü╪º╪¬":      ["PRESCRIPTION_CREATED","PRESCRIPTION_VIEWED","PRESCRIPTION_USED"],
-  "╪¬╪¡╪º┘ä┘è┘ä":     ["LAB_RESULT_UPLOADED","LAB_REQUEST_RECEIVED"],
-  "╪ú┘à╪º┘å":       ["UNAUTHORIZED_ACCESS_ATTEMPT","RATE_LIMIT_EXCEEDED","SUSPICIOUS_ACTIVITY"],
+  "حسابات":     ["ACCOUNT_APPROVED","ACCOUNT_REJECTED","ACCOUNT_BANNED","ACCOUNT_UNBANNED"],
+  "دخول":       ["USER_LOGIN","USER_LOGOUT","LOGIN_FAILED","MFA_VERIFIED"],
+  "وصفات":      ["PRESCRIPTION_CREATED","PRESCRIPTION_VIEWED","PRESCRIPTION_USED"],
+  "تحاليل":     ["LAB_RESULT_UPLOADED","LAB_REQUEST_RECEIVED"],
+  "أمان":       ["UNAUTHORIZED_ACCESS_ATTEMPT","RATE_LIMIT_EXCEEDED","SUSPICIOUS_ACTIVITY"],
 };
 
 export default function AuditPage() {
@@ -89,7 +89,7 @@ export default function AuditPage() {
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-black text-slate-800">╪│╪¼┘ä ╪º┘ä╪¬╪»┘é┘è┘é ╪º┘ä╪ú┘à┘å┘è</h1>
+              <h1 className="text-2xl font-black text-slate-800">سجل التدقيق الأمني</h1>
               {autoRefresh && (
                 <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
                   <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
@@ -98,9 +98,9 @@ export default function AuditPage() {
               )}
             </div>
             <p className="text-slate-400 text-sm">
-              {counts.total} ╪│╪¼┘ä ┘à╪│╪¼┘æ┘ä ΓÇö
-              {counts.BLOCKED > 0 && <span className="text-rose-600 font-bold mr-2"> ≡ƒÜ½ {counts.BLOCKED} ┘à╪¡╪╕┘ê╪▒</span>}
-              {counts.WARNING > 0 && <span className="text-amber-600 font-bold mr-2"> ΓÜá∩╕Å {counts.WARNING} ╪¬╪¡╪░┘è╪▒</span>}
+              {counts.total} سجل مسجّل —
+              {counts.BLOCKED > 0 && <span className="text-rose-600 font-bold mr-2"> 🚫 {counts.BLOCKED} محظور</span>}
+              {counts.WARNING > 0 && <span className="text-amber-600 font-bold mr-2"> ⚠️ {counts.WARNING} تحذير</span>}
             </p>
           </div>
           <div className="flex gap-2">
@@ -117,7 +117,7 @@ export default function AuditPage() {
             </button>
             <button onClick={exportCSV}
               className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/20">
-              <Download className="w-4 h-4" /> ╪¬╪╡╪»┘è╪▒ CSV
+              <Download className="w-4 h-4" /> تصدير CSV
             </button>
           </div>
         </div>
@@ -130,12 +130,12 @@ export default function AuditPage() {
             className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
               filterStatus === s ? "bg-slate-800 text-white border-transparent" : "bg-white text-slate-500 border-slate-200 hover:border-slate-400"
             }`}>
-            {s === "ALL" ? "╪º┘ä┘â┘ä" : s}
+            {s === "ALL" ? "الكل" : s}
           </button>
         ))}
         <div className="relative">
           <input value={filterAction} onChange={e => setFilterAction(e.target.value)}
-            placeholder="┘ü┘ä╪¬╪▒╪⌐ ╪¡╪│╪¿ ╪º┘ä╪Ñ╪¼╪▒╪º╪í..."
+            placeholder="فلترة حسب الإجراء..."
             className="h-9 px-4 pr-9 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-slate-700" />
           {filterAction && (
             <button onClick={() => setFilterAction("")} className="absolute right-2.5 top-2 text-slate-400">
@@ -153,22 +153,22 @@ export default function AuditPage() {
             <div className="w-3 h-3 rounded-full bg-rose-500" />
             <div className="w-3 h-3 rounded-full bg-amber-500" />
             <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            <span className="text-slate-500 text-xs font-mono mr-3">3inaya-audit-terminal ΓÇö {entries.length} entries</span>
+            <span className="text-slate-500 text-xs font-mono mr-3">3inaya-audit-terminal — {entries.length} entries</span>
           </div>
-          {autoRefresh && <span className="text-emerald-400 text-xs font-mono animate-pulse">ΓùÅ RECORDING</span>}
+          {autoRefresh && <span className="text-emerald-400 text-xs font-mono animate-pulse">● RECORDING</span>}
         </div>
 
         <div ref={terminalRef} className="p-5 max-h-[70vh] overflow-y-auto font-mono text-sm space-y-2">
           {loading && (
             <div className="flex items-center gap-2 text-slate-500 py-4">
               <Activity className="w-4 h-4 animate-spin" />
-              <span>╪¼╪º╪▒┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä╪│╪¼┘ä╪º╪¬...</span>
+              <span>جاري تحميل السجلات...</span>
             </div>
           )}
 
           {!loading && entries.length === 0 && (
             <div className="py-10 text-center">
-              <p className="text-slate-600">// ┘ä╪º ╪¬┘ê╪¼╪» ╪│╪¼┘ä╪º╪¬ ╪¬╪╖╪º╪¿┘é ┘ç╪░╪º ╪º┘ä┘ü┘ä╪¬╪▒</p>
+              <p className="text-slate-600">// لا توجد سجلات تطابق هذا الفلتر</p>
               <span className="text-slate-700 animate-pulse">_</span>
             </div>
           )}
@@ -197,7 +197,7 @@ export default function AuditPage() {
                 <div className="flex-1 min-w-0">
                   <span className="text-slate-300 truncate block">
                     {entry.actor_name}
-                    {entry.details && <span className="text-slate-500"> ΓÇ║ {entry.details}</span>}
+                    {entry.details && <span className="text-slate-500"> › {entry.details}</span>}
                   </span>
                   {entry.ip_address && (
                     <span className="text-slate-600 text-[10px]">{entry.ip_address}</span>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +21,7 @@ interface Profile {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  doctor: "╪╖╪¿┘è╪¿", lab: "┘à╪«╪¬╪¿╪▒", pharmacy: "╪╡┘è╪»┘ä┘è╪⌐",
+  doctor: "طبيب", lab: "مختبر", pharmacy: "صيدلية",
 };
 const ROLE_COLORS: Record<string, string> = {
   doctor:   "from-blue-500 to-indigo-400",
@@ -74,8 +74,8 @@ export default function AdminApprovals() {
       await supabase.from("audit_log").insert([{
         action: status === "approved" ? "ACCOUNT_APPROVED" : "ACCOUNT_REJECTED",
         actor_id: user.id, actor_role: "admin",
-        actor_name: "┘à╪»┘è╪▒ ╪º┘ä┘å╪╕╪º┘à", target_id: id,
-        details: `╪¬┘à ${status === "approved" ? "╪º╪╣╪¬┘à╪º╪»" : "╪▒┘ü╪╢"} ╪º┘ä╪¡╪│╪º╪¿`,
+        actor_name: "مدير النظام", target_id: id,
+        details: `تم ${status === "approved" ? "اعتماد" : "رفض"} الحساب`,
         status: "SUCCESS",
       }]);
     }
@@ -101,8 +101,8 @@ export default function AdminApprovals() {
 
       {/* Header */}
       <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-2xl font-black text-slate-800 mb-1">╪º╪╣╪¬┘à╪º╪» ╪º┘ä╪¡╪│╪º╪¿╪º╪¬ ╪º┘ä┘à┘ç┘å┘è╪⌐</h1>
-        <p className="text-slate-400 text-sm">┘à╪▒╪º╪¼╪╣╪⌐ ┘ê┘é╪¿┘ê┘ä ╪ú┘ê ╪▒┘ü╪╢ ╪╖┘ä╪¿╪º╪¬ ╪ú╪╖╪¿╪º╪í / ┘à╪«╪¬╪¿╪▒╪º╪¬ / ╪╡┘è╪»┘ä┘è╪º╪¬</p>
+        <h1 className="text-2xl font-black text-slate-800 mb-1">اعتماد الحسابات المهنية</h1>
+        <p className="text-slate-400 text-sm">مراجعة وقبول أو رفض طلبات أطباء / مختبرات / صيدليات</p>
       </motion.header>
 
       {/* Status filter */}
@@ -112,7 +112,7 @@ export default function AdminApprovals() {
             className={`px-4 py-2 rounded-2xl text-sm font-bold border transition-all ${
               filter === f ? "bg-indigo-600 text-white border-transparent shadow-lg" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
             }`}>
-            {f === "pending" ? "ΓÅ│ ╪º┘å╪¬╪╕╪º╪▒" : f === "approved" ? "Γ£à ┘à╪╣╪¬┘à╪»" : f === "rejected" ? "Γ¥î ┘à╪▒┘ü┘ê╪╢" : "╪º┘ä┘â┘ä"}
+            {f === "pending" ? "⏳ انتظار" : f === "approved" ? "✅ معتمد" : f === "rejected" ? "❌ مرفوض" : "الكل"}
             <span className={`mr-2 text-xs px-2 py-0.5 rounded-full font-black ${filter === f ? "bg-white/20" : "bg-slate-100"}`}>
               {counts[f]}
             </span>
@@ -127,7 +127,7 @@ export default function AdminApprovals() {
             className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
               roleFilter === r ? `bg-gradient-to-l ${r !== "all" ? ROLE_COLORS[r] : "from-slate-700 to-slate-600"} text-white border-transparent` : "bg-white text-slate-500 border-slate-200"
             }`}>
-            {r === "all" ? "┘â┘ä ╪º┘ä╪ú╪»┘ê╪º╪▒" : ROLE_LABELS[r]}
+            {r === "all" ? "كل الأدوار" : ROLE_LABELS[r]}
           </button>
         ))}
       </div>
@@ -143,7 +143,7 @@ export default function AdminApprovals() {
       {!loading && filteredProfiles.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 bg-white/60 border border-white rounded-3xl">
           <ShieldCheck className="w-16 h-16 text-slate-200 mb-4" />
-          <p className="font-bold text-slate-500">┘ä╪º ╪¬┘ê╪¼╪» ╪¡╪│╪º╪¿╪º╪¬ ┘ü┘è ┘ç╪░┘ç ╪º┘ä┘ü╪ª╪⌐</p>
+          <p className="font-bold text-slate-500">لا توجد حسابات في هذه الفئة</p>
         </div>
       )}
 
@@ -180,8 +180,8 @@ export default function AdminApprovals() {
                     p.approval_status === "rejected" ? "bg-rose-50 text-rose-700 border-rose-200" :
                     "bg-amber-50 text-amber-700 border-amber-200"
                   }`}>
-                    {p.approval_status === "approved" ? "Γ£à ┘à╪╣╪¬┘à╪»" :
-                     p.approval_status === "rejected" ? "Γ¥î ┘à╪▒┘ü┘ê╪╢" : "ΓÅ│ ╪º┘å╪¬╪╕╪º╪▒"}
+                    {p.approval_status === "approved" ? "✅ معتمد" :
+                     p.approval_status === "rejected" ? "❌ مرفوض" : "⏳ انتظار"}
                   </span>
                 </div>
 
@@ -203,7 +203,7 @@ export default function AdminApprovals() {
                     </p>
                   )}
                   <p className="text-xs text-slate-400">
-                    ╪¬╪│╪¼┘è┘ä: {new Date(p.created_at).toLocaleDateString("ar-DZ")}
+                    تسجيل: {new Date(p.created_at).toLocaleDateString("ar-DZ")}
                   </p>
                 </div>
 
@@ -213,7 +213,7 @@ export default function AdminApprovals() {
                     <button onClick={() => setExpanded(expanded === p.id ? null : p.id)}
                       className="flex items-center gap-1.5 text-xs text-indigo-600 font-bold hover:underline">
                       <Eye className="w-3.5 h-3.5" />
-                      {expanded === p.id ? "╪Ñ╪«┘ü╪º╪í ╪º┘ä╪¬┘ü╪º╪╡┘è┘ä" : "╪╣╪▒╪╢ ╪º┘ä╪¬┘ü╪º╪╡┘è┘ä"}
+                      {expanded === p.id ? "إخفاء التفاصيل" : "عرض التفاصيل"}
                       {expanded === p.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                     </button>
                     <AnimatePresence>
@@ -221,8 +221,8 @@ export default function AdminApprovals() {
                         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden">
                           <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 mt-2 space-y-1.5 text-xs font-mono">
-                            {p.national_id && <p><span className="text-slate-500">╪▒┘é┘à ╪º┘ä┘ç┘ê┘è╪⌐:</span> <span className="font-bold text-slate-800">{p.national_id}</span></p>}
-                            {p.medical_license && <p><span className="text-slate-500">╪▒┘é┘à ╪º┘ä┘å┘é╪º╪¿╪⌐:</span> <span className="font-bold text-slate-800">{p.medical_license}</span></p>}
+                            {p.national_id && <p><span className="text-slate-500">رقم الهوية:</span> <span className="font-bold text-slate-800">{p.national_id}</span></p>}
+                            {p.medical_license && <p><span className="text-slate-500">رقم النقابة:</span> <span className="font-bold text-slate-800">{p.medical_license}</span></p>}
                           </div>
                         </motion.div>
                       )}
@@ -236,25 +236,25 @@ export default function AdminApprovals() {
                     <button onClick={() => updateStatus(p.id, "approved")} disabled={actioning === p.id}
                       className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold disabled:opacity-50 transition-colors shadow-md shadow-emerald-500/20">
                       <CheckCircle className="w-3.5 h-3.5" />
-                      {actioning === p.id ? "..." : "╪º╪╣╪¬┘à╪º╪» ╪º┘ä╪¡╪│╪º╪¿"}
+                      {actioning === p.id ? "..." : "اعتماد الحساب"}
                     </button>
                     <button onClick={() => updateStatus(p.id, "rejected")} disabled={actioning === p.id}
                       className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold disabled:opacity-50 transition-colors">
                       <XCircle className="w-3.5 h-3.5" />
-                      ╪▒┘ü╪╢
+                      رفض
                     </button>
                   </div>
                 )}
                 {p.approval_status === "approved" && (
                   <button onClick={() => updateStatus(p.id, "rejected")} disabled={actioning === p.id}
                     className="w-full py-2.5 rounded-xl border border-rose-200 text-rose-500 hover:bg-rose-50 text-xs font-bold transition-colors">
-                    ╪Ñ┘ä╪║╪º╪í ╪º┘ä╪º╪╣╪¬┘à╪º╪»
+                    إلغاء الاعتماد
                   </button>
                 )}
                 {p.approval_status === "rejected" && (
                   <button onClick={() => updateStatus(p.id, "approved")} disabled={actioning === p.id}
                     className="w-full py-2.5 rounded-xl border border-emerald-200 text-emerald-600 hover:bg-emerald-50 text-xs font-bold transition-colors">
-                    ╪º╪╣╪¬┘à╪º╪» ╪º┘ä╪¡╪│╪º╪¿
+                    اعتماد الحساب
                   </button>
                 )}
               </div>

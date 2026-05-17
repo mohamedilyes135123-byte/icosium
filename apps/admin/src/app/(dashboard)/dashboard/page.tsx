@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +28,7 @@ interface AuditEntry {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  doctor: "╪╖╪¿┘è╪¿", lab: "┘à╪«╪¬╪¿╪▒", pharmacy: "╪╡┘è╪»┘ä┘è╪⌐", patient: "┘à╪▒┘è╪╢",
+  doctor: "طبيب", lab: "مختبر", pharmacy: "صيدلية", patient: "مريض",
 };
 
 const ROLE_ICONS: Record<string, React.ReactNode> = {
@@ -99,21 +99,21 @@ export default function AdminDashboard() {
   const approve = async (id: string) => {
     setActioning(id);
     await supabase.from("profiles").update({ approval_status: "approved" }).eq("id", id);
-    await logAudit("ACCOUNT_APPROVED", id, "╪¬┘à ╪º╪╣╪¬┘à╪º╪» ╪º┘ä╪¡╪│╪º╪¿");
+    await logAudit("ACCOUNT_APPROVED", id, "تم اعتماد الحساب");
     fetchData(); setActioning(null);
   };
 
   const reject = async (id: string) => {
     setActioning(id);
     await supabase.from("profiles").update({ approval_status: "rejected" }).eq("id", id);
-    await logAudit("ACCOUNT_REJECTED", id, "╪¬┘à ╪▒┘ü╪╢ ╪º┘ä╪¡╪│╪º╪¿");
+    await logAudit("ACCOUNT_REJECTED", id, "تم رفض الحساب");
     fetchData(); setActioning(null);
   };
 
   const toggleBan = async (id: string, currentBan: boolean) => {
     setActioning(id);
     await supabase.from("profiles").update({ is_banned: !currentBan }).eq("id", id);
-    await logAudit(currentBan ? "ACCOUNT_UNBANNED" : "ACCOUNT_BANNED", id, currentBan ? "╪▒┘Å┘ü╪╣ ╪º┘ä╪¡╪╕╪▒" : "╪¬┘à ╪¡╪╕╪▒ ╪º┘ä╪¡╪│╪º╪¿");
+    await logAudit(currentBan ? "ACCOUNT_UNBANNED" : "ACCOUNT_BANNED", id, currentBan ? "رُفع الحظر" : "تم حظر الحساب");
     fetchData(); setActioning(null);
   };
 
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
     if (!user) return;
     await supabase.from("audit_log").insert([{
       action, actor_id: user.id, actor_role: "admin",
-      actor_name: "┘à╪»┘è╪▒ ╪º┘ä┘å╪╕╪º┘à", target_id: targetId,
+      actor_name: "مدير النظام", target_id: targetId,
       details, status: "SUCCESS",
     }]);
   };
@@ -145,53 +145,53 @@ export default function AdminDashboard() {
   return (
     <div className="pb-32 w-full" dir="rtl">
 
-      {/* ΓöÇΓöÇ Header ΓöÇΓöÇ */}
+      {/* ── Header ── */}
       <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
         className="flex justify-between items-start mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-black text-slate-800">┘à╪▒┘â╪▓ ╪º┘ä╪Ñ╪»╪º╪▒╪⌐ ┘ê╪º┘ä┘à╪▒╪º┘é╪¿╪⌐</h1>
+            <h1 className="text-2xl font-black text-slate-800">مركز الإدارة والمراقبة</h1>
             <span className="flex items-center gap-1.5 bg-indigo-100 text-indigo-600 text-xs font-black px-3 py-1 rounded-full border border-indigo-200">
               <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
               LIVE
             </span>
           </div>
-          <p className="text-slate-400 text-sm">┘à┘å╪╡╪⌐ ╪╣┘å╪º┘è╪⌐ ΓÇö ╪Ñ╪»╪º╪▒╪⌐ ╪┤╪º┘à┘ä╪⌐ ╪¿╪╡┘ä╪º╪¡┘è╪º╪¬ ┘â╪º┘à┘ä╪⌐</p>
+          <p className="text-slate-400 text-sm">منصة عناية — إدارة شاملة بصلاحيات كاملة</p>
         </div>
         <button onClick={fetchData} disabled={loading}
           className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-600 border border-slate-200 rounded-2xl bg-white hover:bg-slate-50 transition-all">
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-indigo-500" : ""}`} />
-          ╪¬╪¡╪»┘è╪½
+          تحديث
         </button>
       </motion.header>
 
-      {/* ΓöÇΓöÇ Stats ΓöÇΓöÇ */}
+      {/* ── Stats ── */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
         className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {[
-          { label: "╪Ñ╪¼┘à╪º┘ä┘è ╪º┘ä┘à╪│╪¬╪«╪»┘à┘è┘å", value: stats.totalUsers,       color: "from-slate-600 to-slate-500",     icon: <Users /> },
-          { label: "╪º┘ä┘à╪▒╪╢┘ë",            value: stats.totalPatients,    color: "from-emerald-500 to-teal-400",    icon: <User /> },
-          { label: "╪ú╪╖╪¿╪º╪í ┘à╪╣╪¬┘à╪»┘ê┘å",     value: stats.approvedDoctors,  color: "from-blue-500 to-indigo-400",     icon: <Stethoscope /> },
-          { label: "╪╡┘è╪»┘ä┘è╪º╪¬ ┘à╪╣╪¬┘à╪»╪⌐",    value: stats.approvedPharmacies, color: "from-purple-500 to-fuchsia-400", icon: <Pill /> },
-          { label: "┘à╪«╪¬╪¿╪▒╪º╪¬ ┘à╪╣╪¬┘à╪»╪⌐",    value: stats.approvedLabs,     color: "from-cyan-500 to-teal-400",       icon: <FlaskConical /> },
-          { label: "╪¿╪º┘å╪¬╪╕╪º╪▒ ╪º┘ä╪º╪╣╪¬┘à╪º╪»",  value: stats.pendingApprovals, color: "from-amber-500 to-orange-400",    icon: <Clock /> },
+          { label: "إجمالي المستخدمين", value: stats.totalUsers,       color: "from-slate-600 to-slate-500",     icon: <Users /> },
+          { label: "المرضى",            value: stats.totalPatients,    color: "from-emerald-500 to-teal-400",    icon: <User /> },
+          { label: "أطباء معتمدون",     value: stats.approvedDoctors,  color: "from-blue-500 to-indigo-400",     icon: <Stethoscope /> },
+          { label: "صيدليات معتمدة",    value: stats.approvedPharmacies, color: "from-purple-500 to-fuchsia-400", icon: <Pill /> },
+          { label: "مختبرات معتمدة",    value: stats.approvedLabs,     color: "from-cyan-500 to-teal-400",       icon: <FlaskConical /> },
+          { label: "بانتظار الاعتماد",  value: stats.pendingApprovals, color: "from-amber-500 to-orange-400",    icon: <Clock /> },
         ].map((s, i) => (
           <motion.div key={s.label} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 + i * 0.04 }}
             className={`rounded-3xl p-4 bg-gradient-to-br ${s.color} text-white shadow-lg relative overflow-hidden`}>
             <div className="absolute -right-3 -top-3 opacity-20 w-12 h-12">{s.icon}</div>
-            <p className="text-2xl font-black mb-1">{loading ? "ΓÇö" : s.value}</p>
+            <p className="text-2xl font-black mb-1">{loading ? "—" : s.value}</p>
             <p className="text-[10px] font-bold text-white/80 leading-tight">{s.label}</p>
           </motion.div>
         ))}
       </motion.div>
 
-      {/* ΓöÇΓöÇ Tabs ΓöÇΓöÇ */}
+      {/* ── Tabs ── */}
       <div className="flex gap-2 mb-6 bg-slate-100/80 p-1.5 rounded-2xl w-fit">
         {[
-          { key: "pending", label: "╪╖┘ä╪¿╪º╪¬ ╪º┘ä╪º╪╣╪¬┘à╪º╪»", count: stats.pendingApprovals },
-          { key: "all",     label: "╪¼┘à┘è╪╣ ╪º┘ä┘à╪│╪¬╪«╪»┘à┘è┘å", count: stats.totalUsers },
-          { key: "audit",   label: "╪│╪¼┘ä ╪º┘ä╪¬╪»┘é┘è┘é",    count: auditLog.length },
+          { key: "pending", label: "طلبات الاعتماد", count: stats.pendingApprovals },
+          { key: "all",     label: "جميع المستخدمين", count: stats.totalUsers },
+          { key: "audit",   label: "سجل التدقيق",    count: auditLog.length },
         ].map(t => (
           <button key={t.key} onClick={() => setActiveTab(t.key as any)}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
@@ -207,16 +207,16 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+      {/* ══════════════════════════════════════════════ */}
       {/* TAB: Pending approvals */}
-      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+      {/* ══════════════════════════════════════════════ */}
       <AnimatePresence mode="wait">
         {activeTab === "pending" && (
           <motion.div key="pending" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             {!loading && pendingProfiles.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 bg-white/60 border border-white rounded-3xl">
                 <CheckCircle className="w-16 h-16 text-emerald-200 mb-4" />
-                <p className="font-bold text-slate-500">┘ä╪º ╪¬┘ê╪¼╪» ╪╖┘ä╪¿╪º╪¬ ╪¿╪º┘å╪¬╪╕╪º╪▒ ╪º┘ä╪º╪╣╪¬┘à╪º╪»</p>
+                <p className="font-bold text-slate-500">لا توجد طلبات بانتظار الاعتماد</p>
               </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -243,22 +243,22 @@ export default function AdminDashboard() {
                   </div>
 
                   {p.specialty && (
-                    <p className="text-sm text-slate-600 mb-2"><span className="font-bold">╪º┘ä╪¬╪«╪╡╪╡:</span> {p.specialty}</p>
+                    <p className="text-sm text-slate-600 mb-2"><span className="font-bold">التخصص:</span> {p.specialty}</p>
                   )}
                   {p.address && (
-                    <p className="text-xs text-slate-400 mb-3">≡ƒôì {p.address}</p>
+                    <p className="text-xs text-slate-400 mb-3">📍 {p.address}</p>
                   )}
 
                   <div className="flex gap-2 mt-4">
                     <button onClick={() => approve(p.id)} disabled={actioning === p.id}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold disabled:opacity-50 transition-colors">
                       <CheckCircle className="w-4 h-4" />
-                      {actioning === p.id ? "..." : "╪º╪╣╪¬┘à╪º╪»"}
+                      {actioning === p.id ? "..." : "اعتماد"}
                     </button>
                     <button onClick={() => reject(p.id)} disabled={actioning === p.id}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-sm font-bold disabled:opacity-50 transition-colors">
                       <XCircle className="w-4 h-4" />
-                      ╪▒┘ü╪╢
+                      رفض
                     </button>
                   </div>
                 </motion.div>
@@ -267,9 +267,9 @@ export default function AdminDashboard() {
           </motion.div>
         )}
 
-        {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+        {/* ══════════════════════════════════════════════ */}
         {/* TAB: All users */}
-        {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+        {/* ══════════════════════════════════════════════ */}
         {activeTab === "all" && (
           <motion.div key="all" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             {/* Role filter */}
@@ -279,7 +279,7 @@ export default function AdminDashboard() {
                   className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
                     filterRole === role ? "bg-indigo-600 text-white border-transparent" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
                   }`}>
-                  {role === "all" ? "╪º┘ä┘â┘ä" : ROLE_LABELS[role]}
+                  {role === "all" ? "الكل" : ROLE_LABELS[role]}
                 </button>
               ))}
             </div>
@@ -287,10 +287,10 @@ export default function AdminDashboard() {
             <div className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl overflow-hidden shadow-xl">
               {/* Table header */}
               <div className="grid grid-cols-12 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-black text-slate-500 gap-3">
-                <div className="col-span-4">╪º┘ä┘à╪│╪¬╪«╪»┘à</div>
-                <div className="col-span-2">╪º┘ä╪»┘ê╪▒</div>
-                <div className="col-span-3">╪º┘ä╪¡╪º┘ä╪⌐</div>
-                <div className="col-span-3">╪Ñ╪¼╪▒╪º╪í</div>
+                <div className="col-span-4">المستخدم</div>
+                <div className="col-span-2">الدور</div>
+                <div className="col-span-3">الحالة</div>
+                <div className="col-span-3">إجراء</div>
               </div>
               <div className="divide-y divide-slate-50">
                 {filteredProfiles.slice(0, 30).map(p => (
@@ -306,11 +306,11 @@ export default function AdminDashboard() {
                     </div>
                     <div className="col-span-3">
                       {p.is_banned ? (
-                        <span className="text-xs font-black px-2 py-1 rounded-lg bg-rose-100 text-rose-700 border border-rose-200">≡ƒÜ½ ┘à╪¡╪╕┘ê╪▒</span>
+                        <span className="text-xs font-black px-2 py-1 rounded-lg bg-rose-100 text-rose-700 border border-rose-200">🚫 محظور</span>
                       ) : (
                         <span className={`text-xs font-bold px-2 py-1 rounded-lg border ${statusColor(p.approval_status)}`}>
-                          {p.approval_status === "approved" ? "Γ£à ┘à╪╣╪¬┘à╪»" :
-                           p.approval_status === "rejected" ? "Γ¥î ┘à╪▒┘ü┘ê╪╢" : "ΓÅ│ ╪º┘å╪¬╪╕╪º╪▒"}
+                          {p.approval_status === "approved" ? "✅ معتمد" :
+                           p.approval_status === "rejected" ? "❌ مرفوض" : "⏳ انتظار"}
                         </span>
                       )}
                     </div>
@@ -318,7 +318,7 @@ export default function AdminDashboard() {
                       {p.role !== "patient" && p.approval_status === "pending" && (
                         <button onClick={() => approve(p.id)} disabled={actioning === p.id}
                           className="text-xs px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-bold hover:bg-emerald-200 transition-colors">
-                          ╪º╪╣╪¬┘à╪º╪»
+                          اعتماد
                         </button>
                       )}
                       {p.role !== "patient" && (
@@ -326,7 +326,7 @@ export default function AdminDashboard() {
                           className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors ${
                             p.is_banned ? "bg-amber-100 text-amber-700 hover:bg-amber-200" : "bg-rose-100 text-rose-700 hover:bg-rose-200"
                           }`}>
-                          {p.is_banned ? "╪▒┘ü╪╣ ╪º┘ä╪¡╪╕╪▒" : "╪¡╪╕╪▒"}
+                          {p.is_banned ? "رفع الحظر" : "حظر"}
                         </button>
                       )}
                     </div>
@@ -337,9 +337,9 @@ export default function AdminDashboard() {
           </motion.div>
         )}
 
-        {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+        {/* ══════════════════════════════════════════════ */}
         {/* TAB: Audit log */}
-        {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+        {/* ══════════════════════════════════════════════ */}
         {activeTab === "audit" && (
           <motion.div key="audit" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             ref={auditRef}>
@@ -355,7 +355,7 @@ export default function AdminDashboard() {
             <div className="bg-slate-900 rounded-3xl p-6 space-y-3 font-mono max-h-[600px] overflow-y-auto">
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-700">
                 <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-emerald-400 text-xs font-bold">AUDIT TERMINAL ΓÇö LIVE</span>
+                <span className="text-emerald-400 text-xs font-bold">AUDIT TERMINAL — LIVE</span>
               </div>
 
               {auditLog.map((entry, i) => (

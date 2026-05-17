@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 export const dynamic = 'force-dynamic';
 
@@ -20,11 +20,11 @@ interface Profile {
 }
 
 const ROLE_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string }> = {
-  doctor:   { label: "╪╖╪¿┘è╪¿",    icon: Stethoscope, color: "text-blue-700",   bg: "bg-blue-100" },
-  lab:      { label: "┘à╪«╪¬╪¿╪▒",   icon: FlaskConical, color: "text-cyan-700",  bg: "bg-cyan-100" },
-  pharmacy: { label: "╪╡┘è╪»┘ä┘è╪⌐",  icon: Pill,         color: "text-purple-700", bg: "bg-purple-100" },
-  patient:  { label: "┘à╪▒┘è╪╢",   icon: User,          color: "text-emerald-700", bg: "bg-emerald-100" },
-  admin:    { label: "╪Ñ╪»╪º╪▒╪⌐",   icon: Shield,        color: "text-indigo-700", bg: "bg-indigo-100" },
+  doctor:   { label: "طبيب",    icon: Stethoscope, color: "text-blue-700",   bg: "bg-blue-100" },
+  lab:      { label: "مختبر",   icon: FlaskConical, color: "text-cyan-700",  bg: "bg-cyan-100" },
+  pharmacy: { label: "صيدلية",  icon: Pill,         color: "text-purple-700", bg: "bg-purple-100" },
+  patient:  { label: "مريض",   icon: User,          color: "text-emerald-700", bg: "bg-emerald-100" },
+  admin:    { label: "إدارة",   icon: Shield,        color: "text-indigo-700", bg: "bg-indigo-100" },
 };
 
 export default function AdminUsers() {
@@ -53,7 +53,7 @@ export default function AdminUsers() {
     if (!user) return;
     await supabase.from("audit_log").insert([{
       action, actor_id: user.id, actor_role: "admin",
-      actor_name: "┘à╪»┘è╪▒ ╪º┘ä┘å╪╕╪º┘à", target_id: targetId,
+      actor_name: "مدير النظام", target_id: targetId,
       details, status: "SUCCESS",
     }]);
   };
@@ -61,14 +61,14 @@ export default function AdminUsers() {
   const toggleBan = async (id: string, current: boolean) => {
     setActioning(id);
     await supabase.from("profiles").update({ is_banned: !current }).eq("id", id);
-    await logAction(current ? "ACCOUNT_UNBANNED" : "ACCOUNT_BANNED", id, current ? "╪▒┘Å┘ü╪╣ ╪º┘ä╪¡╪╕╪▒ ╪╣┘å ╪º┘ä╪¡╪│╪º╪¿" : "╪¬┘à ╪¡╪╕╪▒ ╪º┘ä╪¡╪│╪º╪¿");
+    await logAction(current ? "ACCOUNT_UNBANNED" : "ACCOUNT_BANNED", id, current ? "رُفع الحظر عن الحساب" : "تم حظر الحساب");
     fetchProfiles(); setActioning(null);
   };
 
   const updateApproval = async (id: string, status: string) => {
     setActioning(id);
     await supabase.from("profiles").update({ approval_status: status }).eq("id", id);
-    await logAction(status === "approved" ? "ACCOUNT_APPROVED" : "ACCOUNT_REJECTED", id, `╪¬┘à ${status === "approved" ? "╪º╪╣╪¬┘à╪º╪»" : "╪▒┘ü╪╢"} ╪º┘ä╪¡╪│╪º╪¿`);
+    await logAction(status === "approved" ? "ACCOUNT_APPROVED" : "ACCOUNT_REJECTED", id, `تم ${status === "approved" ? "اعتماد" : "رفض"} الحساب`);
     fetchProfiles(); setActioning(null);
   };
 
@@ -88,8 +88,8 @@ export default function AdminUsers() {
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-black text-slate-800 mb-1">╪Ñ╪»╪º╪▒╪⌐ ╪º┘ä┘à╪│╪¬╪«╪»┘à┘è┘å</h1>
-            <p className="text-slate-400 text-sm">{profiles.length} ┘à╪│╪¬╪«╪»┘à ┘à╪│╪¼┘æ┘ä ┘ü┘è ╪º┘ä┘å╪╕╪º┘à</p>
+            <h1 className="text-2xl font-black text-slate-800 mb-1">إدارة المستخدمين</h1>
+            <p className="text-slate-400 text-sm">{profiles.length} مستخدم مسجّل في النظام</p>
           </div>
           <button onClick={fetchProfiles} disabled={loading}
             className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-2xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">
@@ -101,7 +101,7 @@ export default function AdminUsers() {
       {/* Role filter tabs */}
       <div className="flex gap-3 mb-5 overflow-x-auto pb-1">
         {[
-          { key: "all", label: "╪º┘ä┘â┘ä", count: profiles.length },
+          { key: "all", label: "الكل", count: profiles.length },
           ...Object.entries(ROLE_CONFIG).map(([key, conf]) => ({ key, label: conf.label, count: roleCounts(key) }))
         ].map(tab => (
           <button key={tab.key} onClick={() => setRoleFilter(tab.key)}
@@ -122,7 +122,7 @@ export default function AdminUsers() {
       <div className="relative mb-6">
         <Search className="absolute right-4 top-3.5 w-5 h-5 text-slate-400" />
         <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="╪¿╪¡╪½ ╪¿╪º┘ä╪º╪│┘à ╪ú┘ê ╪º┘ä┘ç╪º╪¬┘ü..."
+          placeholder="بحث بالاسم أو الهاتف..."
           className="w-full h-12 pr-12 pl-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-400 outline-none text-slate-700 text-sm shadow-sm" />
       </div>
 
@@ -138,7 +138,7 @@ export default function AdminUsers() {
         {filtered.length === 0 && !loading && (
           <div className="flex flex-col items-center py-16">
             <Users className="w-12 h-12 text-slate-200 mb-3" />
-            <p className="text-slate-500 font-bold">┘ä╪º ┘è┘ê╪¼╪» ┘à╪│╪¬╪«╪»┘à┘ê┘å ┘è╪╖╪º╪¿┘é┘ê┘å ╪º┘ä╪¿╪¡╪½</p>
+            <p className="text-slate-500 font-bold">لا يوجد مستخدمون يطابقون البحث</p>
           </div>
         )}
 
@@ -161,7 +161,7 @@ export default function AdminUsers() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-slate-800 text-sm truncate">{p.full_name}</p>
-                      {p.is_banned && <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-black">≡ƒÜ½ ┘à╪¡╪╕┘ê╪▒</span>}
+                      {p.is_banned && <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-black">🚫 محظور</span>}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${conf.bg} ${conf.color}`}>{conf.label}</span>
@@ -174,7 +174,7 @@ export default function AdminUsers() {
                     p.approval_status === "rejected" ? "bg-rose-50 text-rose-700 border-rose-200" :
                     "bg-amber-50 text-amber-700 border-amber-200"
                   }`}>
-                    {p.approval_status === "approved" ? "Γ£à" : p.approval_status === "rejected" ? "Γ¥î" : "ΓÅ│"}
+                    {p.approval_status === "approved" ? "✅" : p.approval_status === "rejected" ? "❌" : "⏳"}
                   </span>
                   <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                 </div>
@@ -188,21 +188,21 @@ export default function AdminUsers() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 text-xs text-slate-600">
                           {p.phone && <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-slate-400" /> {p.phone}</p>}
                           {p.address && <p className="flex items-center gap-2 truncate"><MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" /> {p.address}</p>}
-                          <p className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5 text-slate-400" /> ╪¬╪│╪¼┘è┘ä: {new Date(p.created_at).toLocaleDateString("ar-DZ")}</p>
-                          {p.subscription_plan && <p className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-slate-400" /> ╪º┘ä╪¿╪º┘é╪⌐: <span className="font-bold text-indigo-700">{p.subscription_plan}</span></p>}
+                          <p className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5 text-slate-400" /> تسجيل: {new Date(p.created_at).toLocaleDateString("ar-DZ")}</p>
+                          {p.subscription_plan && <p className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-slate-400" /> الباقة: <span className="font-bold text-indigo-700">{p.subscription_plan}</span></p>}
                         </div>
 
                         <div className="flex flex-wrap gap-2">
                           {p.role !== "patient" && p.approval_status !== "approved" && (
                             <button onClick={() => updateApproval(p.id, "approved")} disabled={actioning === p.id}
                               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold disabled:opacity-50">
-                              <CheckCircle className="w-3.5 h-3.5" /> ╪º╪╣╪¬┘à╪º╪»
+                              <CheckCircle className="w-3.5 h-3.5" /> اعتماد
                             </button>
                           )}
                           {p.role !== "patient" && p.approval_status === "approved" && (
                             <button onClick={() => updateApproval(p.id, "rejected")} disabled={actioning === p.id}
                               className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-amber-200 text-amber-600 text-xs font-bold disabled:opacity-50 hover:bg-amber-50">
-                              <XCircle className="w-3.5 h-3.5" /> ╪Ñ┘ä╪║╪º╪í ╪º┘ä╪º╪╣╪¬┘à╪º╪»
+                              <XCircle className="w-3.5 h-3.5" /> إلغاء الاعتماد
                             </button>
                           )}
                           {p.role !== "admin" && (
@@ -211,7 +211,7 @@ export default function AdminUsers() {
                                 p.is_banned ? "border-emerald-200 text-emerald-600 hover:bg-emerald-50" : "border-rose-200 text-rose-600 hover:bg-rose-50"
                               }`}>
                               <Ban className="w-3.5 h-3.5" />
-                              {p.is_banned ? "╪▒┘ü╪╣ ╪º┘ä╪¡╪╕╪▒" : "╪¡╪╕╪▒ ╪º┘ä╪¡╪│╪º╪¿"}
+                              {p.is_banned ? "رفع الحظر" : "حظر الحساب"}
                             </button>
                           )}
                         </div>
