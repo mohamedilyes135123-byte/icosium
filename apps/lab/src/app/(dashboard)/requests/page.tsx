@@ -31,15 +31,6 @@ export default function LabRequests() {
   const [resultNotes, setResultNotes] = useState("");
   const [resultFileUrl, setResultFileUrl] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  const ensureAbsoluteUrl = (url: string) => {
-    if (!url) return "#";
-    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("mailto:") || url.startsWith("tel:")) {
-      return url;
-    }
-    return `https://${url}`;
-  };
 
   // ── Get current user ──────────────────────────────────────────
   useEffect(() => {
@@ -76,6 +67,7 @@ export default function LabRequests() {
   // ── Update lab request status ─────────────────────────────────
   const updateStatus = async (id: string, status: string) => {
     setProcessing(id);
+    // Lab can ONLY update status — cannot modify tests_list
     await supabase.from("lab_requests").update({ status }).eq("id", id);
     setProcessing(null);
   };
@@ -85,51 +77,19 @@ export default function LabRequests() {
     if (!uploadPanel || !currentUser) return;
     setUploading(true);
 
-    let finalFileUrl = resultFileUrl;
-
-    // 1. If a file is selected, upload it first
-    if (selectedFile) {
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
-      const filePath = `${currentUser.id}/${fileName}`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('lab-results')
-        .upload(filePath, selectedFile);
-
-      if (uploadError) {
-        alert("فشل رفع الملف: " + uploadError.message);
-        setUploading(false);
-        return;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('lab-results')
-        .getPublicUrl(filePath);
-      
-      finalFileUrl = publicUrl;
-    }
-
-    // 2. Insert into lab_results
+    // Insert into lab_results (trigger notifies patient automatically)
     const { error } = await supabase.from("lab_results").insert([{
       lab_request_id: uploadPanel.requestId,
       lab_id: currentUser.id,
       patient_id: uploadPanel.patientId,
       result_notes: resultNotes || null,
-      file_url: finalFileUrl || null,
+      file_url: resultFileUrl || null,
     }]);
 
     if (!error) {
-      // Update status to COMPLETED automatically when results are uploaded
-      await supabase.from("lab_requests").update({ status: "COMPLETED" }).eq("id", uploadPanel.requestId);
-      
       setUploadPanel(null);
       setResultNotes("");
       setResultFileUrl("");
-      setSelectedFile(null);
-      fetchRequests();
-    } else {
-        alert("فشل حفظ البيانات: " + error.message);
     }
     setUploading(false);
   };
@@ -145,7 +105,7 @@ export default function LabRequests() {
           طلبات التحاليل
         </h1>
         <p className="text-slate-500">
-          تظهر هنا فقط الطلبات التي أرسلها المرضى مباشرة إلى مختبرك.
+          تظهر هنا فقط الطلبات التي أرسلها المرضى مباشرة إلى مختبركm.
         </p>
       </motion.header>
 
@@ -259,21 +219,9 @@ export default function LabRequests() {
                     {/* Uploaded results preview */}
                     {hasResults && (
                       <div className="mb-3 bg-emerald-50 border border-emerald-200 rounded-2xl p-3">
-                        <div className="flex justify-between items-center mb-1">
-                          <p className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> تم رفع النتائج
-                          </p>
-                          {req.lab_results[0].file_url && (
-                            <a 
-                              href={ensureAbsoluteUrl(req.lab_results[0].file_url)} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-[10px] font-black text-emerald-600 hover:underline flex items-center gap-1"
-                            >
-                              <Eye className="w-3 h-3" /> عرض الملف
-                            </a>
-                          )}
-                        </div>
+                        <p className="text-xs font-bold text-emerald-700 mb-1 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> تم رفع النتائج
+                        </p>
                         {req.lab_results[0].result_notes && (
                           <p className="text-xs text-slate-600">{req.lab_results[0].result_notes}</p>
                         )}
@@ -353,38 +301,10 @@ export default function LabRequests() {
                     className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-emerald-400 outline-none resize-none h-28 text-slate-700 font-medium" />
                 </div>
                 <div>
-                  <label className="text-sm font-black text-slate-700 mb-2 block">ملف النتائج (PDF أو صورة)</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="file" 
-                      id="lab-file-upload"
-                      className="hidden" 
-                      onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                      accept=".pdf,image/*"
-                    />
-                    <label 
-                      htmlFor="lab-file-upload"
-                      className={`flex-1 p-4 rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all ${
-                        selectedFile ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200 bg-slate-50 hover:border-cyan-300'
-                      }`}
-                    >
-                      <Upload className={`w-6 h-6 mb-2 ${selectedFile ? 'text-emerald-500' : 'text-slate-400'}`} />
-                      <span className="text-xs font-bold text-slate-600">
-                        {selectedFile ? selectedFile.name : "اضغط لاختيار ملف"}
-                      </span>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="relative py-4">
-                  <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-100" /></div>
-                  <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-slate-400 font-bold">أو أدخل رابطاً مباشراً</span></div>
-                </div>
-
-                <div>
+                  <label className="text-sm font-black text-slate-700 mb-2 block">رابط ملف النتائج (اختياري)</label>
                   <input value={resultFileUrl} onChange={e => setResultFileUrl(e.target.value)}
-                    placeholder="https://... (رابط خارجي)"
-                    className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-emerald-400 outline-none text-slate-700 font-medium text-sm" />
+                    placeholder="https://... (رابط PDF أو صورة)"
+                    className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-emerald-400 outline-none text-slate-700 font-medium" />
                 </div>
               </div>
 

@@ -8,19 +8,35 @@ import { createClient } from "@/lib/supabase/client";
 import {
   Pill, Plus, Trash2, QrCode, Printer, Send, CheckCircle,
   User, Stethoscope, Calendar, BrainCircuit, AlertTriangle,
-  Search, ArrowRight, Save, FileText, X, Layers
+  Search, ArrowRight, Save, FileText, X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import MedicationPicker from "@/components/ui/MedicationPicker";
-import { getAllDrugs } from "@/lib/medications-catalog";
 
 // ─── Common durations / frequencies ──────────────────────────────────────────
 const FREQUENCIES = ["مرة يومياً", "مرتان يومياً", "3 مرات يومياً", "كل 8 ساعات", "كل 12 ساعة", "عند اللزوم"];
 const DURATIONS = ["7 أيام", "10 أيام", "14 يوم", "شهر", "شهرين", "3 أشهر", "6 أشهر", "مستمر"];
 
-// ─── Drug database from catalog ──────────────────────────────────────────────
-const DRUG_DB = getAllDrugs();
+// ─── Algerian drug database (subset) ─────────────────────────────────────────
+const DRUG_DB = [
+  "Amoxicilline 500mg", "Ampicilline", "Azithromycin 500mg",
+  "Ciprofloxacine 500mg", "Metronidazole 500mg", "Ceftriaxone 1g",
+  "Paracétamol 1g", "Ibuprofène 400mg", "Ibuprofène 600mg",
+  "Aspirine 100mg", "Doliprane 500mg",
+  "Metformine 850mg", "Metformine 1000mg", "Glibenclamide 5mg", "Gliclazide 80mg",
+  "Amlodipine 5mg", "Amlodipine 10mg", "Atenolol 50mg", "Bisoprolol 5mg",
+  "Ramipril 5mg", "Enalapril 10mg", "Losartan 50mg", "Valsartan 80mg",
+  "Furosémide 40mg", "Spironolactone 25mg",
+  "Atorvastatine 10mg", "Rosuvastatine 10mg", "Simvastatine 20mg",
+  "Oméprazole 20mg", "Pantoprazole 40mg", "Ranitidine 150mg",
+  "Cetirizine 10mg", "Loratadine 10mg",
+  "Prednisolone 5mg", "Dexamethasone 0.5mg",
+  "Bromazépam 3mg", "Alprazolam 0.5mg",
+  "Vitamine C 1g", "Vitamine D3 1000UI", "Acide Folique 5mg",
+  "Fer (Fer 33mg/ml)", "Calcium 500mg",
+  "Ventoline 100mcg (spray)", "Becotide 250mcg (spray)",
+  "Insuline Rapide", "Insuline Lente",
+];
 
 // ─── Known interactions (simplified AI-like check) ────────────────────────────
 const INTERACTIONS: Record<string, string[]> = {
@@ -65,8 +81,6 @@ export default function NewPrescriptionPage() {
   const [meds, setMeds] = useState<Med[]>([newMed()]);
   const [drugSearch, setDrugSearch] = useState<Record<string, string>>({});
   const [suggestions, setSuggestions] = useState<Record<string, string[]>>({});
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerMedId, setPickerMedId] = useState<string | null>(null);
 
   // AI
   const [aiWarnings, setAiWarnings] = useState<string[]>([]);
@@ -288,43 +302,30 @@ export default function NewPrescriptionPage() {
                   )}
                 </div>
 
-                {/* Drug search + Catalog picker button */}
+                {/* Drug search */}
                 <div className="relative mb-3">
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <input
-                        value={med.name || drugSearch[med.id] || ""}
-                        onChange={e => {
-                          if (med.name) {
-                            updateMed(med.id, "name", "");
-                          }
-                          handleDrugSearch(med.id, e.target.value);
-                        }}
-                        onFocus={() => med.name && handleDrugSearch(med.id, med.name)}
-                        placeholder="اسم الدواء — ابدأ بالكتابة..."
-                        className="w-full h-10 px-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-sm font-medium"
-                      />
-                      {(suggestions[med.id] || []).length > 0 && (
-                        <div className="absolute top-11 right-0 left-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-20 overflow-hidden">
-                          {suggestions[med.id].map(drug => (
-                            <button key={drug} onClick={() => selectDrug(med.id, drug)}
-                              className="w-full px-4 py-2.5 text-right text-sm font-medium text-slate-700 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0">
-                              💊 {drug}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                  <input
+                    value={med.name || drugSearch[med.id] || ""}
+                    onChange={e => {
+                      if (med.name) {
+                        updateMed(med.id, "name", "");
+                      }
+                      handleDrugSearch(med.id, e.target.value);
+                    }}
+                    onFocus={() => med.name && handleDrugSearch(med.id, med.name)}
+                    placeholder="اسم الدواء — ابدأ بالكتابة..."
+                    className="w-full h-10 px-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-sm font-medium"
+                  />
+                  {(suggestions[med.id] || []).length > 0 && (
+                    <div className="absolute top-11 right-0 left-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-20 overflow-hidden">
+                      {suggestions[med.id].map(drug => (
+                        <button key={drug} onClick={() => selectDrug(med.id, drug)}
+                          className="w-full px-4 py-2.5 text-right text-sm font-medium text-slate-700 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0">
+                          💊 {drug}
+                        </button>
+                      ))}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => { setPickerMedId(med.id); setPickerOpen(true); }}
-                      className="h-10 px-3 rounded-xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white flex items-center gap-1.5 text-xs font-bold shadow-md hover:shadow-lg transition-all flex-shrink-0"
-                      title="فتح قائمة الأدوية"
-                    >
-                      <Layers className="w-4 h-4" />
-                      <span className="hidden sm:inline">القائمة</span>
-                    </button>
-                  </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -388,22 +389,6 @@ export default function NewPrescriptionPage() {
           </button>
         </div>
       </div>
-
-      {/* Medication Picker Modal */}
-      <MedicationPicker
-        open={pickerOpen}
-        onClose={() => { setPickerOpen(false); setPickerMedId(null); }}
-        onSelect={(drugName) => {
-          if (pickerMedId) {
-            setMeds(prev => prev.map(m => m.id === pickerMedId ? { ...m, name: drugName } : m));
-          }
-        }}
-        onAddCustom={(drugName) => {
-          if (pickerMedId) {
-            setMeds(prev => prev.map(m => m.id === pickerMedId ? { ...m, name: drugName } : m));
-          }
-        }}
-      />
     </div>
   );
 

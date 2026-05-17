@@ -1,7 +1,6 @@
 "use client";
-export const dynamic = "force-dynamic";
 
-
+export const dynamic = 'force-dynamic';
 
 
 import { useState, useEffect, useCallback } from "react";
@@ -169,4 +168,3 @@ export default function DoctorDirectory() {
     </div>
   );
 }
-
