@@ -1,11 +1,12 @@
-"use client";
+﻿"use client";
 
 export const dynamic = 'force-dynamic';
+
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Mail, Lock } from "lucide-react";
+import { Activity, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
@@ -33,7 +34,7 @@ export default function LoginPage() {
         password: '123456',
       });
       if (authError) {
-         setError("لم يتم رفع البيانات (Seed) إلى قواعد البيانات بعد. جرب إدخالها.");
+         setError("┘ä┘à ┘è╪¬┘à ╪▒┘ü╪╣ ╪º┘ä╪¿┘è╪º┘å╪º╪¬ (Seed) ╪Ñ┘ä┘ë ┘é┘ê╪º╪╣╪» ╪º┘ä╪¿┘è╪º┘å╪º╪¬ ╪¿╪╣╪». ╪¼╪▒╪¿ ╪Ñ╪»╪«╪º┘ä┘ç╪º.");
          setLoading(false);
          return;
       }
@@ -50,7 +51,7 @@ export default function LoginPage() {
       });
 
       if (authError) {
-        setError("فشل تسجيل الدخول. تأكد من البريد وكلمة المرور.");
+        setError("┘ü╪┤┘ä ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä. ╪¬╪ú┘â╪» ┘à┘å ╪º┘ä╪¿╪▒┘è╪» ┘ê┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒.");
         setLoading(false);
         return;
       }
@@ -59,7 +60,7 @@ export default function LoginPage() {
       if (userRole === role) {
         router.push(`/dashboard`);
       } else {
-         setError("يرجى التأكد من الدخول من البوابة المخصصة لك.");
+         setError("┘è╪▒╪¼┘ë ╪º┘ä╪¬╪ú┘â╪» ┘à┘å ╪º┘ä╪»╪«┘ê┘ä ┘à┘å ╪º┘ä╪¿┘ê╪º╪¿╪⌐ ╪º┘ä┘à╪«╪╡╪╡╪⌐ ┘ä┘â.");
          setLoading(false);
       }
     } else {
@@ -81,7 +82,7 @@ export default function LoginPage() {
         return;
       }
       
-      setSuccessMsg("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.");
+      setSuccessMsg("╪¬┘à ╪Ñ┘å╪┤╪º╪í ╪º┘ä╪¡╪│╪º╪¿ ╪¿┘å╪¼╪º╪¡! ┘è┘à┘â┘å┘â ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä ╪º┘ä╪ó┘å.");
       setIsLogin(true);
       setLoading(false);
     }
@@ -89,41 +90,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 z-0">
-        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-sky-200/40 rounded-full blur-[120px]" />
-        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-indigo-200/30 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-sky-50/30 to-white" />
-      </div>
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-teal-100/50 via-slate-50 to-white"></div>
       
-      {/* Glow keyframes */}
-      <style>{`
-        @keyframes logoFloat {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
-        @keyframes glowPulse {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50% { opacity: 0.85; transform: scale(1.15); }
-        }
-        @keyframes glowColorShift {
-          0% { filter: hue-rotate(0deg); }
-          50% { filter: hue-rotate(40deg); }
-          100% { filter: hue-rotate(0deg); }
-        }
-        .logo-float { animation: logoFloat 4s ease-in-out infinite; }
-        .glow-pulse { animation: glowPulse 3s ease-in-out infinite, glowColorShift 6s ease-in-out infinite; }
-      `}</style>
-
       <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-2xl border border-white relative z-10">
         <div className="flex flex-col items-center mb-8">
-          <div className="relative mb-4">
-            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-indigo-400 via-sky-400 to-blue-300 opacity-60" />
-            <div className="w-28 h-28 rounded-2xl bg-white border border-purple-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
-              <img src="/logo.png" alt="عناية" className="w-24 h-24 object-contain drop-shadow-sm" />
-            </div>
+          <div className="w-16 h-16 bg-gradient-to-tr from-purple-500 to-pink-400 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-purple-500/30 mb-4 element-glow">
+             <Activity className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-black text-slate-800">{isLogin ? "بوابة المختبرات" : "طلب انضمام مختبر"}</h1>
-          <p className="text-slate-500 text-sm mt-1">نظام إدارة التحاليل المستقل</p>
+          <h1 className="text-2xl font-black text-slate-800">{isLogin ? "╪¿┘ê╪º╪¿╪⌐ ╪º┘ä┘à╪«╪¬╪¿╪▒╪º╪¬" : "╪╖┘ä╪¿ ╪º┘å╪╢┘à╪º┘à ┘à╪«╪¬╪¿╪▒"}</h1>
+          <p className="text-slate-500 text-sm mt-1">┘å╪╕╪º┘à ╪Ñ╪»╪º╪▒╪⌐ ╪º┘ä╪¬╪¡╪º┘ä┘è┘ä ╪º┘ä┘à╪│╪¬┘é┘ä</p>
         </div>
 
         {successMsg && (
@@ -145,7 +120,7 @@ export default function LoginPage() {
                 type="text" 
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="الاسم الكامل" 
+                placeholder="╪º┘ä╪º╪│┘à ╪º┘ä┘â╪º┘à┘ä" 
                 className="w-full h-12 px-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-right"
                 required={!isLogin} 
               />
@@ -157,7 +132,7 @@ export default function LoginPage() {
               type="text" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="البريد الإلكتروني أو اسم المستخدم للخادم" 
+              placeholder="╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è ╪ú┘ê ╪º╪│┘à ╪º┘ä┘à╪│╪¬╪«╪»┘à ┘ä┘ä╪«╪º╪»┘à" 
               className="w-full h-12 pl-4 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-left dir-ltr"
               required 
             />
@@ -169,24 +144,24 @@ export default function LoginPage() {
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="كلمة المرور" 
+              placeholder="┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒" 
               className="w-full h-12 pl-4 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-left dir-ltr"
               required 
             />
           </div>
 
           <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-lg font-bold shadow-lg shadow-brand-500/20 mt-4">
-            {loading ? "جاري المعالجة..." : (isLogin ? "تأكيد الدخول" : "إنشاء الحساب")}
+            {loading ? "╪¼╪º╪▒┘è ╪º┘ä┘à╪╣╪º┘ä╪¼╪⌐..." : (isLogin ? "╪¬╪ú┘â┘è╪» ╪º┘ä╪»╪«┘ê┘ä" : "╪Ñ┘å╪┤╪º╪í ╪º┘ä╪¡╪│╪º╪¿")}
           </Button>
         </form>
 
         <div className="mt-6 text-center">
           <button onClick={() => setIsLogin(!isLogin)} type="button" className="text-sm font-bold text-brand-600 hover:text-brand-500 transition-colors">
-            {isLogin ? "ليس لديك حساب؟ إنشاء حساب جديد" : "لديك حساب بالفعل؟ تسجيل الدخول"}
+            {isLogin ? "┘ä┘è╪│ ┘ä╪»┘è┘â ╪¡╪│╪º╪¿╪ƒ ╪Ñ┘å╪┤╪º╪í ╪¡╪│╪º╪¿ ╪¼╪»┘è╪»" : "┘ä╪»┘è┘â ╪¡╪│╪º╪¿ ╪¿╪º┘ä┘ü╪╣┘ä╪ƒ ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä"}
           </button>
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-8">الوصول للمنصات محمي بتشفير Supabase AES-256</p>
+        <p className="text-center text-xs text-slate-400 mt-8">╪º┘ä┘ê╪╡┘ê┘ä ┘ä┘ä┘à┘å╪╡╪º╪¬ ┘à╪¡┘à┘è ╪¿╪¬╪┤┘ü┘è╪▒ Supabase AES-256</p>
       </div>
     </div>
   );
