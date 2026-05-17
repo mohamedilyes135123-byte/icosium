@@ -2,10 +2,11 @@
 
 export const dynamic = 'force-dynamic';
 
+
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Mail, Lock } from "lucide-react";
+import { Activity, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
@@ -91,34 +92,10 @@ export default function LoginPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-teal-100/50 via-slate-50 to-white"></div>
       
-      {/* Glow keyframes */}
-      <style>{`
-        @keyframes logoFloat {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
-        @keyframes glowPulse {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50% { opacity: 0.85; transform: scale(1.15); }
-        }
-        @keyframes glowColorShift {
-          0% { filter: hue-rotate(0deg); }
-          50% { filter: hue-rotate(40deg); }
-          100% { filter: hue-rotate(0deg); }
-        }
-        .logo-float { animation: logoFloat 4s ease-in-out infinite; }
-        .glow-pulse { animation: glowPulse 3s ease-in-out infinite, glowColorShift 6s ease-in-out infinite; }
-      `}</style>
-
       <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-2xl border border-white relative z-10">
         <div className="flex flex-col items-center mb-8">
-          <div className="relative mb-4">
-            <img
-              src="/logo.png"
-              alt="عناية"
-              className="w-24 h-24 object-contain relative z-10 logo-float drop-shadow-lg"
-            />
-            <div className="absolute inset-[-12px] z-0 glow-pulse rounded-full blur-2xl bg-gradient-to-tr from-indigo-400 via-blue-400 to-cyan-300" />
+          <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-blue-400 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 mb-4 element-glow">
+             <Activity className="w-8 h-8" />
           </div>
           <h1 className="text-2xl font-black text-slate-800">مركز إدارة النظام</h1>
           <p className="text-slate-500 text-sm mt-1">الولوج مقتصر على مسؤولي الدعم فقط</p>

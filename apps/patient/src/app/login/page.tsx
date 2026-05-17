@@ -162,8 +162,10 @@ export default function PatientLoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-block relative mb-4">
-            <img src="/logo.png" alt="عناية" className="w-24 h-24 object-contain relative z-10 logo-float drop-shadow-lg" />
-            <div className="absolute inset-[-12px] z-0 glow-pulse rounded-full blur-2xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-green-300" />
+            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-green-300 opacity-60" />
+            <div className="w-28 h-28 rounded-2xl bg-white border border-emerald-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
+              <img src="/logo.png" alt="عناية" className="w-24 h-24 object-contain drop-shadow-sm" />
+            </div>
           </div>
           <h1 className="text-3xl font-black text-slate-900">عناية</h1>
           <p className="text-emerald-600 font-semibold text-sm mt-1">بوابة المرضى — طبيبك في بيتك</p>
@@ -175,19 +177,22 @@ export default function PatientLoginPage() {
 
         <div className="bg-white/85 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 overflow-hidden">
           {/* Tabs */}
-          <div className="flex border-b border-slate-100">
+          <div className="flex" style={{ borderBottom: "1px solid #e8f5ec" }}>
             {["تسجيل الدخول", "فتح ملف جديد"].map((label, idx) => (
               <button key={label} onClick={() => { setIsLogin(idx === 0); setError(null); setStep(1); }}
-                className={`flex-1 py-4 text-sm font-bold transition-colors ${
-                  isLogin === (idx === 0) ? "text-emerald-700 border-b-2 border-emerald-500 bg-emerald-50/50" : "text-slate-500 hover:text-slate-700"
-                }`}>{label}</button>
+                className="flex-1 py-4 text-sm font-bold transition-colors"
+                style={isLogin === (idx === 0)
+                  ? { color: "var(--green-dark)", borderBottom: "2.5px solid var(--green-main)", background: "#f0fdf4" }
+                  : { color: "#9ca3af" }}>
+                {label}
+              </button>
             ))}
           </div>
 
           <div className="p-7">
             {/* Alerts */}
             {successMsg && (
-              <div className="flex items-start gap-3 bg-emerald-50 text-emerald-700 p-4 rounded-2xl text-sm font-semibold mb-5 border border-emerald-200">
+              <div className="flex items-start gap-3 bg-green-50 text-green-800 p-4 rounded-2xl text-sm font-semibold mb-5 border border-green-200">
                 <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" /><span>{successMsg}</span>
               </div>
             )}
@@ -206,10 +211,9 @@ export default function PatientLoginPage() {
                 <Field label="كلمة المرور" icon={<Lock className="w-4 h-4" />}>
                   <input value={loginPassword} onChange={e => setLoginPassword(e.target.value)} type="password" placeholder="••••••••" className={cls} required />
                 </Field>
-                <button type="button" className="text-xs text-emerald-500 hover:underline w-full text-right">نسيت كلمة المرور؟</button>
-                <button type="submit" disabled={loading}
-                  className="w-full h-12 rounded-xl font-bold bg-gradient-to-l from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all mt-2">
-                  {loading ? "جاري التحقق..." : "الدخول إلى ملفي الطبي →"}
+                <button type="button" className="text-xs font-bold w-full text-right" style={{ color: "var(--green-main)" }}>نسيت كلمة المرور؟</button>
+                <button type="submit" disabled={loading} className="btn-pill-green w-full mt-2">
+                  {loading ? "جاري التحقق..." : "دخول العيادة الرقمية →"}
                 </button>
                 <p className="text-center text-xs text-slate-400 mt-4">محمي بتشفير AES-256 · Supabase Auth</p>
               </form>

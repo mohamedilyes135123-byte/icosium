@@ -1,6 +1,7 @@
 "use client";
+export const dynamic = "force-dynamic";
 
-export const dynamic = 'force-dynamic';
+
 
 
 import { useState, useEffect } from "react";
@@ -261,3 +262,4 @@ function MedicalTextarea({ label, icon, value, editing, placeholder, onChange }:
     </div>
   );
 }
+
