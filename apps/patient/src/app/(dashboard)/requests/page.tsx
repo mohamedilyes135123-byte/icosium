@@ -1,91 +1,131 @@
-"use client";
-export const dynamic = "force-dynamic";
+﻿"use client";
+import React from 'react';
+
+export const dynamic = 'force-dynamic';
+
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/Button";
+import {
+  Stethoscope, FlaskConical, Send, Clock, CheckCircle2,
+  XCircle, AlertTriangle, ChevronDown, Pill, TestTube,
+  RotateCcw, Building2, ArrowRight, QrCode
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
+// ΓöÇΓöÇΓöÇ Types ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 type RequestType = "PRESCRIPTION" | "LAB" | "ROUTINE_LAB";
+type TabView = "new" | "my_requests";
 
 const ROUTINE_TESTS = [
-  { name: "صورة الدم الكاملة CBC", code: "CBC" },
-  { name: "سكر الدم الصائم", code: "FBG" },
-  { name: "سكر بعد الأكل", code: "PPBG" },
-  { name: "وظائف الكبد", code: "LFT" },
-  { name: "وظائف الكلى", code: "RFT" },
-  { name: "صورة دهنيات الدم", code: "LIPID" },
-  { name: "فيتامين D", code: "VIT_D" },
-  { name: "هرمون الغدة الدرقية TSH", code: "TSH" },
-  { name: "تحليل البول", code: "UA" },
+  { name: "╪╡┘ê╪▒╪⌐ ╪º┘ä╪»┘à ╪º┘ä┘â╪º┘à┘ä╪⌐ CBC", code: "CBC" },
+  { name: "╪│┘â╪▒ ╪º┘ä╪»┘à ╪º┘ä╪╡╪º╪ª┘à", code: "FBG" },
+  { name: "╪│┘â╪▒ ╪¿╪╣╪» ╪º┘ä╪ú┘â┘ä", code: "PPBG" },
+  { name: "┘ê╪╕╪º╪ª┘ü ╪º┘ä┘â╪¿╪»", code: "LFT" },
+  { name: "┘ê╪╕╪º╪ª┘ü ╪º┘ä┘â┘ä┘ë", code: "RFT" },
+  { name: "╪╡┘ê╪▒╪⌐ ╪»┘ç┘å┘è╪º╪¬ ╪º┘ä╪»┘à", code: "LIPID" },
+  { name: "┘ü┘è╪¬╪º┘à┘è┘å D", code: "VIT_D" },
+  { name: "┘ç╪▒┘à┘ê┘å ╪º┘ä╪║╪»╪⌐ ╪º┘ä╪»╪▒┘é┘è╪⌐ TSH", code: "TSH" },
+  { name: "╪¬╪¡┘ä┘è┘ä ╪º┘ä╪¿┘ê┘ä", code: "UA" },
 ];
 
-const STATUS: Record<string, { label: string; bg: string; color: string }> = {
-  PENDING:  { label: "⏳ قيد الانتظار", bg: "#fef9c3", color: "#92400e" },
-  APPROVED: { label: "✅ موافق",         bg: "#dcfce7", color: "#166534" },
-  REJECTED: { label: "❌ مرفوض",        bg: "#fee2e2", color: "#991b1b" },
-  MODIFIED: { label: "✏️ معدّل",        bg: "#dbeafe", color: "#1e40af" },
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+  PENDING:  { label: "┘é┘è╪» ╪º┘ä╪º┘å╪¬╪╕╪º╪▒",     color: "text-amber-600 bg-amber-50 border-amber-200",  icon: <Clock className="w-3.5 h-3.5" /> },
+  APPROVED: { label: "┘à┘ê╪º┘ü┘é",            color: "text-emerald-600 bg-emerald-50 border-emerald-200", icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+  REJECTED: { label: "┘à╪▒┘ü┘ê╪╢",           color: "text-rose-600 bg-rose-50 border-rose-200",       icon: <XCircle className="w-3.5 h-3.5" /> },
+  MODIFIED: { label: "┘à╪╣╪»┘æ┘ä ┘à┘å ╪º┘ä╪╖╪¿┘è╪¿", color: "text-blue-600 bg-blue-50 border-blue-200",       icon: <AlertTriangle className="w-3.5 h-3.5" /> },
 };
 
+// ΓöÇΓöÇΓöÇ Main Component ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export default function PatientRequests() {
-  const [tab, setTab] = useState<"list" | "new">("list");
-  const [requests, setRequests] = useState<any[]>([]);
+  const supabase = createClient();
+  const [tab, setTab] = useState<TabView>("my_requests");
   const [doctors, setDoctors] = useState<any[]>([]);
-  const [labs, setLabs] = useState<any[]>([]);
-  const [pharmacies, setPharmacies] = useState<any[]>([]);
+  const [providers, setProviders] = useState<{ labs: any[]; pharmacies: any[] }>({ labs: [], pharmacies: [] });
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [modal, setModal] = useState<{ type: "lab" | "pharmacy"; labReqId?: string; prescriptionId?: string } | null>(null);
 
   // Form state
   const [reqType, setReqType] = useState<RequestType>("PRESCRIPTION");
-  const [doctorId, setDoctorId] = useState("");
+  const [selectedDoctorId, setSelectedDoctorId] = useState("");
   const [symptoms, setSymptoms] = useState("");
   const [selectedTests, setSelectedTests] = useState<string[]>([]);
   const [priority, setPriority] = useState("normal");
 
+  // Provider selection modal
+  const [providerModal, setProviderModal] = useState<{
+    open: boolean;
+    type: "lab" | "pharmacy";
+    requestId: string;
+    prescriptionId?: string;
+    labRequestId?: string;
+  } | null>(null);
+
+  // ΓöÇΓöÇ Fetch current user ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   useEffect(() => {
-    const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
-  }, []);
+  }, [supabase]);
 
-  const fetchAll = useCallback(async () => {
-    if (!currentUser) return;
-    const supabase = createClient();
-    setLoading(true);
-
-    const [{ data: reqs }, { data: docs }, { data: labList }, { data: pharmList }] = await Promise.all([
-      supabase.from("medical_requests").select(`
-        *,
-        doctor:profiles!medical_requests_doctor_id_fkey(full_name,specialty),
-        doctor_responses(*),
-        prescriptions(id,qr_token,medications,is_used),
-        lab_requests(id,qr_token,tests_list,status,lab_id)
-      `).eq("patient_id", currentUser.id).order("created_at", { ascending: false }),
+  // ΓöÇΓöÇ Fetch doctors, labs, pharmacies ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const fetchProviders = useCallback(async () => {
+    const [{ data: docs }, { data: labs }, { data: pharms }] = await Promise.all([
       supabase.from("profiles").select("id,full_name,specialty,address").eq("role", "doctor").eq("approval_status", "approved"),
       supabase.from("profiles").select("id,full_name,address").eq("role", "lab").eq("approval_status", "approved"),
       supabase.from("profiles").select("id,full_name,address").eq("role", "pharmacy").eq("approval_status", "approved"),
     ]);
-
-    setRequests(reqs || []);
     setDoctors(docs || []);
-    setLabs(labList || []);
-    setPharmacies(pharmList || []);
-    setLoading(false);
-  }, [currentUser]);
+    setProviders({ labs: labs || [], pharmacies: pharms || [] });
+  }, [supabase]);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  // ΓöÇΓöÇ Fetch patient requests ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const fetchRequests = useCallback(async () => {
+    if (!currentUser) return;
+    const { data } = await supabase
+      .from("medical_requests")
+      .select(`
+        *,
+        doctor:profiles!medical_requests_doctor_id_fkey(full_name, specialty),
+        doctor_responses(*),
+        prescriptions(id, qr_token, medications, is_used),
+        lab_requests(id, qr_token, tests_list, status, lab_id)
+      `)
+      .eq("patient_id", currentUser.id)
+      .order("created_at", { ascending: false });
 
-  const submitRequest = async (e: React.FormEvent) => {
+    setRequests(data || []);
+  }, [supabase, currentUser]);
+
+  useEffect(() => {
+    fetchProviders();
+  }, [fetchProviders]);
+
+  useEffect(() => {
+    fetchRequests();
+    const channel = supabase
+      .channel("patient-requests-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "medical_requests" }, fetchRequests)
+      .on("postgres_changes", { event: "*", schema: "public", table: "doctor_responses" }, fetchRequests)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [supabase, fetchRequests]);
+
+  // ΓöÇΓöÇ Submit new request ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
-    setSubmitting(true);
-    const supabase = createClient();
+    if (reqType === "PRESCRIPTION" && !symptoms.trim()) return;
+    if (reqType !== "PRESCRIPTION" && selectedTests.length === 0) return;
+    setLoading(true);
+
     const payload: any = {
       patient_id: currentUser.id,
-      doctor_id: doctorId || null,
+      doctor_id: selectedDoctorId || null,
       type: reqType,
       priority,
     };
+
     if (reqType === "PRESCRIPTION") {
       payload.symptoms = symptoms;
     } else {
@@ -93,266 +133,412 @@ export default function PatientRequests() {
         ROUTINE_TESTS.find(t => t.code === code) || { name: code, code }
       );
     }
-    await supabase.from("medical_requests").insert([payload]);
-    setSymptoms(""); setSelectedTests([]); setDoctorId(""); setTab("list");
-    setSubmitting(false);
-    fetchAll();
+
+    const { error } = await supabase.from("medical_requests").insert([payload]);
+
+    if (!error) {
+      setSymptoms("");
+      setSelectedTests([]);
+      setSelectedDoctorId("");
+      setTab("my_requests");
+    }
+    setLoading(false);
   };
 
+  // ΓöÇΓöÇ Patient sends prescription to pharmacy ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   const sendToPharmacy = async (pharmacyId: string, prescriptionId: string) => {
     if (!currentUser) return;
-    const supabase = createClient();
-    await supabase.from("pharmacy_orders").insert([{ prescription_id: prescriptionId, patient_id: currentUser.id, pharmacy_id: pharmacyId }]);
-    // Mark prescription as used so the button disappears and results page is accurate
-    await supabase.from("prescriptions").update({ is_used: true }).eq("id", prescriptionId);
-    setModal(null); fetchAll();
+    await supabase.from("pharmacy_orders").insert([{
+      prescription_id: prescriptionId,
+      patient_id: currentUser.id,
+      pharmacy_id: pharmacyId,
+    }]);
+    setProviderModal(null);
+    fetchRequests();
   };
 
-  const sendToLab = async (labId: string, labReqId: string) => {
-    const supabase = createClient();
-    await supabase.from("lab_requests").update({ lab_id: labId }).eq("id", labReqId);
-    setModal(null); fetchAll();
+  // ΓöÇΓöÇ Patient assigns lab to lab request ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const sendToLab = async (labId: string, labRequestId: string) => {
+    await supabase.from("lab_requests").update({ lab_id: labId }).eq("id", labRequestId);
+    setProviderModal(null);
+    fetchRequests();
   };
 
-  const toggleTest = (code: string) =>
-    setSelectedTests(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]);
+  // ΓöÇΓöÇ Toggle test selection ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const toggleTest = (code: string) => {
+    setSelectedTests(prev =>
+      prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
+    );
+  };
 
-  const statusCfg = (s: string) => STATUS[s] || STATUS.PENDING;
+  const statusCfg = (s: string) => STATUS_CONFIG[s] || STATUS_CONFIG.PENDING;
 
+  // ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   return (
-    <div dir="rtl" style={{ paddingBottom: 32 }}>
-      {/* Header */}
-      <div className="green-header" style={{ marginBottom: 0 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff", margin: 0 }}>🩺 طلباتي الطبية</h1>
-        <p style={{ color: "#bbf7d0", fontSize: 13, margin: "4px 0 0" }}>أرسل طلباتك الطبية وتابع حالتها</p>
+    <div className="w-full pb-32" dir="rtl">
+
+      {/* ΓöÇΓöÇ Header ΓöÇΓöÇ */}
+      <motion.header initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+        className="flex items-center gap-4 mb-8">
+        <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-200">
+          <Stethoscope className="w-6 h-6" />
+        </div>
+        <div>
+          <h1 className="text-xl font-black text-slate-800">╪╖┘ä╪¿╪º╪¬┘è ╪º┘ä╪╖╪¿┘è╪⌐</h1>
+          <p className="text-xs font-bold text-slate-400">╪ú┘å╪¬ ╪¬╪¬╪¡┘â┘à ┘ü┘è ┘â┘ä ╪«╪╖┘ê╪⌐ ┘à┘å ╪▒╪¡┘ä╪¬┘â ╪º┘ä╪╖╪¿┘è╪⌐</p>
+        </div>
+      </motion.header>
+
+      {/* ΓöÇΓöÇ Tabs ΓöÇΓöÇ */}
+      <div className="flex gap-2 mb-6 bg-slate-100 p-1.5 rounded-2xl">
+        {[
+          { key: "my_requests", label: "╪╖┘ä╪¿╪º╪¬┘è", icon: <Clock className="w-4 h-4" /> },
+          { key: "new", label: "╪╖┘ä╪¿ ╪¼╪»┘è╪»", icon: <Send className="w-4 h-4" /> },
+        ].map(t => (
+          <button key={t.key} onClick={() => setTab(t.key as TabView)}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              tab === t.key
+                ? "bg-white text-emerald-700 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}>
+            {t.icon} {t.label}
+          </button>
+        ))}
       </div>
 
-      <div style={{ padding: "16px 16px 0" }}>
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: 8, background: "#f1f5f9", borderRadius: 16, padding: 6, marginBottom: 20 }}>
-          {[
-            { key: "list", label: "📋 طلباتي" },
-            { key: "new",  label: "➕ طلب جديد" },
-          ].map(t => (
-            <button key={t.key} onClick={() => setTab(t.key as any)}
-              style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: "none", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer", transition: "all 0.15s", background: tab === t.key ? "#fff" : "transparent", color: tab === t.key ? "#2eb567" : "#64748b", boxShadow: tab === t.key ? "0 1px 4px rgba(0,0,0,0.1)" : "none" }}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {/* New Request Form */}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+      {/* ΓöÇΓöÇ TAB: New Request ΓöÇΓöÇ */}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+      <AnimatePresence mode="wait">
         {tab === "new" && (
-          <form onSubmit={submitRequest} style={{ background: "#fff", borderRadius: 24, padding: 20, border: "1px solid #e8f5ec", display: "flex", flexDirection: "column", gap: 16 }}>
-            {/* Type */}
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 8 }}>نوع الطلب</label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
-                {[
-                  { v: "PRESCRIPTION", label: "وصفة طبية", emoji: "💊" },
-                  { v: "LAB",          label: "تحاليل",    emoji: "🧪" },
-                  { v: "ROUTINE_LAB",  label: "روتينية",   emoji: "🔁" },
-                ].map(o => (
-                  <button key={o.v} type="button" onClick={() => setReqType(o.v as RequestType)}
-                    style={{ padding: "10px 8px", borderRadius: 12, border: `2px solid ${reqType === o.v ? "#2eb567" : "#e5e7eb"}`, background: reqType === o.v ? "#f0fdf4" : "#fff", color: reqType === o.v ? "#166534" : "#6b7280", fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer", textAlign: "center" }}>
-                    <div style={{ fontSize: 20, marginBottom: 4 }}>{o.emoji}</div>
-                    {o.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <motion.div key="new" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+            <form onSubmit={handleSubmit}
+              className="bg-white/80 backdrop-blur-xl border border-white shadow-xl shadow-emerald-500/10 rounded-[2rem] p-6 flex flex-col gap-5">
 
-            {/* Doctor */}
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6 }}>الطبيب</label>
-              <select value={doctorId} onChange={e => setDoctorId(e.target.value)}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid #e5e7eb", fontFamily: "inherit", fontSize: 14, background: "#f9fafb", color: "#374151", outline: "none" }}>
-                <option value="">بث عام — أي طبيب متاح</option>
-                {doctors.map(d => <option key={d.id} value={d.id}>{d.full_name}{d.specialty ? ` (${d.specialty})` : ""}</option>)}
-              </select>
-            </div>
-
-            {/* Priority */}
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6 }}>الأولوية</label>
-              <div style={{ display: "flex", gap: 8 }}>
-                {[{ v: "normal", label: "عادي" }, { v: "urgent", label: "🚨 عاجل" }].map(p => (
-                  <button key={p.v} type="button" onClick={() => setPriority(p.v)}
-                    style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: `2px solid ${priority === p.v ? (p.v === "urgent" ? "#ef4444" : "#2eb567") : "#e5e7eb"}`, background: priority === p.v ? (p.v === "urgent" ? "#fee2e2" : "#f0fdf4") : "#fff", color: priority === p.v ? (p.v === "urgent" ? "#991b1b" : "#166534") : "#6b7280", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Symptoms */}
-            {reqType === "PRESCRIPTION" && (
+              {/* Request Type */}
               <div>
-                <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6 }}>الأعراض والشكوى *</label>
-                <textarea value={symptoms} onChange={e => setSymptoms(e.target.value)} required
-                  placeholder="مثال: أشعر بصداع شديد منذ 3 أيام، مع ارتفاع في الحرارة..."
-                  style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid #e5e7eb", fontFamily: "inherit", fontSize: 14, resize: "none", height: 120, outline: "none", background: "#f9fafb", color: "#374151", boxSizing: "border-box" }} />
-              </div>
-            )}
-
-            {/* Tests */}
-            {reqType !== "PRESCRIPTION" && (
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 8 }}>
-                  اختر التحاليل {selectedTests.length > 0 && <span style={{ background: "#dcfce7", color: "#166534", borderRadius: 999, padding: "2px 8px", fontSize: 11 }}>{selectedTests.length} محدد</span>}
-                </label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                  {ROUTINE_TESTS.map(t => (
-                    <button key={t.code} type="button" onClick={() => toggleTest(t.code)}
-                      style={{ padding: "10px 12px", borderRadius: 12, border: `2px solid ${selectedTests.includes(t.code) ? "#2eb567" : "#e5e7eb"}`, background: selectedTests.includes(t.code) ? "#f0fdf4" : "#fff", color: selectedTests.includes(t.code) ? "#166534" : "#6b7280", fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer", textAlign: "right" }}>
-                      {t.name}
+                <label className="text-sm font-black text-slate-700 mb-3 block">┘å┘ê╪╣ ╪º┘ä╪╖┘ä╪¿</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { v: "PRESCRIPTION", label: "┘ê╪╡┘ü╪⌐ ╪╖╪¿┘è╪⌐", icon: <Pill className="w-5 h-5" /> },
+                    { v: "LAB", label: "╪¬╪¡╪º┘ä┘è┘ä ╪╖╪¿┘è╪⌐", icon: <FlaskConical className="w-5 h-5" /> },
+                    { v: "ROUTINE_LAB", label: "╪¬╪¡╪º┘ä┘è┘ä ╪▒┘ê╪¬┘è┘å┘è╪⌐", icon: <RotateCcw className="w-5 h-5" /> },
+                  ].map(opt => (
+                    <button key={opt.v} type="button" onClick={() => setReqType(opt.v as RequestType)}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-xs font-bold transition-all ${
+                        reqType === opt.v
+                          ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                          : "border-slate-200 text-slate-500 hover:border-emerald-300"
+                      }`}>
+                      {opt.icon}
+                      <span className="text-center leading-tight">{opt.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
-            )}
 
-            <button type="submit" disabled={submitting}
-              style={{ width: "100%", padding: "14px 0", borderRadius: 999, border: "none", background: "linear-gradient(135deg,#2eb567,#1e8a4c)", color: "#fff", fontFamily: "inherit", fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: "0 4px 15px rgba(46,181,103,0.35)", opacity: submitting ? 0.7 : 1 }}>
-              {submitting ? "جاري الإرسال..." : "📨 إرسال الطلب للطبيب"}
-            </button>
-          </form>
+              {/* Doctor Selection */}
+              <div>
+                <label className="text-sm font-black text-slate-700 mb-2 block">╪º╪«╪¬╪▒ ╪╖╪¿┘è╪¿┘â</label>
+                <div className="relative">
+                  <select value={selectedDoctorId} onChange={e => setSelectedDoctorId(e.target.value)}
+                    className="w-full p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 font-medium appearance-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                    <option value="">╪¿╪½ ╪╣╪º┘à ΓÇö ╪ú┘è ╪╖╪¿┘è╪¿ ┘à╪¬╪º╪¡ ┘è╪│╪¬╪¼┘è╪¿</option>
+                    {doctors.map(d => (
+                      <option key={d.id} value={d.id}>{d.full_name} {d.specialty ? `(${d.specialty})` : ""}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Priority */}
+              <div>
+                <label className="text-sm font-black text-slate-700 mb-2 block">╪º┘ä╪ú┘ê┘ä┘ê┘è╪⌐</label>
+                <div className="flex gap-2">
+                  {[{ v: "normal", label: "╪╣╪º╪»┘è" }, { v: "urgent", label: "≡ƒÜ¿ ╪╣╪º╪¼┘ä" }].map(p => (
+                    <button key={p.v} type="button" onClick={() => setPriority(p.v)}
+                      className={`flex-1 py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${
+                        priority === p.v
+                          ? p.v === "urgent" ? "border-rose-500 bg-rose-50 text-rose-700" : "border-emerald-500 bg-emerald-50 text-emerald-700"
+                          : "border-slate-200 text-slate-500"
+                      }`}>
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Symptoms (Prescription only) */}
+              {reqType === "PRESCRIPTION" && (
+                <div>
+                  <label className="text-sm font-black text-slate-700 mb-2 block">╪º┘ä╪ú╪╣╪▒╪º╪╢ ┘ê╪º┘ä╪┤┘â┘ê┘ë</label>
+                  <textarea value={symptoms} onChange={e => setSymptoms(e.target.value)}
+                    placeholder="┘à╪½╪º┘ä: ╪ú╪┤╪╣╪▒ ╪¿╪╡╪»╪º╪╣ ╪┤╪»┘è╪» ┘ê╪º╪▒╪¬┘ü╪º╪╣ ┘ü┘è ╪º┘ä╪╢╪║╪╖ ┘à┘å╪░ ╪ú╪│╪¿┘ê╪╣┘è┘å╪î ╪ú╪¡╪¬╪º╪¼ ╪¬╪¼╪»┘è╪» ╪º┘ä┘ê╪╡┘ü╪⌐..."
+                    className="w-full p-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none resize-none h-32 text-slate-700 transition-all font-medium"
+                    required />
+                </div>
+              )}
+
+              {/* Tests Selection (LAB / ROUTINE_LAB) */}
+              {reqType !== "PRESCRIPTION" && (
+                <div>
+                  <label className="text-sm font-black text-slate-700 mb-3 block">
+                    ╪º╪«╪¬╪▒ ╪º┘ä╪¬╪¡╪º┘ä┘è┘ä ╪º┘ä┘à╪╖┘ä┘ê╪¿╪⌐
+                    {selectedTests.length > 0 && (
+                      <span className="mr-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+                        {selectedTests.length} ┘à╪¡╪»╪»
+                      </span>
+                    )}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {ROUTINE_TESTS.map(test => (
+                      <button key={test.code} type="button" onClick={() => toggleTest(test.code)}
+                        className={`flex items-center gap-2 p-3 rounded-xl border-2 text-right text-xs font-bold transition-all ${
+                          selectedTests.includes(test.code)
+                            ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                            : "border-slate-200 text-slate-500 hover:border-emerald-300"
+                        }`}>
+                        <TestTube className={`w-4 h-4 shrink-0 ${selectedTests.includes(test.code) ? "text-emerald-500" : "text-slate-300"}`} />
+                        <span className="leading-tight">{test.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <Button type="submit" disabled={loading}
+                className="w-full h-14 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-white font-bold shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 text-base">
+                {loading ? "╪¼╪º╪▒┘è ╪º┘ä╪Ñ╪▒╪│╪º┘ä..." : (<>╪Ñ╪▒╪│╪º┘ä ╪º┘ä╪╖┘ä╪¿ ┘ä┘ä╪╖╪¿┘è╪¿ <Send className="w-5 h-5 rtl:-scale-x-100" /></>)}
+              </Button>
+            </form>
+          </motion.div>
         )}
 
-        {/* Requests List */}
-        {tab === "list" && (
-          <div>
-            {loading && [1,2,3].map(i => (
-              <div key={i} style={{ height: 96, borderRadius: 20, background: "#f0fdf4", marginBottom: 12, animation: "pulse 1.5s infinite" }} />
-            ))}
+        {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+        {/* ΓöÇΓöÇ TAB: My Requests ΓöÇΓöÇ */}
+        {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+        {tab === "my_requests" && (
+          <motion.div key="list" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="space-y-4">
 
-            {!loading && requests.length === 0 && (
-              <div style={{ textAlign: "center", padding: "64px 16px" }}>
-                <div style={{ fontSize: 64, marginBottom: 16 }}>🩺</div>
-                <p style={{ fontWeight: 700, color: "#6b7280", marginBottom: 8 }}>لا توجد طلبات بعد</p>
-                <button onClick={() => setTab("new")} className="btn-pill-green" style={{ marginTop: 8, fontSize: 14 }}>
-                  ابدأ بطلب استشارة
-                </button>
+            {requests.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <Stethoscope className="w-16 h-16 text-slate-200 mb-4" />
+                <h3 className="font-bold text-slate-500 mb-2">┘ä╪º ╪¬┘ê╪¼╪» ╪╖┘ä╪¿╪º╪¬ ╪¿╪╣╪»</h3>
+                <p className="text-slate-400 text-sm mb-4">╪º╪¿╪»╪ú ╪¿╪Ñ╪▒╪│╪º┘ä ╪╖┘ä╪¿┘â ╪º┘ä╪╖╪¿┘è ╪º┘ä╪ú┘ê┘ä</p>
+                <Button onClick={() => setTab("new")}
+                  className="bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl">
+                  ╪╖┘ä╪¿ ╪¼╪»┘è╪» +
+                </Button>
               </div>
             )}
 
-            {requests.map(req => {
+            {requests.map((req, i) => {
               const cfg = statusCfg(req.status);
               const response = req.doctor_responses?.[0];
               const prescription = req.prescriptions?.[0];
               const labReq = req.lab_requests?.[0];
               const isApproved = req.status === "APPROVED";
+              const hasPrescription = !!prescription;
+              const hasLabReq = !!labReq && !labReq.lab_id; // lab not assigned yet
 
               return (
-                <div key={req.id} style={{ background: "#fff", borderRadius: 24, border: "1px solid #e8f5ec", padding: 16, marginBottom: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                  {/* Status + Type */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 10px", borderRadius: 8, background: cfg.bg, color: cfg.color, display: "inline-block" }}>
-                        {cfg.label}
-                      </span>
-                      {req.priority === "urgent" && (
-                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 8, background: "#fee2e2", color: "#991b1b", display: "inline-block", animation: "pulse 1.5s infinite" }}>
-                          🚨 عاجل
+                <motion.div key={req.id}
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }}
+                  className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-5 shadow-lg shadow-slate-200/50 relative overflow-hidden">
+
+                  {/* Status stripe */}
+                  <div className={`absolute top-0 right-0 w-1.5 h-full rounded-r-3xl ${
+                    req.status === "APPROVED" ? "bg-emerald-500" :
+                    req.status === "REJECTED" ? "bg-rose-500" :
+                    req.status === "MODIFIED" ? "bg-blue-500" : "bg-amber-400"
+                  }`} />
+
+                  {/* Request Header */}
+                  <div className="flex justify-between items-start mb-3 mr-2">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-lg border ${cfg.color}`}>
+                          {cfg.icon} {cfg.label}
                         </span>
-                      )}
+                        {req.priority === "urgent" && (
+                          <span className="text-xs font-black text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-200 animate-pulse">
+                            ≡ƒÜ¿ ╪╣╪º╪¼┘ä
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-400 font-medium">
+                        {new Date(req.created_at).toLocaleString("ar-DZ")}
+                      </p>
                     </div>
-                    <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 10px", borderRadius: 8, background: req.type === "PRESCRIPTION" ? "#f3e8ff" : "#cffafe", color: req.type === "PRESCRIPTION" ? "#7c3aed" : "#0891b2" }}>
-                      {req.type === "PRESCRIPTION" ? "💊 وصفة" : req.type === "LAB" ? "🧪 تحليل" : "🔁 روتيني"}
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
+                      req.type === "PRESCRIPTION" ? "bg-purple-100 text-purple-700" :
+                      req.type === "LAB" ? "bg-cyan-100 text-cyan-700" : "bg-teal-100 text-teal-700"
+                    }`}>
+                      {req.type === "PRESCRIPTION" ? "≡ƒ⌐║ ┘ê╪╡┘ü╪⌐" : req.type === "LAB" ? "≡ƒº¬ ╪¬╪¡┘ä┘è┘ä" : "≡ƒöü ╪▒┘ê╪¬┘è┘å┘è"}
                     </span>
                   </div>
 
                   {/* Doctor */}
                   {req.doctor && (
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#374151", marginBottom: 8 }}>
-                      ⚕️ {req.doctor.full_name} {req.doctor.specialty ? `(${req.doctor.specialty})` : ""}
+                    <div className="flex items-center gap-2 mr-2 mb-3">
+                      <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs">
+                        ΓÜò
+                      </div>
+                      <span className="text-sm font-bold text-slate-700">{req.doctor.full_name}</span>
+                      {req.doctor.specialty && (
+                        <span className="text-xs text-slate-400">({req.doctor.specialty})</span>
+                      )}
                     </div>
                   )}
 
-                  {/* Symptoms */}
+                  {/* Content */}
                   {req.symptoms && (
-                    <p style={{ fontSize: 13, color: "#6b7280", background: "#f9fafb", borderRadius: 10, padding: "8px 12px", marginBottom: 8 }}>
+                    <p className="text-sm text-slate-600 font-medium bg-slate-50 rounded-xl p-3 mr-2 mb-3 leading-relaxed">
                       {req.symptoms}
                     </p>
                   )}
 
-                  {/* Date */}
-                  <p style={{ fontSize: 11, color: "#9ca3af", marginBottom: 8 }}>
-                    {new Date(req.created_at).toLocaleDateString("ar-DZ", { day: "2-digit", month: "long", year: "numeric" })}
-                  </p>
-
                   {/* Doctor Response */}
                   {response && (
-                    <div style={{ padding: "10px 12px", borderRadius: 12, background: response.action === "APPROVE" ? "#f0fdf4" : response.action === "REJECT" ? "#fef2f2" : "#eff6ff", border: `1px solid ${response.action === "APPROVE" ? "#86efac" : response.action === "REJECT" ? "#fca5a5" : "#93c5fd"}`, marginBottom: 8 }}>
-                      <p style={{ fontSize: 11, fontWeight: 900, color: "#6b7280", marginBottom: 4 }}>رد الطبيب:</p>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: "#374151", margin: 0 }}>{response.notes}</p>
+                    <div className={`mr-2 mb-3 p-3 rounded-xl border ${
+                      response.action === "APPROVE" ? "bg-emerald-50 border-emerald-200" :
+                      response.action === "REJECT" ? "bg-rose-50 border-rose-200" : "bg-blue-50 border-blue-200"
+                    }`}>
+                      <p className="text-xs font-black text-slate-500 mb-0.5">╪▒╪» ╪º┘ä╪╖╪¿┘è╪¿:</p>
+                      <p className="text-sm font-bold text-slate-700">{response.notes}</p>
                     </div>
                   )}
 
-                  {/* Send to Pharmacy */}
-                  {isApproved && prescription && !prescription.is_used && (
-                    <button onClick={() => setModal({ type: "pharmacy", prescriptionId: prescription.id })}
-                      style={{ width: "100%", padding: "12px 0", borderRadius: 12, border: "2px solid #a855f7", background: "#faf5ff", color: "#7c3aed", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer", marginBottom: 8 }}>
-                      💊 اختر صيدلية وأرسل الوصفة
-                    </button>
-                  )}
-                  {isApproved && prescription?.is_used && (
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#7c3aed", background: "#faf5ff", padding: "8px 12px", borderRadius: 10, marginBottom: 8 }}>
-                      ✅ تم إرسال الوصفة للصيدلية
-                    </div>
+                  {/* ΓöÇΓöÇ ACTION: Send Prescription to Pharmacy ΓöÇΓöÇ */}
+                  {isApproved && hasPrescription && !prescription.is_used && (
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                      className="mr-2 mt-4 p-4 bg-purple-50 border-2 border-purple-200 rounded-2xl">
+                      <div className="flex items-center gap-2 mb-3">
+                        <QrCode className="w-5 h-5 text-purple-600" />
+                        <span className="font-bold text-purple-800 text-sm">┘ê╪╡┘ü╪¬┘â ╪¼╪º┘ç╪▓╪⌐ ΓÇö ╪º╪«╪¬╪▒ ╪╡┘è╪»┘ä┘è╪⌐</span>
+                      </div>
+                      <div className="flex items-center gap-2 mb-3 bg-white rounded-xl p-2 border border-purple-100">
+                        <img
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${prescription.qr_token}`}
+                          alt="QR"
+                          className="w-12 h-12 rounded"
+                        />
+                        <div className="text-xs text-slate-500">
+                          <p className="font-bold text-slate-700 mb-0.5">╪▒┘é┘à ╪º┘ä╪¬╪¡┘é┘é</p>
+                          <p className="font-mono text-purple-600">{prescription.qr_token?.substring(0, 16)}...</p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => setProviderModal({ open: true, type: "pharmacy", requestId: req.id, prescriptionId: prescription.id })}
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-2">
+                        <Building2 className="w-4 h-4" /> ╪º╪«╪¬╪▒ ╪╡┘è╪»┘ä┘è╪⌐ ┘ê╪ú╪▒╪│┘ä ╪º┘ä┘ê╪╡┘ü╪⌐
+                      </Button>
+                    </motion.div>
                   )}
 
-                  {/* Send to Lab */}
-                  {isApproved && labReq && !labReq.lab_id && (
-                    <button onClick={() => setModal({ type: "lab", labReqId: labReq.id })}
-                      style={{ width: "100%", padding: "12px 0", borderRadius: 12, border: "2px solid #06b6d4", background: "#ecfeff", color: "#0e7490", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
-                      🧪 اختر مختبراً وأرسل طلب التحليل
-                    </button>
+                  {/* ΓöÇΓöÇ ACTION: Send Lab Request to Lab ΓöÇΓöÇ */}
+                  {isApproved && hasLabReq && (
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                      className="mr-2 mt-4 p-4 bg-cyan-50 border-2 border-cyan-200 rounded-2xl">
+                      <div className="flex items-center gap-2 mb-3">
+                        <QrCode className="w-5 h-5 text-cyan-600" />
+                        <span className="font-bold text-cyan-800 text-sm">╪╖┘ä╪¿ ╪º┘ä╪¬╪¡┘ä┘è┘ä ╪¼╪º┘ç╪▓ ΓÇö ╪º╪«╪¬╪▒ ┘à╪«╪¬╪¿╪▒╪º┘ï</span>
+                      </div>
+                      <div className="flex items-center gap-2 mb-3 bg-white rounded-xl p-2 border border-cyan-100">
+                        <img
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${labReq.qr_token}`}
+                          alt="QR"
+                          className="w-12 h-12 rounded"
+                        />
+                        <div className="text-xs text-slate-500">
+                          <p className="font-bold text-slate-700 mb-0.5">╪▒┘à╪▓ ╪º┘ä╪¬╪¡┘ä┘è┘ä</p>
+                          <p className="font-mono text-cyan-600">{labReq.qr_token?.substring(0, 16)}...</p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => setProviderModal({ open: true, type: "lab", requestId: req.id, labRequestId: labReq.id })}
+                        className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-2">
+                        <FlaskConical className="w-4 h-4" /> ╪º╪«╪¬╪▒ ┘à╪«╪¬╪¿╪▒╪º┘ï ┘ê╪ú╪▒╪│┘ä ╪º┘ä╪╖┘ä╪¿
+                      </Button>
+                    </motion.div>
                   )}
+
+                  {/* Already assigned to a lab */}
                   {isApproved && labReq?.lab_id && (
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#0e7490", background: "#ecfeff", padding: "8px 12px", borderRadius: 10 }}>
-                      ✅ تم إرسال طلب التحليل للمختبر
+                    <div className="mr-2 mt-3 text-xs text-cyan-700 font-bold flex items-center gap-2 bg-cyan-50 p-2.5 rounded-xl border border-cyan-100">
+                      <CheckCircle2 className="w-4 h-4" /> ╪¬┘à ╪Ñ╪▒╪│╪º┘ä ╪╖┘ä╪¿ ╪º┘ä╪¬╪¡┘ä┘è┘ä ┘ä┘ä┘à╪«╪¬╪¿╪▒ ΓÇö ╪¿╪º┘å╪¬╪╕╪º╪▒ ╪º┘ä┘å╪¬╪º╪ª╪¼
                     </div>
                   )}
-                </div>
+
+                  {/* Prescription already used */}
+                  {isApproved && prescription?.is_used && (
+                    <div className="mr-2 mt-3 text-xs text-purple-700 font-bold flex items-center gap-2 bg-purple-50 p-2.5 rounded-xl border border-purple-100">
+                      <CheckCircle2 className="w-4 h-4" /> ╪¬┘à ╪Ñ╪▒╪│╪º┘ä ╪º┘ä┘ê╪╡┘ü╪⌐ ┘ä┘ä╪╡┘è╪»┘ä┘è╪⌐
+                    </div>
+                  )}
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
 
-      {/* Provider Modal */}
-      {modal && (
-        <div onClick={() => setModal(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 50, display: "flex", alignItems: "flex-end" }}>
-          <div onClick={e => e.stopPropagation()} style={{ width: "100%", background: "#fff", borderRadius: "24px 24px 0 0", padding: 24, maxHeight: "70vh", overflowY: "auto" }}>
-            <div style={{ width: 48, height: 4, background: "#e5e7eb", borderRadius: 999, margin: "0 auto 20px" }} />
-            <h3 style={{ fontWeight: 900, fontSize: 18, textAlign: "center", marginBottom: 6 }}>
-              {modal.type === "pharmacy" ? "💊 اختر الصيدلية" : "🧪 اختر المختبر"}
-            </h3>
-            <p style={{ fontSize: 13, color: "#6b7280", textAlign: "center", marginBottom: 20 }}>
-              سيتم إرسال {modal.type === "pharmacy" ? "وصفتك" : "طلب التحليل"} مباشرة
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {(modal.type === "pharmacy" ? pharmacies : labs).map(p => (
-                <button key={p.id}
-                  onClick={() => modal.type === "pharmacy" ? sendToPharmacy(p.id, modal.prescriptionId!) : sendToLab(p.id, modal.labReqId!)}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderRadius: 16, border: "2px solid #e5e7eb", background: "#f9fafb", cursor: "pointer", fontFamily: "inherit", textAlign: "right" }}>
-                  <div>
-                    <p style={{ fontWeight: 700, fontSize: 14, color: "#374151", margin: 0 }}>{p.full_name}</p>
-                    {p.address && <p style={{ fontSize: 12, color: "#9ca3af", margin: "2px 0 0" }}>📍 {p.address}</p>}
-                  </div>
-                  <span style={{ fontSize: 20 }}>←</span>
-                </button>
-              ))}
-              {(modal.type === "pharmacy" ? pharmacies : labs).length === 0 && (
-                <p style={{ textAlign: "center", color: "#9ca3af", padding: "32px 0" }}>
-                  لا يوجد {modal.type === "pharmacy" ? "صيدليات" : "مختبرات"} متاحة حالياً
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+      {/* ΓöÇΓöÇ Provider Selection Modal ΓöÇΓöÇ */}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
+      <AnimatePresence>
+        {providerModal?.open && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end"
+            onClick={() => setProviderModal(null)}>
+            <motion.div
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25 }}
+              className="w-full bg-white rounded-t-[2rem] p-6 max-h-[70vh] overflow-y-auto"
+              onClick={e => e.stopPropagation()}>
+
+              <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6" />
+
+              <h3 className="font-black text-slate-800 text-lg mb-1 text-center">
+                {providerModal.type === "pharmacy" ? "╪º╪«╪¬╪▒ ╪º┘ä╪╡┘è╪»┘ä┘è╪⌐" : "╪º╪«╪¬╪▒ ╪º┘ä┘à╪«╪¬╪¿╪▒"}
+              </h3>
+              <p className="text-sm text-slate-400 text-center mb-6">
+                {providerModal.type === "pharmacy"
+                  ? "╪│┘è╪¬┘à ╪Ñ╪▒╪│╪º┘ä ┘ê╪╡┘ü╪¬┘â ┘à╪¿╪º╪┤╪▒╪⌐ ┘ä┘ä╪╡┘è╪»┘ä┘è╪⌐ ╪º┘ä╪¬┘è ╪¬╪«╪¬╪º╪▒┘ç╪º"
+                  : "╪│┘è╪¬┘à ╪Ñ╪▒╪│╪º┘ä ╪╖┘ä╪¿ ╪º┘ä╪¬╪¡┘ä┘è┘ä ┘ä┘ä┘à╪«╪¬╪¿╪▒ ╪º┘ä╪░┘è ╪¬╪«╪¬╪º╪▒┘ç"}
+              </p>
+
+              <div className="space-y-3">
+                {(providerModal.type === "pharmacy" ? providers.pharmacies : providers.labs).map(p => (
+                  <button key={p.id}
+                    onClick={() => {
+                      if (providerModal.type === "pharmacy") {
+                        sendToPharmacy(p.id, providerModal.prescriptionId!);
+                      } else {
+                        sendToLab(p.id, providerModal.labRequestId!);
+                      }
+                    }}
+                    className="w-full flex items-center justify-between p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl hover:border-emerald-400 hover:bg-emerald-50 transition-all group">
+                    <div className="text-right">
+                      <p className="font-bold text-slate-800 group-hover:text-emerald-700">{p.full_name}</p>
+                      {p.address && <p className="text-xs text-slate-400 mt-0.5">≡ƒôì {p.address}</p>}
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500 rtl:rotate-180" />
+                  </button>
+                ))}
+
+                {(providerModal.type === "pharmacy" ? providers.pharmacies : providers.labs).length === 0 && (
+                  <p className="text-center text-slate-400 py-8 font-medium">
+                    ┘ä╪º ┘è┘ê╪¼╪» {providerModal.type === "pharmacy" ? "╪╡┘è╪»┘ä┘è╪º╪¬" : "┘à╪«╪¬╪¿╪▒╪º╪¬"} ┘à╪¬╪º╪¡╪⌐ ╪¡╪º┘ä┘è╪º┘ï
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
