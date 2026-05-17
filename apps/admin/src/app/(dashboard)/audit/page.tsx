@@ -43,7 +43,7 @@ export default function AuditPage() {
   const terminalRef = useRef<HTMLDivElement>(null);
 
   const fetchAudit = useCallback(async () => {
-    let query = supabase.from("audit_logs")
+    let query = supabase.from("audit_log")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(200);
@@ -58,7 +58,7 @@ export default function AuditPage() {
     fetchAudit();
     if (!autoRefresh) return;
     const channel = supabase.channel("audit-terminal-rt")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "audit_logs" }, () => fetchAudit())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "audit_log" }, () => fetchAudit())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [supabase, fetchAudit, autoRefresh]);
@@ -222,4 +222,3 @@ export default function AuditPage() {
     </div>
   );
 }
-

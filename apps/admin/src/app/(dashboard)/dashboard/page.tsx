@@ -66,7 +66,7 @@ export default function AdminDashboard() {
       supabase.from("profiles")
         .select("id,full_name,role,approval_status,created_at,specialty,address,phone,is_banned")
         .order("created_at", { ascending: false }),
-      supabase.from("audit_logs")
+      supabase.from("audit_log")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(50),
@@ -120,13 +120,10 @@ export default function AdminDashboard() {
   const logAudit = async (action: string, targetId: string, details: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await supabase.from("audit_logs").insert([{
-      actor_id: user.id,
-      actor_role: "admin",
-      action,
-      entity_type: "profiles",
-      entity_id: targetId,
-      metadata: { details },
+    await supabase.from("audit_log").insert([{
+      action, actor_id: user.id, actor_role: "admin",
+      actor_name: "مدير النظام", target_id: targetId,
+      details, status: "SUCCESS",
     }]);
   };
 

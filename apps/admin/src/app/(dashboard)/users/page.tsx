@@ -51,7 +51,7 @@ export default function AdminUsers() {
   const logAction = async (action: string, targetId: string, details: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await supabase.from("audit_logs").insert([{
+    await supabase.from("audit_log").insert([{
       action, actor_id: user.id, actor_role: "admin",
       actor_name: "مدير النظام", target_id: targetId,
       details, status: "SUCCESS",
@@ -227,4 +227,3 @@ export default function AdminUsers() {
     </div>
   );
 }
-
