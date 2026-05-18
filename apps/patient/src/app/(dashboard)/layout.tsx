@@ -41,11 +41,10 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
   ];
 
   const mobileNav = [
-    { href: "/dashboard", icon: <Home className="w-5 h-5" />,      label: "الرئيسية" },
-    { href: "/ai-chat",   icon: <Sparkles className="w-5 h-5" />,  label: "المساعد" },
-    { href: "/requests",  icon: <Activity className="w-5 h-5" />,   label: "طلباتي" },
-    { href: "/vitals",    icon: <HeartPulse className="w-5 h-5" />, label: "قياساتي" },
-    { href: "/profile",   icon: <User className="w-5 h-5" />,       label: "ملفي" },
+    { href: "/dashboard", icon: <Home className="w-6 h-6" />,      label: "الرئيسية" },
+    { href: "/ai-chat",   icon: <Sparkles className="w-6 h-6" />,  label: "المساعد" },
+    { href: "/vitals",    icon: <HeartPulse className="w-6 h-6" />, label: "قياساتي" },
+    { href: "/profile",   icon: <User className="w-6 h-6" />,       label: "ملفي" },
   ];
 
   const isActive = (href: string) =>
@@ -107,13 +106,17 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
           {children}
         </div>
 
-        <nav className="bottom-nav">
+        <nav className="premium-bottom-nav">
           {mobileNav.map(item => {
             const active = isActive(item.href);
             return (
-              <Link key={item.href} href={item.href} prefetch={true} className={`bottom-nav-item${active ? " active" : ""}`}>
-                <span className="nav-icon-wrap">{item.icon}</span>
-                <span>{item.label}</span>
+              <Link key={item.href} href={item.href} prefetch={true} className={`nav-item${active ? " active" : ""}`}>
+                <div className="nav-icon" style={{ color: active ? "#16a34a" : "#9ca3af" }}>
+                  {item.icon}
+                </div>
+                <span style={{ fontSize: "0.6rem", fontWeight: 700, color: active ? "#16a34a" : "#9ca3af", marginTop: 2 }}>
+                  {item.label}
+                </span>
               </Link>
             );
           })}
