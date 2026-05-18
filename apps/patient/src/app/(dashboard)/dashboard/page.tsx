@@ -7,10 +7,42 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Search } from "lucide-react";
 
+type MetricType = "blood_sugar" | "blood_pressure" | "weight" | "oximetry" | "heart_rate";
+
+interface Vital {
+  id: string;
+  type: MetricType;
+  value1: number;
+  value2?: number;
+  created_at: string;
+}
+
+const METRICS = [
+  { id: "heart_rate"     as MetricType, img: "/icon_heart_rate.png",     label: "نبضات القلب",   unit: "bpm",   bg: "#fef2f2", color: "#dc2626", hasSecond: false },
+  { id: "blood_pressure" as MetricType, img: "/icon_blood_pressure.png", label: "ضغط الدم",      unit: "mmHg",  bg: "#fff1f2", color: "#e11d48", hasSecond: true  },
+  { id: "blood_sugar"    as MetricType, img: "/icon_blood_sugar.png",    label: "مستوى السكر",   unit: "mg/dL", bg: "#fffbeb", color: "#d97706", hasSecond: false },
+  { id: "weight"         as MetricType, img: "/icon_weight.png",         label: "الوزن",          unit: "kg",    bg: "#eff6ff", color: "#2563eb", hasSecond: false },
+];
+
+function getStatus(type: MetricType, v1: number): "normal" | "high" | "low" {
+  if (type === "blood_sugar")    return v1 < 70 ? "low" : v1 > 126 ? "high" : "normal";
+  if (type === "blood_pressure") return v1 < 90 ? "low" : v1 > 140 ? "high" : "normal";
+  if (type === "heart_rate")     return v1 < 60 ? "low" : v1 > 100 ? "high" : "normal";
+  if (type === "oximetry")       return v1 < 95 ? "low" : "normal";
+  return "normal";
+}
+
+const STATUS_LABEL: Record<string, string> = { normal: "طبيعي", high: "مرتفع", low: "منخفض" };
+const STATUS_BG:    Record<string, string> = { normal: "#dcfce7", high: "#fee2e2", low: "#fef9c3" };
+const STATUS_CLR:   Record<string, string> = { normal: "#15803d", high: "#dc2626", low: "#92400e" };
+
 export default function PatientDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState({ requests: 0, prescriptions: 0, labs: 0 });
   const [loading, setLoading] = useState(true);
+  const [todayVitals, setTodayVitals] = useState<Record<MetricType, Vital | null>>({
+    blood_pressure: null, blood_sugar: null, heart_rate: null, oximetry: null, weight: null,
+  });
 
   useEffect(() => {
     const supabase = createClient();
@@ -18,12 +50,21 @@ export default function PatientDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [{ data: prof }, { data: reqs }, { data: prescriptions }, { data: labs }] =
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const [{ data: prof }, { data: reqs }, { data: prescriptions }, { data: labs }, { data: vitals }] =
         await Promise.all([
           supabase.from("profiles").select("*").eq("id", user.id).single(),
           supabase.from("medical_requests").select("id").eq("patient_id", user.id),
           supabase.from("prescriptions").select("id").eq("patient_id", user.id),
           supabase.from("lab_results").select("id").eq("patient_id", user.id),
+          supabase
+            .from("vitals")
+            .select("*")
+            .eq("patient_id", user.id)
+            .gte("created_at", today.toISOString())
+            .order("created_at", { ascending: false }),
         ]);
 
       setProfile(prof);
@@ -32,6 +73,14 @@ export default function PatientDashboard() {
         prescriptions: (prescriptions || []).length,
         labs:          (labs          || []).length,
       });
+
+      const map: Record<MetricType, Vital | null> = {
+        blood_pressure: null, blood_sugar: null, heart_rate: null, oximetry: null, weight: null,
+      };
+      (vitals || []).forEach((v: Vital) => {
+        if (!map[v.type]) map[v.type] = v;
+      });
+      setTodayVitals(map);
       setLoading(false);
     };
     load();
@@ -177,30 +226,59 @@ export default function PatientDashboard() {
             display: "grid", gridTemplateColumns: "repeat(2, 1fr)",
             gap: "0.75rem", paddingTop: "1rem",
           }}>
-            {[
-              { label: "نبضات القلب", icon: "/icon_heart_rate.png", href: "/vitals" },
-              { label: "ضغط الدم", icon: "/icon_blood_pressure.png", href: "/vitals" },
-              { label: "مستوى السكر", icon: "/icon_blood_sugar.png", href: "/vitals" },
-              { label: "الوزن", icon: "/icon_weight.png", href: "/vitals" },
-            ].map(vital => (
-              <Link key={vital.label} href={vital.href} style={{
-                background: "#fff", borderRadius: "1.25rem",
-                padding: "1.25rem 0.75rem",
-                textDecoration: "none",
-                display: "flex", flexDirection: "column",
-                alignItems: "center", justifyContent: "center",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
-                minHeight: 120, gap: "0.5rem",
-              }}>
-                <Image
-                  src={vital.icon}
-                  alt={vital.label}
-                  width={72} height={72}
-                  style={{ objectFit: "contain" }}
-                />
-                <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b7280" }}>{vital.label}</span>
-              </Link>
-            ))}
+            {METRICS.map(m => {
+              const vital  = todayVitals[m.id];
+              const status = vital ? getStatus(m.id, vital.value1) : null;
+
+              return (
+                <Link
+                  key={m.id}
+                  href="/vitals"
+                  style={{
+                    background: "#fff", borderRadius: "1.25rem",
+                    padding: "1.25rem 0.75rem",
+                    textDecoration: "none",
+                    display: "flex", flexDirection: "column",
+                    alignItems: "center", justifyContent: "center",
+                    boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
+                    minHeight: 120, gap: "0.5rem",
+                    transition: "all 0.2s ease",
+                    textAlign: "center",
+                  }}
+                >
+                  <Image src={m.img} alt={m.label} width={64} height={64} style={{ objectFit: "contain" }} />
+
+                  {vital ? (
+                    <p style={{ margin: 0, fontSize: "1.3rem", fontWeight: 900, color: m.color, lineHeight: 1 }}>
+                      {vital.value1}{vital.value2 != null ? `/${vital.value2}` : ""}
+                      <span style={{ fontSize: "0.6rem", color: "#9ca3af", marginRight: 3, fontWeight: 600 }}>{m.unit}</span>
+                    </p>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: "1.1rem", fontWeight: 900, color: "#e5e7eb" }}>—</p>
+                  )}
+
+                  <p style={{ margin: 0, fontSize: "0.68rem", fontWeight: 700, color: "#6b7280" }}>{m.label}</p>
+
+                  {status && (
+                    <span style={{
+                      fontSize: "0.58rem", fontWeight: 900, padding: "2px 8px", borderRadius: 999,
+                      background: STATUS_BG[status], color: STATUS_CLR[status],
+                    }}>
+                      {STATUS_LABEL[status]}
+                    </span>
+                  )}
+
+                  {!vital && (
+                    <span style={{
+                      fontSize: "0.65rem", fontWeight: 700, color: "#16a34a",
+                      background: "#f0fdf4", borderRadius: 999, padding: "3px 0", width: "100%", textAlign: "center",
+                    }}>
+                      اضغط للتسجيل
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
           </div>
         </div>
 
