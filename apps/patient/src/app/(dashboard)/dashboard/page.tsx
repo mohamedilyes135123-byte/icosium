@@ -171,44 +171,36 @@ export default function PatientDashboard() {
             <span style={{ fontSize: "2rem" }}>🧑‍⚕️</span>
           </div>
 
-          {/* 2-column metric cards */}
+          {/* Vitals Cards Grid */}
           <div style={{
             position: "relative", zIndex: 2,
-            display: "grid", gridTemplateColumns: "1fr 1fr",
+            display: "grid", gridTemplateColumns: "repeat(2, 1fr)",
             gap: "0.75rem", paddingTop: "1rem",
           }}>
-            {/* Heart Rate */}
-            <Link href="/vitals" style={{
-              background: "#fff", borderRadius: "1.25rem",
-              padding: "1.25rem 0.75rem",
-              textDecoration: "none",
-              display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
-              minHeight: 120, gap: "0.5rem",
-            }}>
-              <Image
-                src="/icon_heart_rate.png"
-                alt="نبضات القلب"
-                width={72} height={72}
-                style={{ objectFit: "contain" }}
-              />
-              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b7280" }}>نبضات القلب</span>
-            </Link>
-
-            {/* Mood / Wellbeing */}
-            <Link href="/vitals" style={{
-              background: "#fff", borderRadius: "1.25rem",
-              padding: "1.25rem 0.75rem",
-              textDecoration: "none",
-              display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
-              minHeight: 120, gap: "0.5rem",
-            }}>
-              <span style={{ fontSize: "3.5rem", lineHeight: 1 }}>😊</span>
-              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b7280" }}>الحالة العامة</span>
-            </Link>
+            {[
+              { label: "نبضات القلب", icon: "/icon_heart_rate.png", href: "/vitals" },
+              { label: "ضغط الدم", icon: "/icon_blood_pressure.png", href: "/vitals" },
+              { label: "مستوى السكر", icon: "/icon_blood_sugar.png", href: "/vitals" },
+              { label: "الوزن", icon: "/icon_weight.png", href: "/vitals" },
+            ].map(vital => (
+              <Link key={vital.label} href={vital.href} style={{
+                background: "#fff", borderRadius: "1.25rem",
+                padding: "1.25rem 0.75rem",
+                textDecoration: "none",
+                display: "flex", flexDirection: "column",
+                alignItems: "center", justifyContent: "center",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
+                minHeight: 120, gap: "0.5rem",
+              }}>
+                <Image
+                  src={vital.icon}
+                  alt={vital.label}
+                  width={72} height={72}
+                  style={{ objectFit: "contain" }}
+                />
+                <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b7280" }}>{vital.label}</span>
+              </Link>
+            ))}
           </div>
         </div>
 
