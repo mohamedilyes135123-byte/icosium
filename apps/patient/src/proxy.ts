@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -31,7 +31,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // RBAC Routing Guard Logic
   const path = request.nextUrl.pathname;
 
   // QUICK DEBUG BYPASS
@@ -41,8 +40,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protect Patient Portal
-  const isPublicPath = path === '/login' || path === '/unauthorized' || path.startsWith('/api/') || path === '/';
-  
+  const isPublicPath =
+    path === '/login' ||
+    path === '/unauthorized' ||
+    path === '/' ||
+    path.startsWith('/api/') ||
+    path.startsWith('/_next/');
+
   if (!isPublicPath) {
     if (!user) {
       const url = request.nextUrl.clone()
@@ -52,9 +56,9 @@ export async function middleware(request: NextRequest) {
 
     const role = user.user_metadata?.role;
     if (role !== 'patient') {
-       const url = request.nextUrl.clone()
-       url.pathname = '/unauthorized'
-       return NextResponse.redirect(url)
+      const url = request.nextUrl.clone()
+      url.pathname = '/unauthorized'
+      return NextResponse.redirect(url)
     }
   }
 
