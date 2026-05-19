@@ -161,7 +161,7 @@ export default function PatientDashboard() {
   };
 
   return (
-    <div dir="rtl" style={{ minHeight: "100vh", background: "#f4faf6", paddingBottom: 100 }}>
+    <div dir="rtl" style={{ minHeight: "100vh", paddingBottom: 100 }}>
 
       {/* ═══════════════════════════════
           GREEN WAVE HEADER
@@ -246,13 +246,10 @@ export default function PatientDashboard() {
         </div>
 
         {/* ── Three Service Icons Card ── */}
-        <div style={{
-          background: "#fff",
+        <div className="glass-panel" style={{
           borderRadius: "1.5rem",
           padding: "1.25rem 0.75rem",
           marginBottom: "1.25rem",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
-          border: "1px solid rgba(22,163,74,0.06)",
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gap: "0.5rem",
@@ -304,16 +301,15 @@ export default function PatientDashboard() {
               return (
                 <button
                   key={m.id}
+                  className="glass-panel"
                   onClick={() => { setSelected(isSelected ? null : m.id); setVal1(""); setVal2(""); setNote(""); setMessage(null); }}
                   style={{
-                    background: "#fff", borderRadius: "1.25rem",
+                    borderRadius: "1.25rem",
                     padding: "1.25rem 0.75rem",
                     border: isSelected ? `2px solid ${m.color}` : "2px solid transparent",
                     display: "flex", flexDirection: "column",
                     alignItems: "center", justifyContent: "center",
-                    boxShadow: isSelected ? `0 4px 16px ${m.color}30` : "0 4px 16px rgba(0,0,0,0.05)",
                     minHeight: 120, gap: "0.5rem", cursor: "pointer",
-                    transition: "all 0.2s ease",
                     textAlign: "center",
                   }}
                 >
@@ -371,11 +367,10 @@ export default function PatientDashboard() {
         {selected && (() => {
           const m = METRICS.find(mx => mx.id === selected)!;
           return (
-            <div style={{
-              background: "#fff", borderRadius: "1.5rem",
+            <div className="glass-panel" style={{
+              borderRadius: "1.5rem",
               padding: "1.5rem", marginBottom: "1.25rem",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-              border: `2px solid ${m.color}20`,
+              border: `2px solid ${m.color}30`,
             }}>
               <h3 style={{ fontWeight: 900, color: m.color, fontSize: "1rem", marginBottom: "0.25rem", textAlign: "center" }}>
                 تسجيل قياس {m.label}
@@ -465,14 +460,12 @@ export default function PatientDashboard() {
         })()}
 
         {/* ── Green CTA Button ── */}
-        <Link href="/requests" style={{
+        <Link href="/requests" className="btn-gradient" style={{
           display: "flex", alignItems: "center", justifyContent: "center",
-          background: "linear-gradient(135deg, #22c55e, #16a34a)",
           borderRadius: "999px",
           padding: "1.1rem",
           textDecoration: "none",
           marginBottom: "0.875rem",
-          boxShadow: "0 6px 20px rgba(22,163,74,0.3)",
         }}>
           <span style={{ color: "#fff", fontSize: "1rem", fontWeight: 900 }}>
             🚀 دخول البوابة الطبية
@@ -480,10 +473,8 @@ export default function PatientDashboard() {
         </Link>
 
         {/* ── Search / Secondary Button ── */}
-        <div style={{
+        <div className="glass-panel" style={{
           display: "flex", alignItems: "center", gap: "0.75rem",
-          background: "#fff",
-          border: "2px solid #e5e7eb",
           borderRadius: "999px",
           padding: "0.9rem 1.25rem",
           cursor: "pointer",

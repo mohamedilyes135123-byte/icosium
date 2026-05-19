@@ -435,3 +435,47 @@ body {
 .animate-pulse-slow {
   animation: pulse-slow 3s infinite ease-in-out;
 }
+
+/* ── UI Overhaul Utilities ── */
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-white shadow-xl shadow-emerald-500/5 transition-all duration-300;
+  }
+  
+  .glass-panel:hover {
+    @apply shadow-2xl shadow-emerald-500/10 -translate-y-1;
+  }
+
+  .glass-header {
+    @apply bg-white/80 backdrop-blur-2xl border-b border-emerald-100 shadow-sm;
+  }
+
+  .btn-gradient {
+    @apply bg-gradient-to-l from-emerald-500 to-teal-400 text-white font-bold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300;
+  }
+
+  .text-gradient {
+    @apply text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-teal-500;
+  }
+  
+  .bg-daylight {
+    @apply absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none opacity-60;
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}

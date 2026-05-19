@@ -61,11 +61,17 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--bg-page)", direction: "rtl" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--bg-page)", direction: "rtl", position: "relative" }}>
+      
+      {/* Daylight Ambient Background */}
+      <div className="bg-daylight">
+         <div className="absolute top-[-10%] -left-[10%] w-[800px] h-[800px] bg-emerald-100 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft"></div>
+         <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-teal-100 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '1.5s' }}></div>
+      </div>
 
       {/* Desktop Sidebar */}
       <div className="hidden md:flex">
-        <aside style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: 288, background: "#fff", borderLeft: "1px solid #d1fae5", display: "flex", flexDirection: "column", zIndex: 40, boxShadow: "0 0 20px rgba(0,0,0,0.05)" }}>
+        <aside className="glass-panel" style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: 288, borderLeft: "1px solid #d1fae5", display: "flex", flexDirection: "column", zIndex: 40 }}>
           <div style={{ padding: "24px", display: "flex", alignItems: "center", gap: 12, borderBottom: "1px solid #f0fdf4" }}>
             <div style={{ width: 40, height: 40, borderRadius: 14, background: "linear-gradient(135deg,#2eb567,#1e8a4c)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <HeartPulse className="w-5 h-5 text-white" />
@@ -107,7 +113,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
           {children}
         </div>
 
-        <nav className="premium-bottom-nav">
+        <nav className="premium-bottom-nav glass-panel border-t border-emerald-100">
           {mobileNav.map(item => {
             const active = isActive(item.href);
             return (

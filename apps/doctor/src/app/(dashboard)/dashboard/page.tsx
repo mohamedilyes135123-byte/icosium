@@ -17,7 +17,7 @@ export default function DoctorDashboardMobile() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="flex justify-between items-center mb-8 bg-white/40 backdrop-blur-lg p-3 rounded-2xl border border-white/60 shadow-sm"
+        className="flex justify-between items-center mb-8 glass-panel p-3 rounded-2xl"
       >
         <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-[18px] bg-gradient-to-tr from-blue-500 to-cyan-400 p-[2px] shadow-sm">
@@ -87,7 +87,7 @@ export default function DoctorDashboardMobile() {
         transition={{ delay: 0.4 }}
         className="mb-8"
       >
-         <div className="w-full bg-white/70 backdrop-blur-xl border border-white shadow-lg shadow-blue-500/5 rounded-3xl p-5 flex items-center justify-between group cursor-pointer hover:bg-white transition-colors">
+         <div className="w-full glass-panel rounded-3xl p-5 flex items-center justify-between group cursor-pointer transition-colors">
             <div className="flex items-center gap-4">
                <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 border border-blue-100/50 group-hover:scale-105 transition-transform">
                   <ScanBarcode className="w-6 h-6" />
@@ -105,7 +105,7 @@ export default function DoctorDashboardMobile() {
 
 function QuickStat({ title, icon, value, color, notification }: any) {
   return (
-    <Card className="border border-white/50 bg-white/60 backdrop-blur-xl shadow-lg shadow-slate-200/40 relative overflow-hidden rounded-3xl">
+    <Card className="glass-panel relative overflow-hidden rounded-3xl border-0">
       {notification && <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white z-20 animate-pulse"></span>}
       <CardContent className="p-5 flex flex-col gap-3 relative z-10">
         <div className={`w-10 h-10 rounded-2xl bg-gradient-to-tr ${color} text-white flex items-center justify-center shadow-sm`}>

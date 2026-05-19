@@ -124,7 +124,7 @@ export default function LabDashboard() {
         )}
 
         {!loading && recentRequests.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 bg-white/60 backdrop-blur-xl border border-white rounded-3xl">
+          <div className="glass-panel flex flex-col items-center justify-center py-16 rounded-3xl">
             <FlaskConical className="w-14 h-14 text-cyan-100 mb-3" />
             <p className="text-slate-500 font-bold">لم تصل أي طلبات بعد</p>
             <p className="text-slate-400 text-sm mt-1">ستظهر هنا طلبات المرضى عند إرسالها لمختبركم</p>
@@ -135,7 +135,7 @@ export default function LabDashboard() {
           {recentRequests.map((req, i) => (
             <motion.div key={req.id}
               initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0, transition: { delay: i * 0.05 } }}
-              className="bg-white/80 backdrop-blur-xl border border-white rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+              className="glass-panel rounded-2xl p-5 flex items-center gap-4">
               {/* Status dot */}
               <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
                 req.status === "COMPLETED" ? "bg-emerald-500" :
@@ -165,7 +165,7 @@ export default function LabDashboard() {
         <h2 className="font-black text-slate-800 text-lg mb-4">إجراءات سريعة</h2>
         <div className="grid grid-cols-2 gap-4">
           <Link href="/requests"
-            className="flex items-center gap-3 p-5 bg-white/80 backdrop-blur-xl border border-white rounded-2xl shadow-sm hover:shadow-md hover:border-cyan-200 transition-all">
+            className="glass-panel flex items-center gap-3 p-5 rounded-2xl">
             <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600">
               <TestTube2 className="w-5 h-5" />
             </div>
@@ -175,7 +175,7 @@ export default function LabDashboard() {
             </div>
           </Link>
           <Link href="/results"
-            className="flex items-center gap-3 p-5 bg-white/80 backdrop-blur-xl border border-white rounded-2xl shadow-sm hover:shadow-md hover:border-emerald-200 transition-all">
+            className="glass-panel flex items-center gap-3 p-5 rounded-2xl">
             <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
               <UploadCloud className="w-5 h-5" />
             </div>

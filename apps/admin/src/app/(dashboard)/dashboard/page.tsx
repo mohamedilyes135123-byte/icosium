@@ -214,7 +214,7 @@ export default function AdminDashboard() {
         {activeTab === "pending" && (
           <motion.div key="pending" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             {!loading && pendingProfiles.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-20 bg-white/60 border border-white rounded-3xl">
+              <div className="glass-panel flex flex-col items-center justify-center py-20 rounded-3xl">
                 <CheckCircle className="w-16 h-16 text-emerald-200 mb-4" />
                 <p className="font-bold text-slate-500">لا توجد طلبات بانتظار الاعتماد</p>
               </div>
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
               {pendingProfiles.map((p, i) => (
                 <motion.div key={p.id}
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }}
-                  className="bg-white/90 backdrop-blur-xl border border-white rounded-3xl p-6 shadow-xl shadow-indigo-500/5">
+                  className="glass-panel rounded-3xl p-6">
 
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
@@ -284,7 +284,7 @@ export default function AdminDashboard() {
               ))}
             </div>
 
-            <div className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl overflow-hidden shadow-xl">
+            <div className="glass-panel rounded-3xl overflow-hidden shadow-xl">
               {/* Table header */}
               <div className="grid grid-cols-12 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-black text-slate-500 gap-3">
                 <div className="col-span-4">المستخدم</div>

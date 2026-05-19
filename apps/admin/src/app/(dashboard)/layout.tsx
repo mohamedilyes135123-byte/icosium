@@ -33,14 +33,14 @@ export default function AdminLayout({
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-indigo-500/20 relative">
       
-      {/* Slate/Indigo Ambient Background */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none opacity-60">
-         <div className="absolute top-[-10%] -left-[10%] w-[800px] h-[800px] bg-indigo-100 rounded-full mix-blend-multiply filter blur-[150px] opacity-40"></div>
-         <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-slate-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-30"></div>
+      {/* Daylight Ambient Background */}
+      <div className="bg-daylight">
+         <div className="absolute top-[-10%] -left-[10%] w-[800px] h-[800px] bg-indigo-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft"></div>
+         <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
       {/* Glass Sidebar */}
-      <aside className="w-72 border-r rtl:border-l rtl:border-r-0 border-slate-200/50 flex flex-col z-20 h-screen bg-white/40 backdrop-blur-3xl shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+      <aside className="w-72 border-r rtl:border-l rtl:border-r-0 border-slate-200/50 flex flex-col z-20 h-screen glass-panel">
         <div className="p-6 flex items-center gap-3 text-slate-800 font-bold text-xl border-b border-slate-100 bg-white/50">
           <img src="/logo.png" alt="عناية" className="w-10 h-10 object-contain" />
           <span className="tracking-wide">Administration</span>

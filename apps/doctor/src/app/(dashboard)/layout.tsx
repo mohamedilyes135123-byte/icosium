@@ -23,14 +23,14 @@ export default function DoctorLayout({
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-blue-500/20 relative">
       
-      {/* Professional Blue Ambient Background */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none opacity-60">
-         <div className="absolute top-[-10%] -left-[10%] w-[800px] h-[800px] bg-blue-100 rounded-full mix-blend-multiply filter blur-[150px] opacity-40"></div>
-         <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-cyan-100 rounded-full mix-blend-multiply filter blur-[150px] opacity-30"></div>
+      {/* Daylight Ambient Background */}
+      <div className="bg-daylight">
+         <div className="absolute top-[-10%] -left-[10%] w-[800px] h-[800px] bg-blue-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft"></div>
+         <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
       {/* Bright Glass Sidebar (Desktop) */}
-      <aside className="hidden md:flex w-72 border-r rtl:border-l rtl:border-r-0 border-blue-100 flex-col z-20 h-screen bg-white/40 backdrop-blur-3xl shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+      <aside className="hidden md:flex w-72 border-r rtl:border-l rtl:border-r-0 border-blue-100 flex-col z-20 h-screen glass-panel">
         <div className="p-6 flex items-center gap-3 text-slate-800 font-bold text-xl border-b border-blue-100 bg-white/50">
           <img src="/logo.png" alt="عناية" className="w-10 h-10 object-contain" />
           <span className="tracking-wide">منصة الطبيب</span>
@@ -79,7 +79,7 @@ export default function DoctorLayout({
           </AnimatePresence>
       </main>
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-blue-100 z-50 flex justify-around items-center px-2 py-3" style={{ paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
+      <nav className="md:hidden fixed bottom-0 left-0 w-full glass-panel border-t border-blue-100 z-50 flex justify-around items-center px-2 py-3" style={{ paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
         <MobileNavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5"/>} label="الرئيسية" current={pathname} />
         <MobileNavItem href="/requests" icon={<Calendar className="w-5 h-5"/>} label="الطلبات" current={pathname} />
         <Link href="/prescriptions/new" className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full text-white shadow-lg shadow-blue-500/30 -mt-8 border-4 border-slate-50">
