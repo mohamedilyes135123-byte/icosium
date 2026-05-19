@@ -18,9 +18,9 @@ interface Vital {
 const METRICS = [
   { id: "blood_pressure" as MetricType, img: "/icon_blood_pressure.png", label: "ضغط الدم",      unit: "mmHg",  bg: "#fff1f2", color: "#e11d48", hasSecond: true  },
   { id: "blood_sugar"    as MetricType, img: "/icon_blood_sugar.png",    label: "سكر الدم",      unit: "mg/dL", bg: "#fffbeb", color: "#d97706", hasSecond: false },
-  { id: "heart_rate"     as MetricType, img: "/icon_heart_rate.png",     label: "نبضات القلب",   unit: "bpm",   bg: "#fef2f2", color: "#dc2626", hasSecond: false },
+  { id: "heart_rate"     as MetricType, img: "/icon_weight.png",         label: "نبضات القلب",   unit: "bpm",   bg: "#fef2f2", color: "#dc2626", hasSecond: false },
   { id: "oximetry"       as MetricType, img: "/icon_oximetry.png",       label: "تشبع الأكسجين", unit: "%",     bg: "#ecfeff", color: "#0891b2", hasSecond: false },
-  { id: "weight"         as MetricType, img: "/icon_weight.png",         label: "الوزن",          unit: "kg",    bg: "#eff6ff", color: "#2563eb", hasSecond: false },
+  { id: "weight"         as MetricType, img: "/icon_heart_rate.png",     label: "الوزن",          unit: "kg",    bg: "#eff6ff", color: "#2563eb", hasSecond: false },
 ];
 
 function getStatus(type: MetricType, v1: number): "normal" | "high" | "low" {

@@ -18,10 +18,10 @@ interface Vital {
 }
 
 const METRICS = [
-  { id: "heart_rate"     as MetricType, img: "/icon_heart_rate.png",     label: "نبضات القلب",   unit: "bpm",   bg: "#fef2f2", color: "#dc2626", hasSecond: false },
+  { id: "heart_rate"     as MetricType, img: "/icon_weight.png",         label: "نبضات القلب",   unit: "bpm",   bg: "#fef2f2", color: "#dc2626", hasSecond: false },
   { id: "blood_pressure" as MetricType, img: "/icon_blood_pressure.png", label: "ضغط الدم",      unit: "mmHg",  bg: "#fff1f2", color: "#e11d48", hasSecond: true  },
   { id: "blood_sugar"    as MetricType, img: "/icon_blood_sugar.png",    label: "مستوى السكر",   unit: "mg/dL", bg: "#fffbeb", color: "#d97706", hasSecond: false },
-  { id: "weight"         as MetricType, img: "/icon_weight.png",         label: "الوزن",          unit: "kg",    bg: "#eff6ff", color: "#2563eb", hasSecond: false },
+  { id: "weight"         as MetricType, img: "/icon_heart_rate.png",     label: "الوزن",          unit: "kg",    bg: "#eff6ff", color: "#2563eb", hasSecond: false },
 ];
 
 function getStatus(type: MetricType, v1: number): "normal" | "high" | "low" {
@@ -36,6 +36,25 @@ const STATUS_LABEL: Record<string, string> = { normal: "طبيعي", high: "مر
 const STATUS_BG:    Record<string, string> = { normal: "#dcfce7", high: "#fee2e2", low: "#fef9c3" };
 const STATUS_CLR:   Record<string, string> = { normal: "#15803d", high: "#dc2626", low: "#92400e" };
 
+function getFeedbackMessage(type: MetricType, v1: number): string {
+  const status = getStatus(type, v1);
+  if (type === "weight") return "تم تسجيل الوزن بنجاح، حافظ على نشاطك البدني.";
+  
+  if (status === "normal") return "النتيجة طبيعية وممتازة! استمر في الحفاظ على صحتك.";
+  if (status === "high") return "النتيجة أعلى من المعدل الطبيعي. يُنصح بمراقبتها واستشارة الطبيب إذا استمرت.";
+  if (status === "low") return "النتيجة أقل من المعدل الطبيعي. يرجى الانتباه واستشارة طبيبك.";
+  return "تم التسجيل بنجاح.";
+}
+
+function getReferenceText(type: MetricType): string {
+  if (type === "blood_pressure") return "المعدل الطبيعي: حوالي 120/80";
+  if (type === "blood_sugar") return "المعدل الطبيعي: 70 - 126 mg/dL";
+  if (type === "heart_rate") return "المعدل الطبيعي: 60 - 100 نبضة/دقيقة";
+  if (type === "oximetry") return "المعدل الطبيعي: 95% فأكثر";
+  if (type === "weight") return "سجل وزنك بانتظام لمتابعة كتلة الجسم";
+  return "";
+}
+
 export default function PatientDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState({ requests: 0, prescriptions: 0, labs: 0 });
@@ -43,6 +62,12 @@ export default function PatientDashboard() {
   const [todayVitals, setTodayVitals] = useState<Record<MetricType, Vital | null>>({
     blood_pressure: null, blood_sugar: null, heart_rate: null, oximetry: null, weight: null,
   });
+  const [selected, setSelected] = useState<MetricType | null>(null);
+  const [val1, setVal1] = useState("");
+  const [val2, setVal2] = useState("");
+  const [note, setNote] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -63,7 +88,6 @@ export default function PatientDashboard() {
             .from("vitals")
             .select("*")
             .eq("patient_id", user.id)
-            .gte("created_at", today.toISOString())
             .order("created_at", { ascending: false }),
         ]);
 
@@ -89,6 +113,52 @@ export default function PatientDashboard() {
   const firstName = loading
     ? "..."
     : profile?.full_name?.split(" ")[0] || "مريض";
+
+  const save = async () => {
+    if (!selected || !val1) return;
+    setSaving(true);
+    setMessage(null);
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSaving(false); return; }
+
+    const metric = METRICS.find(m => m.id === selected)!;
+    const payload: Record<string, unknown> = {
+      patient_id: user.id,
+      type: selected,
+      value1: parseFloat(val1),
+    };
+    if (metric.hasSecond && val2) payload.value2 = parseFloat(val2);
+    if (note) payload.notes = note;
+
+    const { error } = await supabase.from("vitals").insert(payload);
+    if (error) {
+      setMessage({ text: "حدث خطأ أثناء الحفظ", ok: false });
+    } else {
+      const feedback = getFeedbackMessage(selected, parseFloat(val1));
+      setMessage({ text: `تم التسجيل بنجاح! ${feedback}`, ok: true });
+      setVal1("");
+      setVal2("");
+      setNote("");
+      setSelected(null);
+      
+      const { data: vitals } = await supabase
+        .from("vitals")
+        .select("*")
+        .eq("patient_id", user.id)
+        .order("created_at", { ascending: false });
+      
+      const map: Record<MetricType, Vital | null> = {
+        blood_pressure: null, blood_sugar: null, heart_rate: null, oximetry: null, weight: null,
+      };
+      (vitals || []).forEach((v: Vital) => {
+        if (!map[v.type]) map[v.type] = v;
+      });
+      setTodayVitals(map);
+    }
+    setSaving(false);
+  };
 
   return (
     <div dir="rtl" style={{ minHeight: "100vh", background: "#f4faf6", paddingBottom: 100 }}>
@@ -229,24 +299,25 @@ export default function PatientDashboard() {
             {METRICS.map(m => {
               const vital  = todayVitals[m.id];
               const status = vital ? getStatus(m.id, vital.value1) : null;
+              const isSelected = selected === m.id;
 
               return (
-                <Link
+                <button
                   key={m.id}
-                  href="/vitals"
+                  onClick={() => { setSelected(isSelected ? null : m.id); setVal1(""); setVal2(""); setNote(""); setMessage(null); }}
                   style={{
                     background: "#fff", borderRadius: "1.25rem",
                     padding: "1.25rem 0.75rem",
-                    textDecoration: "none",
+                    border: isSelected ? `2px solid ${m.color}` : "2px solid transparent",
                     display: "flex", flexDirection: "column",
                     alignItems: "center", justifyContent: "center",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
-                    minHeight: 120, gap: "0.5rem",
+                    boxShadow: isSelected ? `0 4px 16px ${m.color}30` : "0 4px 16px rgba(0,0,0,0.05)",
+                    minHeight: 120, gap: "0.5rem", cursor: "pointer",
                     transition: "all 0.2s ease",
                     textAlign: "center",
                   }}
                 >
-                  <Image src={m.img} alt={m.label} width={64} height={64} style={{ objectFit: "contain" }} />
+                  <Image src={m.img} alt={m.label} width={90} height={90} style={{ objectFit: "contain", marginBottom: "0.5rem" }} />
 
                   {vital ? (
                     <p style={{ margin: 0, fontSize: "1.3rem", fontWeight: 900, color: m.color, lineHeight: 1 }}>
@@ -276,11 +347,122 @@ export default function PatientDashboard() {
                       اضغط للتسجيل
                     </span>
                   )}
-                </Link>
+                </button>
               );
             })}
           </div>
         </div>
+
+        {/* Success/error message */}
+        {message && (
+          <div style={{
+            background: message.ok ? "#dcfce7" : "#fee2e2",
+            border: `1.5px solid ${message.ok ? "#86efac" : "#fca5a5"}`,
+            color: message.ok ? "#15803d" : "#dc2626",
+            borderRadius: "1rem", padding: "0.75rem 1rem",
+            fontSize: "0.85rem", fontWeight: 700,
+            marginBottom: "1rem", textAlign: "center",
+          }}>
+            {message.ok ? "✅" : "❌"} {message.text}
+          </div>
+        )}
+
+        {/* Input form when a metric is selected */}
+        {selected && (() => {
+          const m = METRICS.find(mx => mx.id === selected)!;
+          return (
+            <div style={{
+              background: "#fff", borderRadius: "1.5rem",
+              padding: "1.5rem", marginBottom: "1.25rem",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+              border: `2px solid ${m.color}20`,
+            }}>
+              <h3 style={{ fontWeight: 900, color: m.color, fontSize: "1rem", marginBottom: "0.25rem", textAlign: "center" }}>
+                تسجيل قياس {m.label}
+              </h3>
+              <p style={{ textAlign: "center", fontSize: "0.75rem", color: "#6b7280", fontWeight: 600, marginBottom: "1rem" }}>
+                {getReferenceText(m.id)}
+              </p>
+
+              <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder={m.hasSecond ? "الانقباضي (مثال: 120)" : `القيمة (${m.unit})`}
+                  value={val1}
+                  onChange={e => setVal1(e.target.value)}
+                  style={{
+                    flex: "1 1 120px", height: 52, borderRadius: "0.875rem",
+                    border: "2px solid #e5e7eb", padding: "0 1rem",
+                    fontSize: "1.2rem", fontWeight: 800, textAlign: "center",
+                    outline: "none", direction: "ltr",
+                  }}
+                />
+                {m.hasSecond && (
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    placeholder="الانبساطي (مثال: 80)"
+                    value={val2}
+                    onChange={e => setVal2(e.target.value)}
+                    style={{
+                      flex: "1 1 120px", height: 52, borderRadius: "0.875rem",
+                      border: "2px solid #e5e7eb", padding: "0 1rem",
+                      fontSize: "1.2rem", fontWeight: 800, textAlign: "center",
+                      outline: "none", direction: "ltr",
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* Quick Notes / Context */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1rem", justifyContent: "center" }}>
+                {["صائم", "بعد الأكل", "بعد مجهود رياضي", "وقت الراحة"].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => setNote(n === note ? "" : n)}
+                    style={{
+                      padding: "0.4rem 0.8rem", borderRadius: "999px",
+                      fontSize: "0.75rem", fontWeight: 700,
+                      background: note === n ? m.color : "#f3f4f6",
+                      color: note === n ? "#fff" : "#4b5563",
+                      border: "none", cursor: "pointer", transition: "all 0.2s"
+                    }}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                <button
+                  onClick={save}
+                  disabled={saving || !val1}
+                  style={{
+                    flex: "1 1 150px", height: 52, borderRadius: "0.875rem",
+                    background: saving || !val1 ? "#d1d5db" : `linear-gradient(135deg, #22c55e, #16a34a)`,
+                    color: "#fff", fontSize: "0.95rem", fontWeight: 900,
+                    border: "none", cursor: saving || !val1 ? "not-allowed" : "pointer",
+                    boxShadow: val1 ? "0 4px 14px rgba(22,163,74,0.3)" : "none",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {saving ? "جاري الحفظ..." : "✅ تسجيل"}
+                </button>
+                <button
+                  onClick={() => { setSelected(null); setVal1(""); setVal2(""); setNote(""); }}
+                  style={{
+                    flex: "1 1 100px", height: 52, padding: "0 1.25rem", borderRadius: "0.875rem",
+                    border: "2px solid #e5e7eb", background: "#fff",
+                    color: "#6b7280", fontWeight: 700, cursor: "pointer",
+                  }}
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── Green CTA Button ── */}
         <Link href="/requests" style={{

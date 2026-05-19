@@ -47,11 +47,11 @@ export default function PatientResults() {
           file_url,
           result_notes,
           uploaded_at,
-          lab:lab_id(full_name, address),
-          lab_request:lab_request_id(
+          lab:profiles!lab_results_lab_id_fkey(full_name, address),
+          lab_request:lab_requests!lab_results_lab_request_id_fkey(
             tests_list,
             doctor_notes,
-            doctor:doctor_id(full_name)
+            doctor:profiles!lab_requests_doctor_id_fkey(full_name)
           )
         `)
         .eq("patient_id", currentUser.id)
@@ -63,12 +63,12 @@ export default function PatientResults() {
           id,
           status,
           created_at,
-          pharmacy:pharmacy_id(full_name, address, phone),
-          prescription:prescription_id(
+          pharmacy:profiles!pharmacy_orders_pharmacy_id_fkey(full_name, address, phone),
+          prescription:prescriptions!pharmacy_orders_prescription_id_fkey(
             medications,
             doctor_notes,
             qr_token,
-            doctor:doctor_id(full_name)
+            doctor:profiles!prescriptions_doctor_id_fkey(full_name)
           )
         `)
         .eq("patient_id", currentUser.id)
@@ -143,24 +143,29 @@ export default function PatientResults() {
               <p style={{ fontWeight: 700, color: "#6b7280" }}>لا توجد نتائج تحاليل بعد</p>
               <p style={{ fontSize: 13, color: "#9ca3af" }}>عندما يرفع المختبر نتائجك ستظهر هنا</p>
             </div>
-          ) : labResults.map(result => (
+          ) : labResults.map((result: any) => {
+            const lab = Array.isArray(result.lab) ? result.lab[0] : result.lab;
+            const labReq = Array.isArray(result.lab_request) ? result.lab_request[0] : result.lab_request;
+            const tests = labReq?.tests_list || [];
+            
+            return (
             <div key={result.id} style={{ background: "#fff", borderRadius: 24, border: "1px solid #e8f5ec", padding: 16, marginBottom: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", borderRight: "4px solid #4ade80" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
                 <span style={{ fontWeight: 900, fontSize: 14, color: "#374151" }}>✅ نتائج التحليل</span>
-                <span style={{ fontSize: 11, color: "#9ca3af" }}>{new Date(result.uploaded_at).toLocaleDateString("ar-DZ")}</span>
+                <span style={{ fontSize: 11, color: "#9ca3af" }}>{result.uploaded_at ? new Date(result.uploaded_at).toLocaleDateString("ar-DZ") : ""}</span>
               </div>
 
-              {result.lab && (
+              {lab && (
                 <div style={{ fontSize: 13, fontWeight: 700, color: "#0e7490", marginBottom: 8 }}>
-                  ⚗️ {result.lab.full_name} {result.lab.address && `— ${result.lab.address}`}
+                  ⚗️ {lab.full_name} {lab.address && `— ${lab.address}`}
                 </div>
               )}
 
-              {result.lab_request?.tests_list && (
+              {tests && Array.isArray(tests) && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-                  {(Array.isArray(result.lab_request.tests_list) ? result.lab_request.tests_list : []).map((t: any, i: number) => (
+                  {tests.map((t: any, i: number) => (
                     <span key={i} style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 8, background: "#cffafe", color: "#0e7490" }}>
-                      🧪 {t.name}
+                      🧪 {typeof t === 'string' ? t : t?.name || ""}
                     </span>
                   ))}
                 </div>
@@ -169,18 +174,18 @@ export default function PatientResults() {
               {result.result_notes && (
                 <div style={{ background: "#f0fdf4", borderRadius: 12, padding: "10px 14px", marginBottom: 10, border: "1px solid #bbf7d0" }}>
                   <p style={{ fontSize: 11, fontWeight: 900, color: "#6b7280", marginBottom: 4 }}>ملخص النتائج:</p>
-                  <p style={{ fontSize: 13, color: "#374151", fontWeight: 600, margin: 0, lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{result.result_notes}</p>
+                  <p style={{ fontSize: 13, color: "#374151", fontWeight: 600, margin: 0, lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{String(result.result_notes)}</p>
                 </div>
               )}
 
-              {result.file_url && (
+              {result.file_url && typeof result.file_url === 'string' && (
                 <a href={ensureAbsoluteUrl(result.file_url)} target="_blank" rel="noopener noreferrer"
                   style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 999, background: "linear-gradient(135deg,#2eb567,#1e8a4c)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
                   📥 تحميل ملف النتائج
                 </a>
               )}
             </div>
-          ))
+          )})
         )}
 
         {/* Pharmacy Orders */}
@@ -194,9 +199,12 @@ export default function PatientResults() {
                 اطلب استشارة طبية
               </a>
             </div>
-          ) : pharmacyOrders.map(order => {
-            const rx = order.prescription;
+          ) : pharmacyOrders.map((order: any) => {
+            const rx = Array.isArray(order.prescription) ? order.prescription[0] : order.prescription;
+            const pharmacy = Array.isArray(order.pharmacy) ? order.pharmacy[0] : order.pharmacy;
+            const doctor = rx ? (Array.isArray(rx.doctor) ? rx.doctor[0] : rx.doctor) : null;
             const cfg = ORDER_STATUS[order.status] || ORDER_STATUS.PENDING;
+
             return (
               <div key={order.id} style={{ background: "#fff", borderRadius: 24, border: "1px solid #e8f5ec", padding: 16, marginBottom: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", borderRight: `4px solid ${cfg.dot}` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
@@ -206,16 +214,16 @@ export default function PatientResults() {
                   </span>
                 </div>
 
-                {order.pharmacy && (
+                {pharmacy && (
                   <div style={{ marginBottom: 8 }}>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: "#7c3aed", margin: 0 }}>💊 {order.pharmacy.full_name}</p>
-                    {order.pharmacy.address && <p style={{ fontSize: 12, color: "#9ca3af", margin: "2px 0 0" }}>📍 {order.pharmacy.address}</p>}
-                    {order.pharmacy.phone && <p style={{ fontSize: 12, color: "#9ca3af", margin: "2px 0 0" }}>📞 {order.pharmacy.phone}</p>}
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "#7c3aed", margin: 0 }}>💊 {pharmacy.full_name}</p>
+                    {pharmacy.address && <p style={{ fontSize: 12, color: "#9ca3af", margin: "2px 0 0" }}>📍 {pharmacy.address}</p>}
+                    {pharmacy.phone && <p style={{ fontSize: 12, color: "#9ca3af", margin: "2px 0 0" }}>📞 {pharmacy.phone}</p>}
                   </div>
                 )}
 
-                {rx?.doctor && (
-                  <p style={{ fontSize: 12, color: "#6b7280", marginBottom: 8 }}>⚕️ وصفة الطبيب: {rx.doctor.full_name}</p>
+                {doctor && (
+                  <p style={{ fontSize: 12, color: "#6b7280", marginBottom: 8 }}>⚕️ وصفة الطبيب: {doctor.full_name}</p>
                 )}
 
                 {rx?.medications && Array.isArray(rx.medications) && rx.medications.length > 0 && (
@@ -224,8 +232,8 @@ export default function PatientResults() {
                     {rx.medications.map((med: any, i: number) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                         <span style={{ fontSize: 14 }}>💊</span>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: "#374151" }}>{med.name}</span>
-                        <span style={{ fontSize: 12, color: "#9ca3af" }}>{med.dose} — {med.frequency}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#374151" }}>{med?.name || "دواء"}</span>
+                        <span style={{ fontSize: 12, color: "#9ca3af" }}>{med?.dose} — {med?.frequency}</span>
                       </div>
                     ))}
                   </div>
@@ -239,7 +247,7 @@ export default function PatientResults() {
                 )}
 
                 <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 8 }}>
-                  📦 الدفع عند الاستلام · {new Date(order.created_at).toLocaleDateString("ar-DZ")}
+                  📦 الدفع عند الاستلام · {order.created_at ? new Date(order.created_at).toLocaleDateString("ar-DZ") : ""}
                 </p>
               </div>
             );
