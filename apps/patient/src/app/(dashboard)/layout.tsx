@@ -43,6 +43,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
   const mobileNav = [
     { href: "/dashboard", icon: <Home className="w-6 h-6" />,      label: "الرئيسية" },
     { href: "/ai-chat",   icon: <Sparkles className="w-6 h-6" />,  label: "المساعد" },
+    { href: "/results",   icon: <ClipboardList className="w-6 h-6" />, label: "نتائجي" },
     { href: "/vitals",    icon: <HeartPulse className="w-6 h-6" />, label: "قياساتي" },
     { href: "/profile",   icon: <User className="w-6 h-6" />,       label: "ملفي" },
   ];

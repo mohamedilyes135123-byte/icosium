@@ -25,6 +25,7 @@ export default function LabRequests() {
   const [labRequests, setLabRequests] = useState<any[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   // Result upload panel
   const [uploadPanel, setUploadPanel] = useState<{ open: boolean; requestId: string; patientId: string } | null>(null);
@@ -70,6 +71,19 @@ export default function LabRequests() {
     // Lab can ONLY update status — cannot modify tests_list
     await supabase.from("lab_requests").update({ status }).eq("id", id);
     setProcessing(null);
+  };
+
+  // ── Delete lab request ────────────────────────────────────────
+  const handleDeleteRequest = async (id: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+    setIsDeleting(id);
+    const { error } = await supabase.from("lab_requests").delete().eq("id", id);
+    if (!error) {
+      setLabRequests(prev => prev.filter(req => req.id !== id));
+    } else {
+      alert("حدث خطأ أثناء الحذف: " + error.message);
+    }
+    setIsDeleting(null);
   };
 
   // ── Upload lab results ────────────────────────────────────────
@@ -247,10 +261,17 @@ export default function LabRequests() {
                     )}
 
                     {req.status === "COMPLETED" && (
-                      <div className="flex items-center justify-center gap-2 py-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-700 font-bold text-sm">
+                      <div className="flex items-center justify-center gap-2 py-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-700 font-bold text-sm mb-2">
                         <CheckCircle2 className="w-4 h-4" /> النتائج أُرسلت للمريض
                       </div>
                     )}
+
+                    <Button onClick={(e) => { e.stopPropagation(); handleDeleteRequest(req.id); }}
+                      variant="outline"
+                      disabled={isDeleting === req.id}
+                      className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 h-11 rounded-2xl font-bold flex items-center justify-center shadow-sm">
+                      {isDeleting === req.id ? "جاري الحذف..." : "حذف الطلب"}
+                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>
