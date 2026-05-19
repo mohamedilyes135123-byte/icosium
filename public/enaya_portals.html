@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابات إيكوسيوم وعناية الطبية | دليل تجريب المنصات</title>
+    <!-- خطوط جوجل العصرية والمتميزة -->
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;600;800;900&family=Cairo:wght@400;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #0d9488; /* Teal 600 */
+            --primary-glow: rgba(13, 148, 136, 0.3);
+            --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 50%, #f5f3ff 100%);
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border-glass: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f8fafc;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* الخلفية المتدرجة والكرات الضوئية العائمة */
+        .bg-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: var(--bg-gradient);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.45;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+
+        .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: #06b6d4; /* Cyan */
+            top: -150px;
+            right: -100px;
+            animation-duration: 25s;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: #6366f1; /* Indigo */
+            bottom: -150px;
+            left: -100px;
+            animation-duration: 22s;
+            animation-delay: -5s;
+        }
+
+        .orb-3 {
+            width: 400px;
+            height: 400px;
+            background: #14b8a6; /* Teal */
+            top: 35%;
+            left: 35%;
+            animation-duration: 30s;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(60px, 40px) scale(1.1); }
+            100% { transform: translate(-40px, 80px) scale(0.9); }
+        }
+
+        /* الحاوية الرئيسية */
+        .main-container {
+            width: 100%;
+            max-width: 1360px;
+            padding: 50px 24px;
+            z-index: 10;
+        }
+
+        /* الهيدر الأنيق */
+        .header {
+            text-align: center;
+            margin-bottom: 45px;
+            animation: slideDown 1s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        }
+
+        .logo-area {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 1);
+            padding: 10px 24px;
+            border-radius: 50px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-area i {
+            font-size: 24px;
+            color: #0d9488;
+            animation: pulse 2s infinite;
+        }
+
+        .logo-area span {
+            font-family: 'Alexandria', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #0f766e;
+            letter-spacing: -0.5px;
+        }
+
+        .header h1 {
+            font-family: 'Alexandria', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #0d9488 0%, #1d4ed8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+
+
+        /* شبكة الكروت بتقنية Glassmorphism */
+        .portals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            perspective: 1000px;
+            margin-bottom: 40px;
+        }
+
+        /* كرت البوابة المميز */
+        .portal-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+            opacity: 0;
+            transform: translateY(30px);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.04);
+        }
+
+        /* تأثير التوهج الخلفي للبطاقات عند التمرير */
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, var(--glow), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 20px 40px rgba(13, 148, 136, 0.1), 0 0 30px var(--glow);
+        }
+
+        .portal-card:hover::before {
+            opacity: 0.18;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* هيدر الكرت */
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .icon-box {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-left: 15px;
+            color: var(--color);
+            transition: all 0.4s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.03);
+            flex-shrink: 0;
+        }
+
+        .portal-card:hover .icon-box {
+            transform: rotate(8deg) scale(1.08);
+            background: var(--color);
+            color: white;
+            box-shadow: 0 8px 16px var(--glow);
+        }
+
+        .card-title-area {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-family: 'Alexandria', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .card-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* صندوق الحسابات الافتراضية للتجريب السريع */
+        .credentials-box {
+            background: rgba(241, 245, 249, 0.6);
+            border: 1px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .cred-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+
+        .cred-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .cred-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cred-label i {
+            font-size: 11px;
+        }
+
+        .cred-value {
+            font-family: monospace;
+            background: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            color: #0f172a;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid #e2e8f0;
+            word-break: break-all;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cred-value::after {
+            content: '\f0c5';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 10px;
+            color: #94a3b8;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .cred-value:hover {
+            background: var(--color);
+            color: white;
+            border-color: var(--color);
+            transform: translateY(-1.5px);
+            box-shadow: 0 4px 10px var(--glow);
+        }
+
+        .cred-value:hover::after {
+            opacity: 1;
+            color: white;
+        }
+
+        /* زر الدخول التفاعلي */
+        .btn-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #334155;
+            text-decoration: none;
+            border-radius: 14px;
+            font-family: 'Alexandria', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 800;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 0%; height: 100%;
+            background: var(--color);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+
+        .portal-card:hover .btn-card {
+            border-color: transparent;
+            box-shadow: 0 10px 18px var(--glow);
+            color: white;
+        }
+
+        .portal-card:hover .btn-card::before {
+            width: 100%;
+        }
+
+        .btn-card i {
+            transition: transform 0.3s ease;
+        }
+
+        .portal-card:hover .btn-card i {
+            transform: translateX(-4px);
+        }
+
+
+
+        /* تخصيص الألوان لكل كرت بوابة */
+        .patient { --color: #0284c7; --glow: rgba(2, 132, 199, 0.35); }
+        .doctor { --color: #059669; --glow: rgba(5, 150, 105, 0.35); }
+        .lab { --color: #ea580c; --glow: rgba(234, 88, 12, 0.35); }
+        .pharmacy { --color: #db2777; --glow: rgba(219, 39, 119, 0.35); }
+        .admin { --color: #7c3aed; --glow: rgba(124, 58, 237, 0.35); }
+
+        /* حركات الظهور للأنيميشن */
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes cardAppear {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .portal-card:nth-child(1) { animation: cardAppear 0.7s cubic-bezier(0.19, 1, 0.22, 1) 0.1s forwards; }
+        .portal-card:nth-child(2) { animation: cardAppear 0.7s cubic-bezier(0.19, 1, 0.22, 1) 0.2s forwards; }
+        .portal-card:nth-child(3) { animation: cardAppear 0.7s cubic-bezier(0.19, 1, 0.22, 1) 0.3s forwards; }
+        .portal-card:nth-child(4) { animation: cardAppear 0.7s cubic-bezier(0.19, 1, 0.22, 1) 0.4s forwards; }
+        .portal-card:nth-child(5) { animation: cardAppear 0.7s cubic-bezier(0.19, 1, 0.22, 1) 0.5s forwards; }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .tabs { flex-direction: column; width: 100%; }
+            .tab-btn { justify-content: center; }
+            .steps-list { grid-template-columns: 1fr; }
+        }
+
+        /* نوتيفكيشن النسخ الفخم */
+        .copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #10b981;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-family: 'Alexandria', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .copy-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- الكرات الضوئية الخلفية التفاعلية -->
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- إشعار النسخ -->
+    <div class="copy-toast" id="copyToast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>تم نسخ الحساب بنجاح!</span>
+    </div>
+
+    <div class="main-container">
+        
+        <!-- الهيدر -->
+        <div class="header">
+            <div class="logo-area">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span>منصة عناية الطبية & Icosium</span>
+            </div>
+            <h1>بوابات تجريب النظام الصحي</h1>
+            <p>دليلك للتنقل المباشر وتجريب البوابات الخمس السحابية المعتمدة</p>
+        </div>
+
+        <!-- كروت البوابات الخمس التفاعلية -->
+        <div class="portals-grid">
+            
+            <!-- بوابة المريض -->
+            <div class="portal-card patient">
+                <div class="card-content">
+                    <div class="card-header">
+                        <div class="icon-box"><i class="fa-solid fa-user-injured"></i></div>
+                        <div class="card-title-area">
+                            <span class="card-title">بوابة المريض</span>
+                            <span class="card-subtitle">ملف طبي، وصفات، واستشارات</span>
+                        </div>
+                    </div>
+                    <div class="credentials-box">
+                        <div class="cred-row">
+                            <span class="cred-label"><i class="fa-solid fa-envelope"></i> الحساب التجريبي</span>
+                            <span class="cred-value" onclick="copyText('patient11@test.com')">patient11@test.com</span>
+                        </div>
+                        <div class="cred-row">
+                            <span class="cred-label"><i class="fa-solid fa-lock"></i> كلمة المرور</span>
+                            <span class="cred-value" onclick="copyText('123456')">123456</span>
+                        </div>
+                    </div>
+                    <a href="https://3inaya-patient.vercel.app/login" target="_blank" class="btn-card" id="link-patient">
+                        دخول مباشر <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- بوابة الطبيب -->
+            <div class="portal-card doctor">
+                <div class="card-content">
+                    <div class="card-header">
+                        <div class="icon-box"><i class="fa-solid fa-user-doctor"></i></div>
+                        <div class="card-title-area">
+                            <span class="card-title">بوابة الطبيب</span>
+                            <span class="card-subtitle">العيادة الرقمية والوصفات الذكية</span>
+                        </div>
+                    </div>
+                    <div class="credentials-box">
+                        <div class="cred-row">
+                            <span class="cred-label"><i class="fa-solid fa-envelope"></i> الحساب التجريبي</span>
+                            <span class="cred-value" onclick="copyText('doctor11@test.com')">doctor11@test.com</span>
+                        </div>
+                        <div class="cred-row">
+                            <span class="cred-label"><i class="fa-solid fa-lock"></i> كلمة المرور</span>
+                            <span class="cred-value" onclick="copyText('123456')">123456</span>
+                        </div>
+                    </div>
+                    <a href="https://3inaya-doctor.vercel.app/login" target="_blank" class="btn-card" id="link-doctor">
+                        دخول مباشر <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- بوابة المختبر -->
+            <div class="portal-card lab">
+                <div class="card-content">
+                    <div class="card-header">
+                        <div class="icon-box"><i class="fa-solid fa-flask"></i></div>
+                        <div class="card-title-area">
+                            <span class="card-title">بوابة المختبر</span>
+                            <span class="card-subtitle">التحاليل والنتائج الرقمية</span>
+                        </div>
+                    </div>
+                    <div class="credentials-box">
+                        <div class="cred-row">
+                            <span class="cred-label"><i class="fa-solid fa-envelope"></i> الحساب التجريبي</span>
+                            <span class="cred-value" onclick="copyText('lab11@test.com')">lab11@test.com</span>
+                        </div>
+                        <div class="cred-row">
+                            <span class="cred-label"><i class="fa-solid fa-lock"></i> كلمة المرور</span>
+                            <span class="cred-value" onclick="copyText('123456')">123456</span>
+                        </div>
+                    </div>
+                    <a href="https://3inaya-lab.vercel.app/login" target="_blank" class="btn-card" id="link-lab">
+                        دخول مباشر <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- بوابة الصيدلية -->
+            <div class="portal-card pharmacy">
+                <div class="card-content">
+                    <div class="card-header">
+                        <div class="icon-box"><i class="fa-solid fa-pills"></i></div>
+                        <div class="card-title-area">
+                            <span class="card-title">بوابة الصيدلية</span>
+                            <span class="card-subtitle">صرف الوصفات وإدارة الأدوية</span>
+                        </div>
+                    </div>
+                    <div class="credentials-box">
+                        <div class="cred-row">
+                            <span class="cred-label"><i class="fa-solid fa-envelope"></i> الحساب التجريبي</span>
+                            <span class="cred-value" onclick="copyText('pharmacy11@test.com')">pharmacy11@test.com</span>
+                        </div>
+                        <div class="cred-row">
+                            <span class="cred-label"><i class="fa-solid fa-lock"></i> كلمة المرور</span>
+                            <span class="cred-value" onclick="copyText('123456')">123456</span>
+                        </div>
+                    </div>
+                    <a href="https://3inaya-pharmacy.vercel.app/login" target="_blank" class="btn-card" id="link-pharmacy">
+                        دخول مباشر <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- بوابة الإدارة -->
+            <div class="portal-card admin">
+                <div class="card-content">
+                    <div class="card-header">
+                        <div class="icon-box"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="card-title-area">
+                            <span class="card-title">الإدارة المركزية</span>
+                            <span class="card-subtitle">الصلاحيات، الاعتمادات، والتدقيق</span>
+                        </div>
+                    </div>
+                    <div class="credentials-box">
+                        <div class="cred-row">
+                            <span class="cred-label"><i class="fa-solid fa-envelope"></i> الحساب التجريبي</span>
+                            <span class="cred-value" onclick="copyText('admin@test.com')">admin@test.com</span>
+                        </div>
+                        <div class="cred-row">
+                            <span class="cred-label"><i class="fa-solid fa-lock"></i> كلمة المرور</span>
+                            <span class="cred-value" onclick="copyText('123456')">123456</span>
+                        </div>
+                    </div>
+                    <a href="https://3inaya-admin.vercel.app/login" target="_blank" class="btn-card" id="link-admin">
+                        دخول مباشر <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+    <script>
+
+        // نسخ الحسابات التجريبية للمطورين بنقرة واحدة
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('copyToast');
+                // تحديث الرسالة حسب نوع القيمة المنسوخة
+                if (text.includes('@')) {
+                    toast.querySelector('span').innerText = 'تم نسخ البريد الإلكتروني بنجاح!';
+                } else if (text === '123456' || text === '123') {
+                    toast.querySelector('span').innerText = 'تم نسخ كلمة المرور التجريبية!';
+                } else {
+                    toast.querySelector('span').innerText = 'تم النسخ!';
+                }
+
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2200);
+            });
+        }
+    </script>
+</body>
+</html>
