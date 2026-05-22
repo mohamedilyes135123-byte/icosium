@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic';
 
-
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -27,47 +26,33 @@ export default function LoginPage() {
     setError(null);
     setSuccessMsg(null);
 
-    // --- QUICK DEBUG CREDENTIALS ---
-    if (password === "1" && email === '1') {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: 'pharmacy@3inaya.com',
-        password: '123456',
-      });
-      if (authError) {
-         setError("لم يتم رفع البيانات (Seed) إلى قواعد البيانات بعد. جرب إدخالها.");
-         setLoading(false);
-         return;
-      }
-      document.cookie = `testing_bypass=pharmacy; path=/; max-age=86400`;
-      window.location.href = `/dashboard`;
-      return;
+    // Map shortcut credentials
+    let loginEmail = email;
+    let loginPassword = password;
+    if (password === "1" && email === "1") {
+      loginEmail = "pharmacy@test.com";
+      loginPassword = "123456";
     }
-    // -------------------------------
-    
+
     if (isLogin) {
       const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: loginEmail,
+        password: loginPassword,
       });
 
       if (authError) {
-        setError("فشل تسجيل الدخول. تأكد من البريد وكلمة المرور.");
+        setError(`فشل تسجيل الدخول: ${authError.message}`);
         setLoading(false);
         return;
       }
 
-      const userRole = data?.user?.user_metadata?.role;
-      if (userRole === role) {
-        router.push(`/dashboard`);
-      } else {
-         setError("يرجى التأكد من الدخول من البوابة المخصصة لك.");
-         setLoading(false);
-      }
+      // Login succeeded – go to dashboard
+      window.location.href = `/dashboard`;
     } else {
       // Signup flow
       const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
+        email: loginEmail,
+        password: loginPassword,
         options: {
           data: {
             full_name: fullName,
@@ -81,7 +66,7 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      
+
       setSuccessMsg("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.");
       setIsLogin(true);
       setLoading(false);
