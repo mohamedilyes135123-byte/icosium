@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,7 +16,7 @@ export default function LabLayout({
     <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-indigo-500/20 relative">
       
       {/* Daylight Ambient Background */}
-      <div className="bg-daylight">
+      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-daylight">
          <div className="absolute top-[-10%] -left-[10%] w-[800px] h-[800px] bg-teal-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft"></div>
          <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '1.5s' }}></div>
       </div>
@@ -24,21 +24,21 @@ export default function LabLayout({
       {/* Glass Sidebar */}
       <aside className="w-72 border-r rtl:border-l rtl:border-r-0 border-indigo-100 flex flex-col z-20 h-screen glass-panel">
         <div className="p-6 flex items-center gap-3 text-slate-800 font-bold text-xl border-b border-indigo-100 bg-white/50">
-          <img src="/logo.png" alt="عناية" className="w-10 h-10 object-contain" />
-          <span className="tracking-wide">نظام المختبر</span>
+          <img src="/logo.png" alt="Ø¹Ù†Ø§ÙŠØ©" className="w-10 h-10 object-contain" />
+          <span className="tracking-wide">Ù†Ø¸Ø§Ù… Ø§Ù„Ù…Ø®ØªØ¨Ø±</span>
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-2 relative">
-          <NavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5"/>} label="لوحة التحكم" current={pathname} />
-          <NavItem href="/requests" icon={<ClipboardList className="w-5 h-5"/>} label="طلبات التحليل" current={pathname} />
-          <NavItem href="/results" icon={<Beaker className="w-5 h-5"/>} label="إرسال النتائج" current={pathname} />
-          <NavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label="الإعدادات" current={pathname} />
+          <NavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5"/>} label="Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…" current={pathname} />
+          <NavItem href="/requests" icon={<ClipboardList className="w-5 h-5"/>} label="Ø·Ù„Ø¨Ø§Øª Ø§Ù„ØªØ­Ù„ÙŠÙ„" current={pathname} />
+          <NavItem href="/results" icon={<Beaker className="w-5 h-5"/>} label="Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„Ù†ØªØ§Ø¦Ø¬" current={pathname} />
+          <NavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label="Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª" current={pathname} />
         </nav>
 
         <div className="p-4 border-t border-indigo-100 bg-white/40">
           <button className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 transition-colors text-sm font-bold border border-indigo-100 bg-white/50 shadow-sm">
             <LogOut className="w-4 h-4"/>
-            تسجيل الخروج
+            ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬
           </button>
         </div>
       </aside>
@@ -60,6 +60,7 @@ export default function LabLayout({
             </motion.div>
           </AnimatePresence>
       </main>
+        </div>
     </div>
   );
 }
@@ -85,3 +86,4 @@ function NavItem({ href, icon, label, current }: { href: string; icon: React.Rea
     </Link>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -34,7 +34,7 @@ export default function AdminLayout({
     <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-indigo-500/20 relative">
       
       {/* Daylight Ambient Background */}
-      <div className="bg-daylight">
+      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-daylight">
          <div className="absolute top-[-10%] -left-[10%] w-[800px] h-[800px] bg-indigo-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft"></div>
          <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '1.5s' }}></div>
       </div>
@@ -42,29 +42,29 @@ export default function AdminLayout({
       {/* Glass Sidebar */}
       <aside className="w-72 border-r rtl:border-l rtl:border-r-0 border-slate-200/50 flex flex-col z-20 h-screen glass-panel">
         <div className="p-6 flex items-center gap-3 text-slate-800 font-bold text-xl border-b border-slate-100 bg-white/50">
-          <img src="/logo.png" alt="عناية" className="w-10 h-10 object-contain" />
+          <img src="/logo.png" alt="Ø¹Ù†Ø§ÙŠØ©" className="w-10 h-10 object-contain" />
           <span className="tracking-wide">Administration</span>
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-2 relative">
-          <NavItem href="/dashboard" icon={<BarChart3 className="w-5 h-5"/>} label="لوحة التحكم" current={pathname} />
+          <NavItem href="/dashboard" icon={<BarChart3 className="w-5 h-5"/>} label="Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…" current={pathname} />
           <div className="relative">
-            <NavItem href="/approvals" icon={<ShieldCheck className="w-5 h-5"/>} label="التراخيص" current={pathname} />
+            <NavItem href="/approvals" icon={<ShieldCheck className="w-5 h-5"/>} label="Ø§Ù„ØªØ±Ø§Ø®ÙŠØµ" current={pathname} />
             {pendingCount > 0 && (
               <span className="absolute left-4 top-3 w-5 h-5 bg-amber-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md">
                 {pendingCount}
               </span>
             )}
           </div>
-          <NavItem href="/users" icon={<Users className="w-5 h-5"/>} label="المستخدمين" current={pathname} />
-          <NavItem href="/audit" icon={<FileLock2 className="w-5 h-5"/>} label="سجل التدقيق" current={pathname} />
+          <NavItem href="/users" icon={<Users className="w-5 h-5"/>} label="Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙŠÙ†" current={pathname} />
+          <NavItem href="/audit" icon={<FileLock2 className="w-5 h-5"/>} label="Ø³Ø¬Ù„ Ø§Ù„ØªØ¯Ù‚ÙŠÙ‚" current={pathname} />
         </nav>
 
         <div className="p-4 border-t border-slate-100 bg-white/40">
           <button onClick={handleLogout}
             className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors text-sm font-bold border border-rose-100 bg-white/50 shadow-sm">
             <LogOut className="w-4 h-4"/>
-            تسجيل الخروج
+            ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬
           </button>
         </div>
       </aside>
@@ -86,6 +86,7 @@ export default function AdminLayout({
             </motion.div>
           </AnimatePresence>
       </main>
+        </div>
     </div>
   );
 }
@@ -111,3 +112,4 @@ function NavItem({ href, icon, label, current }: { href: string; icon: React.Rea
     </Link>
   );
 }
+

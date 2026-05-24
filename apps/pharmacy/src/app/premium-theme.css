@@ -1,0 +1,376 @@
+﻿/* ================================================================
+   ENAYA â€” Premium Visual Theme (Pharmacy â€” Emerald/Purple Identity)
+   âœ… Only cosmetic overrides â€” zero layout changes
+   âœ… Revert = remove import from layout.tsx
+   ================================================================ */
+
+:root {
+  --phar-emerald-main:  #16a34a;
+  --phar-purple-main:   #7c3aed;
+
+  --grad-btn-emerald:   linear-gradient(160deg, #6ee7b7 0%, #10b981 50%, #047857 100%);
+  --grad-btn-purple:    linear-gradient(160deg, #d8b4fe 0%, #9333ea 50%, #581c87 100%);
+  --grad-btn-red:       linear-gradient(160deg, #fda4af 0%, #f43f5e 60%, #be123c 100%);
+  --grad-btn-blue:      linear-gradient(160deg, #93c5fd 0%, #3b82f6 50%, #1d4ed8 100%);
+  --grad-btn-blue-cyan: linear-gradient(160deg, #93c5fd 0%, #3b82f6 40%, #06b6d4 100%);
+  --grad-btn-eme-green: linear-gradient(160deg, #6ee7b7 0%, #10b981 40%, #4ade80 100%);
+}
+
+/* ================================================================
+   GLASS PANELS
+   ================================================================ */
+
+.glass-panel {
+  background: rgba(255,255,255,0.82) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  box-shadow:
+    0 4px 24px rgba(22,163,74,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.92) !important;
+  border: 1px solid rgba(255,255,255,0.65) !important;
+}
+
+/* ================================================================
+   CARDS â€” same white/70 pattern as lab
+   ================================================================ */
+
+.bg-white\/70.backdrop-blur-2xl,
+.rounded-3xl.bg-white\/70 {
+  background: rgba(255,255,255,0.90) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  box-shadow:
+    0 8px 32px rgba(124,58,237,0.06),
+    0 2px 8px rgba(0,0,0,0.03),
+    inset 0 1px 0 rgba(255,255,255,0.95) !important;
+  border: 1px solid rgba(255,255,255,0.7) !important;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+}
+.bg-white\/70.backdrop-blur-2xl:hover {
+  box-shadow:
+    0 14px 40px rgba(124,58,237,0.10),
+    0 4px 12px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.97) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* Status bar at top of card */
+.bg-emerald-500.absolute { background: linear-gradient(90deg, #6ee7b7, #10b981) !important; box-shadow: 0 2px 8px rgba(16,185,129,0.30) !important; }
+.bg-blue-400.absolute    { background: linear-gradient(90deg, #93c5fd, #3b82f6) !important; box-shadow: 0 2px 8px rgba(59,130,246,0.25) !important; }
+.bg-amber-400.absolute   { background: linear-gradient(90deg, #fde68a, #f59e0b) !important; box-shadow: 0 2px 8px rgba(245,158,11,0.25) !important; }
+.bg-slate-300.absolute   { background: linear-gradient(90deg, #cbd5e1, #94a3b8) !important; }
+
+/* CardHeader */
+.bg-white\/50.border-b.border-slate-100 {
+  background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(245,243,255,0.4) 100%) !important;
+  border-bottom: 1px solid rgba(124,58,237,0.06) !important;
+}
+
+/* QR box â€” purple */
+.bg-purple-50.border.border-purple-100 {
+  background: linear-gradient(135deg, #faf5ff, #f3e8ff) !important;
+  border: 1px solid rgba(124,58,237,0.15) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 8px rgba(124,58,237,0.06) !important;
+}
+.text-purple-700, .text-purple-600 { color: #6d28d9 !important; }
+
+/* RBAC notice â€” amber */
+.bg-amber-50\/50.border.border-amber-200 {
+  background: linear-gradient(135deg, rgba(255,251,235,0.9), rgba(254,243,199,0.7)) !important;
+  border: 1px solid rgba(202,138,4,0.2) !important;
+  box-shadow: 0 2px 12px rgba(202,138,4,0.06), inset 0 1px 0 rgba(255,255,255,0.7) !important;
+}
+
+
+
+/* ================================================================
+   GRADIENT BUTTONS
+   ================================================================ */
+
+.btn-gradient,
+button.btn-gradient {
+  background: var(--grad-btn-emerald) !important;
+  box-shadow:
+    0 6px 20px rgba(16,185,129,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -1px 0 rgba(0,0,0,0.08) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  position: relative; overflow: hidden;
+  transition: all 0.25s ease !important;
+}
+.btn-gradient::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 48%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%);
+  pointer-events: none;
+}
+.btn-gradient:hover { transform: translateY(-2px) !important; box-shadow: 0 10px 28px rgba(16,185,129,0.40) !important; }
+
+/* Emerald/green buttons */
+.bg-emerald-500, .bg-green-500 {
+  background: var(--grad-btn-emerald) !important;
+  box-shadow: 0 6px 18px rgba(16,185,129,0.28), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  position: relative; overflow: hidden; transition: all 0.25s ease !important;
+}
+.bg-emerald-500::before { content:''; position:absolute; top:0;left:0;right:0;height:48%; background:linear-gradient(180deg,rgba(255,255,255,0.16) 0%,transparent 100%); pointer-events:none; }
+.bg-emerald-500:hover { transform: translateY(-2px) !important; box-shadow: 0 10px 26px rgba(16,185,129,0.40) !important; }
+
+/* Purple buttons (pharmacy color) */
+.bg-purple-500, .bg-violet-500 {
+  background: var(--grad-btn-purple) !important;
+  box-shadow: 0 6px 18px rgba(124,58,237,0.28), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  position: relative; overflow: hidden; transition: all 0.25s ease !important;
+}
+.bg-purple-500::before { content:''; position:absolute; top:0;left:0;right:0;height:48%; background:linear-gradient(180deg,rgba(255,255,255,0.16) 0%,transparent 100%); pointer-events:none; }
+
+/* Red buttons */
+.bg-rose-500, .bg-red-500 {
+  background: var(--grad-btn-red) !important;
+  box-shadow: 0 6px 18px rgba(244,63,94,0.28), inset 0 1px 0 rgba(255,255,255,0.18) !important;
+  position: relative; overflow: hidden; transition: all 0.25s ease !important;
+}
+.bg-rose-500::before { content:''; position:absolute; top:0;left:0;right:0;height:48%; background:linear-gradient(180deg,rgba(255,255,255,0.14) 0%,transparent 100%); pointer-events:none; }
+
+/* ================================================================
+   STATUS BADGES
+   ================================================================ */
+
+.bg-emerald-50  { background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8) !important; }
+.bg-rose-50     { background: linear-gradient(135deg, #fff1f2, #fee2e2) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8) !important; }
+.bg-amber-50    { background: linear-gradient(135deg, #fffbeb, #fef3c7) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8) !important; }
+.bg-blue-50     { background: linear-gradient(135deg, #eff6ff, #dbeafe) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8) !important; }
+.bg-purple-50   { background: linear-gradient(135deg, #faf5ff, #f3e8ff) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8) !important; }
+.bg-emerald-100 { background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important; }
+.bg-rose-100    { background: linear-gradient(135deg, #fee2e2, #fecaca) !important; }
+.bg-purple-100  { background: linear-gradient(135deg, #f3e8ff, #e9d5ff) !important; }
+.bg-cyan-100    { background: linear-gradient(135deg, #ecfeff, #cffafe) !important; }
+
+/* Urgent */
+.animate-pulse { animation: phar-urgent-pulse 2s ease-in-out infinite !important; }
+@keyframes phar-urgent-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+/* ================================================================
+   INPUTS
+   ================================================================ */
+
+input, textarea, select {
+  background: rgba(255,255,255,0.95) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+  transition: all 0.2s ease !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 3px rgba(22,163,74,0.12), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+
+/* ================================================================
+   AMBIENT BLOBS â€” more vivid
+   ================================================================ */
+
+.bg-emerald-200 { background: radial-gradient(circle, #6ee7b7, #16a34a) !important; }
+.bg-green-200   { background: radial-gradient(circle, #86efac, #22c55e) !important; }
+
+/* ================================================================
+   EXISTING TAILWIND GRADIENT BUTTONS â€” enhance with shadow + glow
+   Note: bg-gradient-to-r from-blue-500 to-cyan-400 (Processing)
+         bg-gradient-to-r from-emerald-500 to-green-400 (Ready)
+   ================================================================ */
+
+/* Upgrade "Ø¨Ø¯Ø¡ Ø§Ù„ØªØ­Ø¶ÙŠØ±" button (blueâ†’cyan gradient) */
+.from-blue-500.to-cyan-400,
+.from-blue-500.to-cyan-400.hover\:from-blue-600 {
+  background: linear-gradient(160deg, #60a5fa 0%, #3b82f6 45%, #0891b2 100%) !important;
+  box-shadow:
+    0 6px 20px rgba(14,116,144,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -1px 0 rgba(0,0,0,0.08) !important;
+  position: relative; overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1) !important;
+}
+.from-blue-500.to-cyan-400::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:48%;
+  background: linear-gradient(180deg,rgba(255,255,255,0.18) 0%, transparent 100%);
+  pointer-events: none;
+}
+.from-blue-500.to-cyan-400:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 28px rgba(14,116,144,0.38) !important;
+}
+
+/* Upgrade "Ø¬Ø§Ù‡Ø² Ù„Ù„Ø§Ø³ØªÙ„Ø§Ù…" button (emeraldâ†’green gradient) */
+.from-emerald-500.to-green-400,
+.from-emerald-500.to-green-400.hover\:from-emerald-600 {
+  background: linear-gradient(160deg, #6ee7b7 0%, #10b981 45%, #16a34a 100%) !important;
+  box-shadow:
+    0 6px 20px rgba(16,185,129,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -1px 0 rgba(0,0,0,0.08) !important;
+  position: relative; overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1) !important;
+}
+.from-emerald-500.to-green-400::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:48%;
+  background: linear-gradient(180deg,rgba(255,255,255,0.18) 0%, transparent 100%);
+  pointer-events: none;
+}
+.from-emerald-500.to-green-400:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 28px rgba(16,185,129,0.42) !important;
+}
+
+/* Completed order success box */
+.bg-emerald-50.border.border-emerald-200.rounded-2xl {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important;
+  border: 1px solid rgba(22,163,74,0.20) !important;
+  box-shadow: 0 2px 12px rgba(22,163,74,0.08), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+
+/* Medication item box */
+.bg-white.rounded-xl.p-2\.5.border.border-slate-200 {
+  background: rgba(255,255,255,0.95) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(148,163,184,0.12) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Doctor badge */
+.text-emerald-500 { filter: drop-shadow(0 0 4px rgba(16,185,129,0.30)); }
+
+/* ================================================================
+   EXTREME GLASSMORPHISM (Global)
+   ================================================================ */
+.glass-panel,
+div[style*="background: \"#fff\""][style*="borderRadius: 24"],
+div[style*="background: '#fff'"][style*="borderRadius: 24"],
+.bg-white\/80.backdrop-blur-xl,
+.card-premium {
+  background: rgba(255,255,255,0.65) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 0 20px rgba(255,255,255,0.5) !important;
+  border: 1px solid rgba(255,255,255,0.7) !important;
+}
+
+/* ================================================================
+   UNIVERSAL ENHANCEMENTS (Buttons, Alerts, Notifications, Headers)
+   ================================================================ */
+
+/* All Buttons General Interaction */
+button, .btn {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+button:hover, .btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+button:active, .btn:active {
+  transform: scale(0.95) !important;
+}
+
+/* Alert & Notification Boxes (Premium Styling) */
+[class*="bg-red-50"], [class*="bg-rose-50"] {
+  background: linear-gradient(135deg, rgba(254,226,226,0.8), rgba(254,202,202,0.8)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(248,113,113,0.3) !important;
+  box-shadow: 0 4px 15px rgba(220,38,38,0.05), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+[class*="bg-yellow-50"], [class*="bg-amber-50"] {
+  background: linear-gradient(135deg, rgba(254,243,199,0.8), rgba(253,230,138,0.8)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(251,191,36,0.3) !important;
+  box-shadow: 0 4px 15px rgba(217,119,6,0.05), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+[class*="bg-blue-50"], [class*="bg-cyan-50"] {
+  background: linear-gradient(135deg, rgba(219,234,254,0.8), rgba(191,219,254,0.8)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(96,165,250,0.3) !important;
+  box-shadow: 0 4px 15px rgba(37,99,235,0.05), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+[class*="bg-green-50"], [class*="bg-emerald-50"] {
+  background: linear-gradient(135deg, rgba(220,252,231,0.8), rgba(187,247,208,0.8)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(74,222,128,0.3) !important;
+  box-shadow: 0 4px 15px rgba(22,163,74,0.05), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+
+/* Header areas - apply subtle glass shimmer */
+header, .header, [class*="Header"], div[style*="font-size: 22"] {
+  position: relative;
+}
+header::before, .header::before, [class*="Header"]::before {
+  content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1), transparent);
+  pointer-events: none; z-index: 10;
+}
+
+/* Tab Buttons (like طلب جديد, طلباتي) */
+.glass-panel button, .glass-panel a, button[class*="bg-white"], div[class*="bg-white"][role="button"], div[class*="border"] > button {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Badges: Green (موافق, طبيعي, الخ) */
+[class*="bg-green-100"], [class*="bg-emerald-100"], [class*="text-green-"], [style*="background: \"#dcfce7\""], [style*="background: '#dcfce7'"], [style*="background: #dcfce7"] {
+  background: linear-gradient(135deg, rgba(220, 252, 231, 0.7), rgba(187, 247, 208, 0.7)) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(74, 222, 128, 0.5) !important;
+  color: #15803d !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 10px rgba(34,197,94,0.15) !important;
+}
+
+/* Badges: Blue (تحليل, روتيني, الخ) */
+[class*="bg-blue-100"], [class*="bg-cyan-100"], [class*="text-blue-"], [style*="background: \"#e0f2fe\""], [style*="background: '#e0f2fe'"], [style*="background: #e0f2fe"], [style*="background: \"#eff6ff\""] {
+  background: linear-gradient(135deg, rgba(219, 234, 254, 0.7), rgba(191, 219, 254, 0.7)) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(96, 165, 250, 0.5) !important;
+  color: #1d4ed8 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 10px rgba(59,130,246,0.15) !important;
+}
+
+/* Badges: Purple/Pink (وصفة, الخ) */
+[class*="bg-purple-100"], [class*="bg-fuchsia-100"], [style*="background: \"#f3e8ff\""], [style*="background: '#f3e8ff'"], [style*="background: #f3e8ff"] {
+  background: linear-gradient(135deg, rgba(243, 232, 255, 0.7), rgba(233, 213, 255, 0.7)) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(192, 132, 252, 0.5) !important;
+  color: #7e22ce !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 10px rgba(168,85,247,0.15) !important;
+}
+
+/* Badges: Red/Yellow (عاجل, مرتفع, الخ) */
+[class*="bg-red-100"], [class*="bg-rose-100"], [style*="background: \"#fee2e2\""], [style*="background: '#fee2e2'"], [style*="background: #fee2e2"] {
+  background: linear-gradient(135deg, rgba(254, 226, 226, 0.7), rgba(254, 202, 202, 0.7)) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(248, 113, 113, 0.5) !important;
+  color: #b91c1c !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 10px rgba(239,68,68,0.15) !important;
+}
+
+/* Make all badges interactive */
+span[class*="rounded-"], div[class*="rounded-"] > span {
+  transition: all 0.3s ease !important;
+}
+span[class*="rounded-"]:hover, div[class*="rounded-"] > span:hover {
+  transform: translateY(-1px) scale(1.05);
+  filter: brightness(1.1);
+}
+
+/* Response boxes (رد الطبيب) */
+div[style*="background: \"#f0fdf4\""], div[style*="background: '#f0fdf4'"], div[style*="background: #f0fdf4"],
+div[style*="background: \"#eff6ff\""], div[style*="background: '#eff6ff'"], div[style*="background: #eff6ff"] {
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: inset 0 2px 10px rgba(255,255,255,0.5), 0 4px 15px rgba(0,0,0,0.03) !important;
+}
+
+
+
+
+
+

@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   Search, Users, Stethoscope, FlaskConical, Pill, User,
   Ban, CheckCircle, XCircle, ChevronDown, Phone, MapPin,
-  Calendar, Shield, RefreshCw, AlertTriangle
+  Calendar, Shield, RefreshCw, AlertTriangle, Plus, Trash2, X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -35,6 +35,22 @@ export default function AdminUsers() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [actioning, setActioning] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  // Modal and custom state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [createForm, setCreateForm] = useState({
+    email: "",
+    password: "",
+    fullName: "",
+    phone: "",
+    address: "",
+    specialty: "",
+    role: "doctor" as "doctor" | "lab" | "pharmacy"
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
 
   const fetchProfiles = useCallback(async () => {
     setLoading(true);
@@ -72,6 +88,72 @@ export default function AdminUsers() {
     fetchProfiles(); setActioning(null);
   };
 
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError("");
+    setSubmitSuccess("");
+
+    if (!createForm.email || !createForm.password || !createForm.fullName) {
+      setSubmitError("الرجاء ملء الحقول الإجبارية (البريد الإلكتروني، كلمة المرور، الاسم الكامل).");
+      setSubmitting(false);
+      return;
+    }
+
+    const { data, error } = await supabase.rpc("admin_create_user", {
+      p_email: createForm.email,
+      p_password: createForm.password,
+      p_role: createForm.role,
+      p_full_name: createForm.fullName,
+      p_phone: createForm.phone || null,
+      p_address: createForm.address || null,
+      p_specialty: createForm.role === "doctor" ? (createForm.specialty || null) : null
+    });
+
+    if (error) {
+      setSubmitError(`فشل إنشاء الحساب: ${error.message}`);
+    } else {
+      setSubmitSuccess("تم إنشاء الحساب واعتماده بنجاح.");
+      // Log audit action
+      await logAction("ACCOUNT_CREATED", data || "", `تم إنشاء حساب ${createForm.fullName} بصلاحية ${ROLE_CONFIG[createForm.role]?.label}`);
+      
+      // Clear form
+      setCreateForm({
+        email: "",
+        password: "",
+        fullName: "",
+        phone: "",
+        address: "",
+        specialty: "",
+        role: "doctor"
+      });
+      
+      // Refresh list
+      fetchProfiles();
+      
+      // Wait a moment and close modal
+      setTimeout(() => {
+        setShowCreateModal(false);
+        setSubmitSuccess("");
+      }, 1500);
+    }
+    setSubmitting(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    setActioning(id);
+    const targetProfile = profiles.find(p => p.id === id);
+    const { error } = await supabase.rpc("admin_delete_user", { p_user_id: id });
+    if (error) {
+      alert(`فشل الحذف: ${error.message}`);
+    } else {
+      await logAction("ACCOUNT_DELETED", id, `تم حذف حساب ${targetProfile?.full_name || id} (${ROLE_CONFIG[targetProfile?.role || '']?.label || ''}) نهائياً`);
+      fetchProfiles();
+    }
+    setActioning(null);
+    setShowDeleteConfirm(null);
+  };
+
   const filtered = profiles.filter(p => {
     const matchSearch = !search ||
       p.full_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -91,10 +173,17 @@ export default function AdminUsers() {
             <h1 className="text-2xl font-black text-slate-800 mb-1">إدارة المستخدمين</h1>
             <p className="text-slate-400 text-sm">{profiles.length} مستخدم مسجّل في النظام</p>
           </div>
-          <button onClick={fetchProfiles} disabled={loading}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-2xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-2xl bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-600/10 transition-colors">
+              <Plus className="w-4 h-4" />
+              إضافة مستخدم
+            </button>
+            <button onClick={fetchProfiles} disabled={loading}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-2xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
+          </div>
         </div>
       </motion.div>
 
@@ -214,6 +303,13 @@ export default function AdminUsers() {
                               {p.is_banned ? "رفع الحظر" : "حظر الحساب"}
                             </button>
                           )}
+                          {["doctor", "lab", "pharmacy"].includes(p.role) && (
+                            <button onClick={() => setShowDeleteConfirm(p.id)} disabled={actioning === p.id}
+                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-50 border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors">
+                              <Trash2 className="w-3.5 h-3.5" />
+                              حذف الحساب
+                            </button>
+                          )}
                         </div>
                       </div>
                     </motion.div>
@@ -224,6 +320,195 @@ export default function AdminUsers() {
           })}
         </div>
       </div>
+
+      {/* Create User Modal */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xl w-full max-w-lg overflow-hidden relative"
+            >
+              <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
+                <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-indigo-600" />
+                  إضافة مستخدم جديد
+                </h2>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {submitError && (
+                <div className="mb-4 p-3.5 bg-rose-50 border border-rose-100 rounded-2xl text-rose-700 text-xs font-bold flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  <span>{submitError}</span>
+                </div>
+              )}
+
+              {submitSuccess && (
+                <div className="mb-4 p-3.5 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-700 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{submitSuccess}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleCreateSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">الاسم الكامل *</label>
+                    <input
+                      type="text"
+                      required
+                      value={createForm.fullName}
+                      onChange={e => setCreateForm({ ...createForm, fullName: e.target.value })}
+                      placeholder="د. محمد علي / صيدلية الأمل"
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs focus:ring-2 focus:ring-indigo-400 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">نوع الحساب *</label>
+                    <select
+                      value={createForm.role}
+                      onChange={e => setCreateForm({ ...createForm, role: e.target.value as any })}
+                      className="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs focus:ring-2 focus:ring-indigo-400 outline-none"
+                    >
+                      <option value="doctor">طبيب</option>
+                      <option value="lab">مخبري</option>
+                      <option value="pharmacy">صيدلية</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">البريد الإلكتروني *</label>
+                    <input
+                      type="email"
+                      required
+                      value={createForm.email}
+                      onChange={e => setCreateForm({ ...createForm, email: e.target.value })}
+                      placeholder="user@example.com"
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs focus:ring-2 focus:ring-indigo-400 outline-none ltr"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">كلمة المرور *</label>
+                    <input
+                      type="password"
+                      required
+                      value={createForm.password}
+                      onChange={e => setCreateForm({ ...createForm, password: e.target.value })}
+                      placeholder="******"
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs focus:ring-2 focus:ring-indigo-400 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">الهاتف (اختياري)</label>
+                    <input
+                      type="text"
+                      value={createForm.phone}
+                      onChange={e => setCreateForm({ ...createForm, phone: e.target.value })}
+                      placeholder="0550000000"
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs focus:ring-2 focus:ring-indigo-400 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">العنوان (اختياري)</label>
+                    <input
+                      type="text"
+                      value={createForm.address}
+                      onChange={e => setCreateForm({ ...createForm, address: e.target.value })}
+                      placeholder="الجزائر العاصمة"
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs focus:ring-2 focus:ring-indigo-400 outline-none"
+                    />
+                  </div>
+                </div>
+
+                {createForm.role === "doctor" && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">التخصص الطبي</label>
+                    <input
+                      type="text"
+                      value={createForm.specialty}
+                      onChange={e => setCreateForm({ ...createForm, specialty: e.target.value })}
+                      placeholder="طب عام، أمراض القلب، إلخ."
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs focus:ring-2 focus:ring-indigo-400 outline-none"
+                    />
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-3 border-t border-slate-100">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/15 disabled:opacity-50"
+                  >
+                    {submitting ? "جاري الإنشاء..." : "إنشاء واعتماد الحساب"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="px-5 h-11 border border-slate-200 text-slate-500 hover:bg-slate-50 font-bold rounded-2xl text-xs transition-colors"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xl w-full max-w-md overflow-hidden"
+            >
+              <div className="flex flex-col items-center text-center p-2">
+                <div className="w-12 h-12 bg-rose-50 border border-rose-100 rounded-2xl flex items-center justify-center text-rose-500 mb-4">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-black text-slate-800 mb-2">تأكيد حذف الحساب</h3>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                  هل أنت متأكد من رغبتك في حذف هذا الحساب نهائياً؟ 
+                  <br />
+                  <span className="text-rose-500 font-bold">هذا الإجراء لا يمكن التراجع عنه وسيقوم بتنظيف كافة البيانات والطلبات المرتبطة به.</span>
+                </p>
+                
+                <div className="flex w-full gap-3">
+                  <button
+                    onClick={() => handleDelete(showDeleteConfirm)}
+                    disabled={actioning === showDeleteConfirm}
+                    className="flex-1 h-11 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-rose-600/15 disabled:opacity-50"
+                  >
+                    {actioning === showDeleteConfirm ? "جاري الحذف..." : "تأكيد الحذف النهائي"}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(null)}
+                    className="flex-1 h-11 border border-slate-200 text-slate-500 hover:bg-slate-50 font-bold rounded-2xl text-xs transition-colors"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

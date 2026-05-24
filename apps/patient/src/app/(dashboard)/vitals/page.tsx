@@ -106,7 +106,7 @@ export default function VitalsPage() {
   const logged = METRICS.filter(m => todayVitals[m.id] !== null).length;
 
   return (
-    <div dir="rtl" style={{ minHeight: "100vh", background: "#f4faf6", paddingBottom: 100 }}>
+    <div dir="rtl" style={{ background: "#f4faf6", paddingBottom: 100 }}>
 
       {/* Header */}
       <div style={{

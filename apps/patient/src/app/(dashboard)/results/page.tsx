@@ -93,13 +93,28 @@ export default function PatientResults() {
     if (!currentUser) return;
     fetchData();
     const supabase = createClient();
+
+    // Use unique channel name per mount to avoid "already subscribed" error on hot-reload
+    const channelName = `results-rt-${currentUser.id}-${Date.now()}`;
     const ch = supabase
-      .channel("results-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "lab_results", filter: `patient_id=eq.${currentUser.id}` }, fetchData)
-      .on("postgres_changes", { event: "*", schema: "public", table: "pharmacy_orders", filter: `patient_id=eq.${currentUser.id}` }, fetchData)
+      .channel(channelName)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "lab_results",
+        filter: `patient_id=eq.${currentUser.id}`,
+      }, fetchData)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "pharmacy_orders",
+        filter: `patient_id=eq.${currentUser.id}`,
+      }, fetchData)
       .subscribe();
+
     return () => { supabase.removeChannel(ch); };
   }, [currentUser, fetchData]);
+
 
   return (
     <div dir="rtl" style={{ paddingBottom: 32 }}>

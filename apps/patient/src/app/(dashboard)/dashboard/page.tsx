@@ -161,7 +161,7 @@ export default function PatientDashboard() {
   };
 
   return (
-    <div dir="rtl" style={{ minHeight: "100vh", paddingBottom: 100 }}>
+    <div dir="rtl" style={{ paddingBottom: 100 }}>
 
       {/* ═══════════════════════════════
           GREEN WAVE HEADER
@@ -247,7 +247,7 @@ export default function PatientDashboard() {
 
         {/* ── Three Service Icons Card ── */}
         <div className="glass-panel" style={{
-          borderRadius: "1.5rem",
+          borderRadius: "2rem",
           padding: "1.25rem 0.75rem",
           marginBottom: "1.25rem",
           display: "grid",
@@ -261,10 +261,13 @@ export default function PatientDashboard() {
           ].map(s => (
             <Link key={s.label} href={s.href} prefetch style={{
               display: "flex", flexDirection: "column", alignItems: "center",
-              gap: "0.5rem", textDecoration: "none", padding: "0.5rem 0",
+              gap: "0.5rem", textDecoration: "none", padding: "0.75rem 0",
+              borderRadius: "1.5rem", background: "rgba(255,255,255,0.4)",
+              border: "1px solid rgba(255,255,255,0.8)",
+              transition: "all 0.2s ease"
             }}>
-              <div style={{ width: 72, height: 72, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Image src={s.img} alt={s.label} width={72} height={72} style={{ objectFit: "contain" }} />
+              <div style={{ width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Image src={s.img} alt={s.label} width={64} height={64} style={{ objectFit: "contain" }} />
               </div>
               <span style={{ fontSize: "0.78rem", fontWeight: 800, color: "#166534" }}>{s.label}</span>
             </Link>
@@ -306,7 +309,7 @@ export default function PatientDashboard() {
                   style={{
                     borderRadius: "1.25rem",
                     padding: "1.25rem 0.75rem",
-                    border: isSelected ? `2px solid ${m.color}` : "2px solid transparent",
+                    border: isSelected ? `2px solid ${m.color} !important` : "2px solid transparent !important",
                     display: "flex", flexDirection: "column",
                     alignItems: "center", justifyContent: "center",
                     minHeight: 120, gap: "0.5rem", cursor: "pointer",
@@ -417,11 +420,13 @@ export default function PatientDashboard() {
                     key={n}
                     onClick={() => setNote(n === note ? "" : n)}
                     style={{
-                      padding: "0.4rem 0.8rem", borderRadius: "999px",
-                      fontSize: "0.75rem", fontWeight: 700,
-                      background: note === n ? m.color : "#f3f4f6",
-                      color: note === n ? "#fff" : "#4b5563",
-                      border: "none", cursor: "pointer", transition: "all 0.2s"
+                      padding: "0.5rem 1rem", borderRadius: "999px",
+                      fontSize: "0.8rem", fontWeight: 800,
+                      background: note === n ? "linear-gradient(135deg, #1f2937, #111827)" : "#f3f4f6",
+                      color: note === n ? "#ffffff" : "#4b5563",
+                      border: note === n ? "none" : "1px solid #e5e7eb",
+                      boxShadow: note === n ? "0 4px 12px rgba(0,0,0,0.15)" : "none",
+                      cursor: "pointer", transition: "all 0.2s"
                     }}
                   >
                     {n}
@@ -442,14 +447,17 @@ export default function PatientDashboard() {
                     transition: "all 0.2s",
                   }}
                 >
-                  {saving ? "جاري الحفظ..." : "✅ تسجيل"}
+                  {saving ? "جاري الحفظ..." : "تأكيد"}
                 </button>
                 <button
                   onClick={() => { setSelected(null); setVal1(""); setVal2(""); setNote(""); }}
                   style={{
-                    flex: "1 1 100px", height: 52, padding: "0 1.25rem", borderRadius: "0.875rem",
-                    border: "2px solid #e5e7eb", background: "#fff",
-                    color: "#6b7280", fontWeight: 700, cursor: "pointer",
+                    flex: "1 1 100px", height: 52, borderRadius: "0.875rem",
+                    background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                    color: "#ffffff", fontSize: "0.95rem", fontWeight: 900,
+                    border: "none", cursor: "pointer",
+                    boxShadow: "0 4px 14px rgba(239, 68, 68, 0.3)",
+                    transition: "all 0.2s",
                   }}
                 >
                   إلغاء

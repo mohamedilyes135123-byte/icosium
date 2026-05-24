@@ -135,7 +135,8 @@ export default function PatientRequests() {
             { key: "new",  label: "➕ طلب جديد" },
           ].map(t => (
             <button key={t.key} onClick={() => setTab(t.key as any)}
-              style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: "none", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer", transition: "all 0.15s", background: tab === t.key ? "#fff" : "transparent", color: tab === t.key ? "#2eb567" : "#64748b", boxShadow: tab === t.key ? "0 1px 4px rgba(0,0,0,0.1)" : "none" }}>
+              className="btn"
+              style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: "none", fontFamily: "inherit", fontWeight: 800, fontSize: 14, cursor: "pointer", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)", background: tab === t.key ? "linear-gradient(135deg, #22c55e, #16a34a)" : "transparent", color: tab === t.key ? "#fff" : "#64748b", boxShadow: tab === t.key ? "0 4px 14px rgba(22,163,74,0.3)" : "none" }}>
               {t.label}
             </button>
           ))}
@@ -292,7 +293,8 @@ export default function PatientRequests() {
                   {/* Send to Pharmacy */}
                   {isApproved && prescription && !prescription.is_used && (
                     <button onClick={() => setModal({ type: "pharmacy", prescriptionId: prescription.id })}
-                      style={{ width: "100%", padding: "12px 0", borderRadius: 12, border: "2px solid #a855f7", background: "#faf5ff", color: "#7c3aed", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer", marginBottom: 8 }}>
+                      className="btn"
+                      style={{ width: "100%", padding: "12px 0", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #a855f7, #7e22ce)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 14, cursor: "pointer", marginBottom: 8, boxShadow: "0 4px 16px rgba(168,85,247,0.3)", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
                       💊 اختر صيدلية وأرسل الوصفة
                     </button>
                   )}
@@ -305,7 +307,8 @@ export default function PatientRequests() {
                   {/* Send to Lab */}
                   {isApproved && labReq && !labReq.lab_id && (
                     <button onClick={() => setModal({ type: "lab", labReqId: labReq.id })}
-                      style={{ width: "100%", padding: "12px 0", borderRadius: 12, border: "2px solid #06b6d4", background: "#ecfeff", color: "#0e7490", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+                      className="btn"
+                      style={{ width: "100%", padding: "12px 0", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #06b6d4, #0e7490)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 14, cursor: "pointer", boxShadow: "0 4px 16px rgba(6,182,212,0.3)", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
                       🧪 اختر مختبراً وأرسل طلب التحليل
                     </button>
                   )}

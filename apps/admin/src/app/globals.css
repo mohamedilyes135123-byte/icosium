@@ -31,6 +31,17 @@ body {
   direction: ltr; 
 }
 
+/* ── Global Interactive Micro-interactions ── */
+button, a, select, input, textarea, [role="button"] {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+button:hover, a:hover, [role="button"]:hover {
+  transform: translateY(-1px);
+}
+button:active, a:active, [role="button"]:active {
+  transform: translateY(0) scale(0.97);
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -44,7 +55,7 @@ body {
   }
   
   .glass-panel:hover {
-    @apply shadow-2xl shadow-indigo-500/10 -translate-y-1;
+    @apply shadow-2xl shadow-indigo-500/10 -translate-y-1 scale-[1.005];
   }
 
   .glass-header {
@@ -52,7 +63,7 @@ body {
   }
 
   .btn-gradient {
-    @apply bg-gradient-to-l from-indigo-600 to-purple-500 text-white font-bold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300;
+    @apply bg-gradient-to-l from-indigo-600 to-purple-500 text-white font-bold shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-300;
   }
 
   .text-gradient {
@@ -75,8 +86,16 @@ body {
 
 @keyframes pulse-soft {
   0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.05); opacity: 1; }
+  50% { transform: scale(1.03); opacity: 1; }
 }
 .animate-pulse-soft {
   animation: pulse-soft 3s ease-in-out infinite;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
