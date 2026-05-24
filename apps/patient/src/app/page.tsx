@@ -8,7 +8,9 @@ export default function Home() {
       {/* Header */}
       <header className="px-6 py-4 flex justify-between items-center bg-white/70 backdrop-blur-md sticky top-0 z-50 border-b border-emerald-100">
         <div className="flex items-center gap-2 text-brand-600 font-bold text-2xl tracking-tighter">
-          <Activity className="w-8 h-8 text-brand-500" />
+          <div className="w-10 h-10 rounded-xl bg-white border border-emerald-100 shadow-sm flex items-center justify-center">
+            <img src="/logo.png" alt="عناية" className="w-8 h-8 object-contain" />
+          </div>
           <span>عناية للمرضى</span>
         </div>
         <div className="space-x-4 rtl:space-x-reverse">

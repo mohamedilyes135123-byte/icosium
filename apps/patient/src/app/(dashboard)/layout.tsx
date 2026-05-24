@@ -89,8 +89,8 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
           <style>{`@keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-15px) rotate(5deg); } }`}</style>
 
           <div style={{ padding: "24px", display: "flex", alignItems: "center", gap: 12, borderBottom: "1px solid rgba(255,255,255,0.15)", position: "relative", zIndex: 1 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.4)", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
-              <HeartPulse className="w-6 h-6 text-white" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }} />
+            <div style={{ width: 44, height: 44, borderRadius: 14, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.8)", boxShadow: "0 4px 10px rgba(0,0,0,0.15)" }}>
+              <img src="/logo.png" alt="عناية" style={{ width: 32, height: 32, objectFit: "contain", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
             </div>
             <span style={{ fontWeight: 900, fontSize: 22, color: "#ffffff", textShadow: "0 2px 6px rgba(0,0,0,0.4)" }}>عناية للمرضى</span>
           </div>

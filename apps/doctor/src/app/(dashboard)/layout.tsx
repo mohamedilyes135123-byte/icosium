@@ -39,6 +39,7 @@ export default function DoctorLayout({
         <nav className="flex-1 px-4 py-6 space-y-2 relative">
           <NavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5"/>} label="Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…" current={pathname} />
           <NavItem href="/requests" icon={<Calendar className="w-5 h-5"/>} label="Ø·Ù„Ø¨Ø§Øª Ø§Ù„Ù…Ø±Ø¶Ù‰" current={pathname} />
+          <NavItem href="/appointments" icon={<Calendar className="w-5 h-5"/>} label="المواعيد" current={pathname} />
           <NavItem href="/prescriptions" icon={<FileText className="w-5 h-5"/>} label="ÙˆØµÙØ§ØªÙŠ ÙˆØªØ­Ø§Ù„ÙŠÙ„ÙŠ" current={pathname} />
           <NavItem href="/patients" icon={<Users className="w-5 h-5"/>} label="Ù…Ù„ÙØ§Øª Ø§Ù„Ù…Ø±Ø¶Ù‰" current={pathname} />
           <NavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label="Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª" current={pathname} />
