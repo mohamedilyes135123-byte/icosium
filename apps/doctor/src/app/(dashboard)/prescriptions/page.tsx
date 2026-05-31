@@ -9,6 +9,7 @@ import {
   Calendar, BadgeCheck, Eye, EyeOff, TestTube, FlaskConical,
   Link as LinkIcon
 } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -31,6 +32,7 @@ interface Prescription {
 
 // ─────────────────────────────────────────────────────────────────
 export default function DoctorPrescriptions() {
+  const { lang, t } = useLanguage();
   const supabase = createClient();
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -68,14 +70,14 @@ export default function DoctorPrescriptions() {
 
   // ── Helpers ────────────────────────────────────────────────────
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("ar-DZ", { day: "2-digit", month: "long", year: "numeric" });
+    new Date(d).toLocaleDateString(lang === "ar" ? "ar-DZ" : "fr-DZ", { day: "2-digit", month: "long", year: "numeric" });
 
   const ensureUrl = (url: string) =>
     url.startsWith("http") ? url : `https://${url}`;
 
   // ─────────────────────────────────────────────────────────────
   return (
-    <div className="w-full pb-32" dir="rtl">
+    <div className="w-full pb-32" dir={lang === "ar" ? "rtl" : "ltr"}>
 
       {/* ── Header ── */}
       <motion.header initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
@@ -85,12 +87,12 @@ export default function DoctorPrescriptions() {
             <FileSignature className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-slate-800 leading-none mb-1">وصفاتي الطبية</h1>
-            <p className="text-xs font-bold text-blue-500">كل الوصفات التي أصدرتها</p>
+            <h1 className="text-xl font-black text-slate-800 leading-none mb-1">{lang === "ar" ? "وصفاتي الطبية" : "Mes ordonnances médicales"}</h1>
+            <p className="text-xs font-bold text-blue-500">{lang === "ar" ? "كل الوصفات التي أصدرتها" : "Toutes les ordonnances émises"}</p>
           </div>
         </div>
         <span className="bg-blue-100 text-blue-700 font-black text-sm px-3 py-1.5 rounded-xl border border-blue-200">
-          {prescriptions.length} وصفة
+          {prescriptions.length} {lang === "ar" ? "وصفة" : "ordonnance(s)"}
         </span>
       </motion.header>
 
@@ -107,9 +109,9 @@ export default function DoctorPrescriptions() {
       {!loading && prescriptions.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 bg-white/40 backdrop-blur-sm rounded-[2rem] border border-white/60 shadow-inner text-center px-6">
           <FileSignature className="w-14 h-14 text-slate-300 mb-4" />
-          <h3 className="font-black text-slate-600 mb-1">لا توجد وصفات بعد</h3>
+          <h3 className="font-black text-slate-600 mb-1">{lang === "ar" ? "لا توجد وصفات بعد" : "Aucune ordonnance pour l'instant"}</h3>
           <p className="text-slate-400 text-sm">
-            الوصفات التي تُصدرها عند الموافقة على الطلبات أو مباشرة ستظهر هنا.
+            {lang === "ar" ? "الوصفات التي تُصدرها عند الموافقة على الطلبات أو مباشرة ستظهر هنا." : "Les ordonnances émises lors des approbations ou directement apparaîtront ici."}
           </p>
         </div>
       )}
@@ -141,7 +143,7 @@ export default function DoctorPrescriptions() {
                       </div>
                       <div>
                         <p className="font-black text-slate-800 text-sm leading-tight">
-                          {patient?.full_name || "مريض"}
+                        {patient?.full_name || t("patientNamePlaceholder")}
                         </p>
                         {patient?.phone && (
                           <p className="text-xs text-slate-400">{patient.phone}</p>
@@ -154,11 +156,11 @@ export default function DoctorPrescriptions() {
                       {/* Used badge */}
                       {rx.is_used ? (
                         <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> أُرسلت للصيدلية
+                          <CheckCircle2 className="w-3 h-3" /> {lang === "ar" ? "أُرسلت للصيدلية" : "Envoyée en pharmacie"}
                         </span>
                       ) : (
                         <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
-                          ⏳ لم تُستخدم بعد
+                          ⏳ {lang === "ar" ? "لم تُستخدم بعد" : "Pas encore utilisée"}
                         </span>
                       )}
 
@@ -182,7 +184,7 @@ export default function DoctorPrescriptions() {
                     ))}
                     {(rx.medications || []).length > 3 && (
                       <span className="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-lg font-bold">
-                        +{(rx.medications || []).length - 3} أخرى
+                        +{(rx.medications || []).length - 3} {lang === "ar" ? "أخرى" : "autre(s)"}
                       </span>
                     )}
                   </div>
@@ -193,17 +195,17 @@ export default function DoctorPrescriptions() {
                       {labReq.lab_id ? (
                         <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-700 bg-cyan-50 px-3 py-1.5 rounded-xl border border-cyan-100">
                           <FlaskConical className="w-3.5 h-3.5" />
-                          طلب التحليل أُرسل للمختبر
+                          {lang === "ar" ? "طلب التحليل أُرسل للمختبر" : "Demande d'analyse envoyée au laboratoire"}
                           {hasResults && (
-                            <span className="mr-auto text-emerald-600 flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" /> النتائج متاحة
+                            <span className="ms-auto text-emerald-600 flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" /> {lang === "ar" ? "النتائج متاحة" : "Résultats disponibles"}
                             </span>
                           )}
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-100">
                           <TestTube className="w-3.5 h-3.5" />
-                          ⏳ المريض لم يختر مختبراً بعد
+                          {lang === "ar" ? "⏳ المريض لم يختر مختبراً بعد" : "⏳ Le patient n'a pas encore choisi de laboratoire"}
                         </div>
                       )}
                     </div>
@@ -214,8 +216,8 @@ export default function DoctorPrescriptions() {
                     onClick={() => setExpandedId(isExpanded ? null : rx.id)}
                     className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
                     {isExpanded
-                      ? <><EyeOff className="w-3.5 h-3.5" /> إخفاء التفاصيل</>
-                      : <><Eye className="w-3.5 h-3.5" /> عرض التفاصيل</>
+                      ? <><EyeOff className="w-3.5 h-3.5" /> {lang === "ar" ? "إخفاء التفاصيل" : "Masquer les détails"}</>
+                      : <><Eye className="w-3.5 h-3.5" /> {lang === "ar" ? "عرض التفاصيل" : "Voir les détails"}</>
                     }
                   </button>
                 </div>
@@ -233,7 +235,7 @@ export default function DoctorPrescriptions() {
                         {/* All medications */}
                         <div>
                           <p className="text-xs font-black text-slate-500 mb-2 flex items-center gap-1">
-                            <Pill className="w-3.5 h-3.5" /> الأدوية الموصوفة
+                            <Pill className="w-3.5 h-3.5" /> {t("prescribedMeds")}
                           </p>
                           <div className="space-y-2">
                             {(rx.medications || []).map((med, idx) => (
@@ -259,7 +261,7 @@ export default function DoctorPrescriptions() {
                         {/* Doctor notes */}
                         {rx.doctor_notes && (
                           <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3">
-                            <p className="text-xs font-black text-amber-700 mb-1">ملاحظات للمريض:</p>
+                            <p className="text-xs font-black text-amber-700 mb-1">{lang === "ar" ? "ملاحظات للمريض:" : "Notes pour le patient :"}</p>
                             <p className="text-sm text-slate-700 font-medium">{rx.doctor_notes}</p>
                           </div>
                         )}
@@ -268,7 +270,7 @@ export default function DoctorPrescriptions() {
                         {hasLab && labReq && labReq.tests_list && labReq.tests_list.length > 0 && (
                           <div>
                             <p className="text-xs font-black text-slate-500 mb-2 flex items-center gap-1">
-                              <TestTube className="w-3.5 h-3.5" /> التحاليل المطلوبة
+                              <TestTube className="w-3.5 h-3.5" /> {t("requiredLabs")}
                             </p>
                             <div className="flex flex-wrap gap-1.5">
                               {labReq.tests_list.map((t, idx) => (
@@ -285,7 +287,7 @@ export default function DoctorPrescriptions() {
                         {hasResults && labReq && (
                           <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3">
                             <p className="text-xs font-black text-emerald-700 mb-2 flex items-center gap-1">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> النتائج متاحة:
+                              <CheckCircle2 className="w-3.5 h-3.5" /> {lang === "ar" ? "النتائج متاحة:" : "Résultats disponibles :"}
                             </p>
                             {labReq.lab_results[0].result_notes && (
                               <p className="text-xs text-slate-700 mb-2 font-medium leading-relaxed">
@@ -298,7 +300,7 @@ export default function DoctorPrescriptions() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:underline">
-                                <LinkIcon className="w-3 h-3" /> عرض ملف النتائج
+                                <LinkIcon className="w-3 h-3" /> {lang === "ar" ? "عرض ملف النتائج" : "Voir le fichier de résultats"}
                               </a>
                             )}
                           </div>
@@ -314,7 +316,7 @@ export default function DoctorPrescriptions() {
                             />
                             <div>
                               <p className="text-xs font-bold text-slate-700 flex items-center gap-1 mb-0.5">
-                                <QrCode className="w-3 h-3" /> رمز التحقق
+                                <QrCode className="w-3 h-3" /> {lang === "ar" ? "رمز التحقق" : "Code de vérification"}
                               </p>
                               <p className="text-xs font-mono text-slate-400">
                                 {rx.qr_token.substring(0, 16)}...

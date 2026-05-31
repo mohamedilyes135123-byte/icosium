@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { UserPlus } from "lucide-react";
 
 // ─── Common durations / frequencies ──────────────────────────────────────────
 const FREQUENCIES = ["مرة يومياً", "مرتان يومياً", "3 مرات يومياً", "كل 8 ساعات", "كل 12 ساعة", "عند اللزوم"];
@@ -72,10 +73,16 @@ export default function NewPrescriptionPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [doctorProfile, setDoctorProfile] = useState<any>(null);
 
-  // Patient search
+  // Patient search & creation
   const [patientQuery, setPatientQuery] = useState("");
   const [patientResults, setPatientResults] = useState<any[]>([]);
+  const [myPatients, setMyPatients] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
+
+  const [showNewPatientModal, setShowNewPatientModal] = useState(false);
+  const [newPatient, setNewPatient] = useState({ full_name: "", phone: "" });
+  const [creatingPatient, setCreatingPatient] = useState(false);
 
   // Medications
   const [meds, setMeds] = useState<Med[]>([newMed()]);
@@ -89,10 +96,11 @@ export default function NewPrescriptionPage() {
 
   // State
   const [saving, setSaving] = useState(false);
+  const [isSent, setIsSent] = useState(false);
   const [saved, setSaved] = useState<{ rx: any; qr: string } | null>(null);
   const [step, setStep] = useState<"form" | "preview">("form");
 
-  // Load doctor
+  // Load doctor & their patients
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -100,6 +108,17 @@ export default function NewPrescriptionPage() {
       setCurrentUser(user);
       const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
       setDoctorProfile(prof);
+
+      // Fetch my patients
+      const [{ data: rxs }, { data: appts }] = await Promise.all([
+        supabase.from("prescriptions").select("patient:profiles!prescriptions_patient_id_fkey(id, full_name, phone)").eq("doctor_id", user.id),
+        supabase.from("appointments").select("patient:profiles!appointments_patient_id_fkey(id, full_name, phone)").eq("doctor_id", user.id)
+      ]);
+      const pMap = new Map();
+      [...(rxs || []), ...(appts || [])].forEach((row: any) => {
+        if (row.patient && row.patient.id) pMap.set(row.patient.id, row.patient);
+      });
+      setMyPatients(Array.from(pMap.values()));
     };
     load();
   }, [supabase]);
@@ -113,11 +132,49 @@ export default function NewPrescriptionPage() {
         .select("id, full_name, phone")
         .eq("role", "patient")
         .ilike("full_name", `%${patientQuery}%`)
-        .limit(5);
+        .limit(10);
       setPatientResults(data || []);
     }, 300);
     return () => clearTimeout(timeout);
   }, [patientQuery, supabase]);
+
+  const handleCreateNewPatient = async () => {
+    if (!newPatient.full_name) return alert("يرجى إدخال اسم المريض");
+    setCreatingPatient(true);
+    
+    // Create an isolated client so it doesn't log the doctor out
+    const adminAuthClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!, 
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, 
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    );
+    
+    const { data, error } = await adminAuthClient.auth.signUp({
+      email: `patient_${Date.now()}@offline.icosium.com`,
+      password: 'OfflineUser123!',
+      options: {
+        data: {
+          full_name: newPatient.full_name,
+          phone: newPatient.phone,
+          role: 'patient',
+          is_offline: true
+        }
+      }
+    });
+    
+    setCreatingPatient(false);
+    if (error || !data.user) {
+      alert("خطأ في إنشاء ملف المريض: " + (error?.message || ""));
+      return;
+    }
+    
+    const createdProfile = { id: data.user.id, full_name: newPatient.full_name, phone: newPatient.phone };
+    setMyPatients(prev => [createdProfile, ...prev]);
+    setSelectedPatient(createdProfile);
+    setShowNewPatientModal(false);
+    setNewPatient({ full_name: "", phone: "" });
+    setPatientQuery("");
+  };
 
   // Drug search autocomplete
   const handleDrugSearch = (medId: string, query: string) => {
@@ -182,6 +239,22 @@ export default function NewPrescriptionPage() {
     window.print();
   };
 
+  const handleSendToPatient = async () => {
+    if (!saved?.rx || !selectedPatient || !currentUser) return;
+    
+    // Create a notification for the patient
+    await supabase.from("notifications").insert([{
+       user_id: selectedPatient.id,
+       title: "وصفة طبية جديدة",
+       content: `تلقيت وصفة طبية جديدة من د. ${doctorProfile?.full_name || currentUser.user_metadata?.full_name || "الطبيب"}`,
+       type: "prescription",
+       is_read: false
+    }]);
+    
+    setIsSent(true);
+    alert("تم إرسال الوصفة للمريض بنجاح، وتلقى إشعاراً بذلك!");
+  };
+
   // ── FORM VIEW ────────────────────────────────────────────────────────────────
   if (step === "form") return (
     <div className="w-full max-w-3xl mx-auto pb-20" dir="rtl">
@@ -223,33 +296,73 @@ export default function NewPrescriptionPage() {
         {/* Patient selection */}
         <Section title="المريض" icon={<User className="w-5 h-5 text-blue-600" />}>
           {!selectedPatient ? (
-            <div className="relative">
+              <div className="relative">
               <Search className="absolute right-3 top-3 w-4 h-4 text-slate-400" />
               <input
                 value={patientQuery}
                 onChange={e => setPatientQuery(e.target.value)}
-                placeholder="ابحث عن المريض بالاسم..."
+                onFocus={() => setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                placeholder="ابحث عن المريض بالاسم، أو اختر من مرضاك السابقين..."
                 className={`w-full h-11 pr-9 pl-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-sm`}
               />
-              {patientResults.length > 0 && (
-                <div className="absolute top-12 right-0 left-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-10 overflow-hidden">
-                  {patientResults.map(p => (
-                    <button key={p.id} onClick={() => { setSelectedPatient(p); setPatientQuery(""); setPatientResults([]); }}
-                      className="w-full px-4 py-3 flex items-center gap-3 hover:bg-blue-50 transition-colors text-right border-b border-slate-100 last:border-0">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-black text-sm">
-                        {p.full_name[0]}
+              
+              {showDropdown && (
+                <div className="absolute top-12 right-0 left-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-20 overflow-hidden max-h-72 overflow-y-auto">
+                  {patientQuery.length >= 2 ? (
+                    patientResults.length > 0 ? (
+                      patientResults.map(p => (
+                        <button key={p.id} onMouseDown={() => { setSelectedPatient(p); setPatientQuery(""); setPatientResults([]); setShowDropdown(false); }}
+                          className="w-full px-4 py-3 flex items-center gap-3 hover:bg-blue-50 transition-colors text-right border-b border-slate-100 last:border-0">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-black text-sm">
+                            {p.full_name[0]}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-800 text-sm">{p.full_name}</p>
+                            {p.phone && <p className="text-xs text-slate-400">{p.phone}</p>}
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center">
+                        <p className="text-xs text-slate-400 mb-2">لا توجد نتائج</p>
+                        <button onMouseDown={(e) => { e.preventDefault(); setShowNewPatientModal(true); setShowDropdown(false); setNewPatient(prev => ({...prev, full_name: patientQuery})) }} 
+                          className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1 mx-auto bg-blue-50 px-3 py-1.5 rounded-lg">
+                          <UserPlus className="w-3.5 h-3.5" /> إضافة "{patientQuery}" كمريض جديد
+                        </button>
                       </div>
-                      <div>
-                        <p className="font-bold text-slate-800 text-sm">{p.full_name}</p>
-                        {p.phone && <p className="text-xs text-slate-400">{p.phone}</p>}
+                    )
+                  ) : (
+                    <>
+                      <div className="bg-slate-50 px-4 py-2 border-b border-slate-100 flex justify-between items-center sticky top-0 z-10">
+                        <span className="text-xs font-bold text-slate-500">مرضاك السابقين</span>
+                        <button onMouseDown={(e) => { e.preventDefault(); setShowNewPatientModal(true); setShowDropdown(false); }} 
+                          className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 bg-white px-2 py-1 rounded shadow-sm border border-slate-200">
+                          <UserPlus className="w-3.5 h-3.5" /> مريض جديد
+                        </button>
                       </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-              {patientQuery.length >= 2 && patientResults.length === 0 && (
-                <div className="absolute top-12 right-0 left-0 bg-white border border-slate-100 rounded-2xl shadow-md z-10 p-4 text-center">
-                  <p className="text-xs text-slate-400">لا توجد نتائج — تأكد أن المريض مسجل في المنصة</p>
+                      {myPatients.length > 0 ? myPatients.map(p => (
+                        <button key={p.id} onMouseDown={() => { setSelectedPatient(p); setShowDropdown(false); }}
+                          className="w-full px-4 py-3 flex items-center gap-3 hover:bg-blue-50 transition-colors text-right border-b border-slate-100 last:border-0">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-black text-sm">
+                            {p.full_name[0]}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-700 text-sm">{p.full_name}</p>
+                            {p.phone && <p className="text-xs text-slate-400">{p.phone}</p>}
+                          </div>
+                        </button>
+                      )) : (
+                        <div className="p-6 text-center">
+                          <p className="text-xs text-slate-400 mb-3">لم تقم بمعاينة أي مرضى بعد</p>
+                          <button onMouseDown={(e) => { e.preventDefault(); setShowNewPatientModal(true); setShowDropdown(false); }} 
+                            className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-all shadow-md">
+                            إنشاء أول ملف طبي
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -389,6 +502,51 @@ export default function NewPrescriptionPage() {
           </button>
         </div>
       </div>
+
+      {/* New Patient Modal */}
+      <AnimatePresence>
+        {showNewPatientModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-200 p-6 relative">
+              <button onClick={() => setShowNewPatientModal(false)} className="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-full">
+                <X className="w-4 h-4" />
+              </button>
+              
+              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
+                <UserPlus className="w-6 h-6" />
+              </div>
+              <h2 className="text-xl font-black text-slate-800 mb-1">إضافة مريض جديد</h2>
+              <p className="text-sm text-slate-500 mb-6">إنشاء ملف طبي جديد لمريض غير مسجل في المنصة.</p>
+              
+              <div className="space-y-4 mb-8">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">الاسم الكامل <span className="text-red-500">*</span></label>
+                  <input value={newPatient.full_name} onChange={e => setNewPatient(prev => ({...prev, full_name: e.target.value}))} 
+                    className="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-sm" placeholder="اسم المريض الثلاثي..." />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">رقم الهاتف (اختياري)</label>
+                  <input value={newPatient.phone} onChange={e => setNewPatient(prev => ({...prev, phone: e.target.value}))} 
+                    className="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-sm text-left" placeholder="0550... أو 0660..." dir="ltr" />
+                </div>
+              </div>
+              
+              <div className="flex gap-3">
+                <button onClick={handleCreateNewPatient} disabled={creatingPatient || !newPatient.full_name.trim()}
+                  className="flex-1 h-12 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                  {creatingPatient ? "جاري الإنشاء..." : "إنشاء الملف"}
+                </button>
+                <button onClick={() => setShowNewPatientModal(false)}
+                  className="h-12 px-6 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors">
+                  إلغاء
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 
@@ -402,16 +560,41 @@ export default function NewPrescriptionPage() {
           <ArrowRight className="w-4 h-4" /> تعديل
         </button>
         <button onClick={handlePrint}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white font-bold text-sm shadow-lg">
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all">
           <Printer className="w-4 h-4" /> طباعة
         </button>
-        <button className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 text-white font-bold text-sm shadow-lg">
-          <Send className="w-4 h-4" /> إرسال للمريض
+        <button onClick={handleSendToPatient} disabled={isSent}
+          className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-bold text-sm shadow-lg transition-all ${isSent ? 'bg-slate-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600'}`}>
+          {isSent ? <CheckCircle className="w-4 h-4" /> : <Send className="w-4 h-4" />}
+          {isSent ? "تم الإرسال" : "إرسال للمريض"}
         </button>
       </div>
 
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #print-section, #print-section * {
+            visibility: visible;
+          }
+          #print-section {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+        }
+      `}</style>
+
       {/* ── PRINTABLE PRESCRIPTION ── */}
-      <div ref={printRef} className="bg-white rounded-3xl shadow-2xl shadow-slate-200/60 border border-slate-200 overflow-hidden print:shadow-none print:border-0 print:rounded-none">
+      <div id="print-section" ref={printRef} className="bg-white rounded-3xl shadow-2xl shadow-slate-200/60 border border-slate-200 overflow-hidden print:shadow-none print:border-0 print:rounded-none">
         
         {/* Header bar */}
         <div className="bg-gradient-to-l from-blue-700 to-cyan-600 px-8 py-5 flex justify-between items-center">

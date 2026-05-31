@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Home, HeartPulse, User, LogOut, Search, Activity, Sparkles, Thermometer, ClipboardList } from "lucide-react";
+import { Home, HeartPulse, User, LogOut, Search, Activity, Sparkles, Thermometer, ClipboardList, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function PatientLayout({ children }: { children: React.ReactNode }) {
@@ -17,8 +17,6 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
         window.location.href = "/login";
-      } else if (data.user.user_metadata?.role !== "patient") {
-        window.location.href = "/unauthorized";
       } else {
         setChecking(false);
       }
@@ -36,6 +34,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
     { href: "/ai-chat",   icon: <Sparkles className="w-5 h-5" />,     label: "المساعد الذكي" },
     { href: "/doctors",   icon: <Search className="w-5 h-5" />,        label: "البحث عن طبيب" },
     { href: "/requests",  icon: <Activity className="w-5 h-5" />,      label: "طلباتي الطبية" },
+    { href: "/appointments", icon: <Calendar className="w-5 h-5" />,   label: "مواعيدي" },
     { href: "/results",   icon: <ClipboardList className="w-5 h-5" />, label: "نتائجي ووصفاتي" },
     { href: "/vitals",    icon: <Thermometer className="w-5 h-5" />,   label: "قياساتي اليومية" },
     { href: "/profile",   icon: <User className="w-5 h-5" />,          label: "الملف الصحي" },
@@ -44,13 +43,31 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
   const mobileNav = [
     { href: "/dashboard", icon: <Home className="w-6 h-6" />,      label: "الرئيسية" },
     { href: "/ai-chat",   icon: <Sparkles className="w-6 h-6" />,  label: "المساعد" },
+    { href: "/appointments", icon: <Calendar className="w-6 h-6" />, label: "مواعيدي" },
     { href: "/results",   icon: <ClipboardList className="w-6 h-6" />, label: "نتائجي" },
-    { href: "/vitals",    icon: <HeartPulse className="w-6 h-6" />, label: "قياساتي" },
     { href: "/profile",   icon: <User className="w-6 h-6" />,       label: "ملفي" },
   ];
 
   const isActive = (href: string) =>
     href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
+
+  const [notifCount, setNotifCount] = useState(0);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        supabase
+          .from("notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("is_read", false)
+          .then(({ count }) => {
+            setNotifCount(count || 0);
+          });
+      }
+    });
+  }, [pathname]);
 
   if (checking) {
     return (
@@ -98,6 +115,9 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
           <nav style={{ flex: 1, padding: "24px 16px", display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
             {sideNav.map(item => {
               const active = isActive(item.href);
+              const isApptsOrReqs = item.href === "/requests" || item.href === "/appointments";
+              // We show the badge on the requests and appointments tab just to alert them
+              const showBadge = isApptsOrReqs && notifCount > 0;
               return (
                 <Link key={item.href} href={item.href} prefetch={true} style={{
                   position: "relative",
@@ -128,7 +148,12 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                   <div style={{ position: "relative", zIndex: 1, filter: active ? "none" : "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }}>
                     {item.icon}
                   </div>
-                  <span style={{ position: "relative", zIndex: 1 }}>{item.label}</span>
+                  <span style={{ position: "relative", zIndex: 1, flex: 1 }}>{item.label}</span>
+                  {showBadge && (
+                    <span style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", height: 20, minWidth: 20, padding: "0 6px", borderRadius: 999, background: "#ef4444", color: "#ffffff", fontSize: 10, fontWeight: "bold", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+                      {notifCount > 99 ? '99+' : notifCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -152,10 +177,17 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
         <nav className="premium-bottom-nav glass-panel md:hidden border-t border-emerald-100">
           {mobileNav.map(item => {
             const active = isActive(item.href);
+            const isApptsOrReqs = item.href === "/requests" || item.href === "/appointments";
+            const showBadge = isApptsOrReqs && notifCount > 0;
             return (
-              <Link key={item.href} href={item.href} prefetch={true} className={`nav-item${active ? " active" : ""}`}>
-                <div className="nav-icon" style={{ color: active ? "#16a34a" : "#9ca3af" }}>
+              <Link key={item.href} href={item.href} prefetch={true} className={`nav-item${active ? " active" : ""}`} style={{ position: "relative" }}>
+                <div className="nav-icon" style={{ color: active ? "#16a34a" : "#9ca3af", position: "relative" }}>
                   {item.icon}
+                  {showBadge && (
+                    <span style={{ position: "absolute", top: -4, right: -4, display: "flex", alignItems: "center", justifyContent: "center", height: 16, width: 16, borderRadius: 999, background: "#ef4444", color: "#ffffff", fontSize: 9, fontWeight: "bold", border: "2px solid #ffffff" }}>
+                      {notifCount > 99 ? '99+' : notifCount}
+                    </span>
+                  )}
                 </div>
                 <span style={{ fontSize: "0.6rem", fontWeight: 700, color: active ? "#16a34a" : "#9ca3af", marginTop: 2 }}>
                   {item.label}

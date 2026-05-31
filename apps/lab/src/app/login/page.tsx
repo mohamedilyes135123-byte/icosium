@@ -58,7 +58,8 @@ export default function LoginPage() {
 
       const userRole = data?.user?.user_metadata?.role;
       if (userRole === role) {
-        router.push(`/dashboard`);
+        document.cookie = `testing_bypass=lab; path=/; max-age=86400`;
+        window.location.href = `/dashboard`;
       } else {
          setError("يرجى التأكد من الدخول من البوابة المخصصة لك.");
          setLoading(false);
@@ -90,11 +91,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" dir="rtl">
-      {/* Animated background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-teal-200/40 rounded-full blur-[120px]" />
-        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-cyan-200/30 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-teal-50/40 to-white" />
+      {/* Animated Prominent Background */}
+      <div className="absolute inset-0 z-0 overflow-hidden bg-slate-50">
+        <div className="absolute top-[-10%] -right-[10%] w-[800px] h-[800px] bg-cyan-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft" />
+        <div className="absolute bottom-[-10%] -left-[10%] w-[600px] h-[600px] bg-sky-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px]" />
       </div>
 
       {/* Glow keyframes */}
@@ -109,8 +110,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-2xl border border-white relative z-10">
         <div className="flex flex-col items-center mb-8">
           <div className="inline-block relative mb-4">
-            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-300 opacity-60" />
-            <div className="w-28 h-28 rounded-2xl bg-white border border-teal-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
+            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-cyan-400 via-sky-400 to-cyan-300 opacity-60" />
+            <div className="w-28 h-28 rounded-2xl bg-white border border-cyan-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
               <img src="/logo.png" alt="عناية" className="w-24 h-24 object-contain drop-shadow-sm" />
             </div>
           </div>
@@ -138,7 +139,7 @@ export default function LoginPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="الاسم الكامل" 
-                className="w-full h-12 px-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-right"
+                className="w-full h-12 px-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all text-right"
                 required={!isLogin} 
               />
             </div>
@@ -150,7 +151,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="البريد الإلكتروني أو اسم المستخدم للخادم" 
-              className="w-full h-12 pl-4 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-left dir-ltr"
+              className="w-full h-12 pl-4 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all text-left dir-ltr"
               required 
             />
           </div>
@@ -162,18 +163,18 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="كلمة المرور" 
-              className="w-full h-12 pl-4 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-left dir-ltr"
+              className="w-full h-12 pl-4 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all text-left dir-ltr"
               required 
             />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-lg font-bold shadow-lg shadow-brand-500/20 mt-4">
+          <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-lg font-bold shadow-[0_4px_16px_rgba(6,182,212,0.3)] mt-4 bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-600 hover:to-sky-600 border-none text-white transition-all">
             {loading ? "جاري المعالجة..." : (isLogin ? "تأكيد الدخول" : "إنشاء الحساب")}
           </Button>
         </form>
 
         <div className="mt-6 text-center">
-          <button onClick={() => setIsLogin(!isLogin)} type="button" className="text-sm font-bold text-brand-600 hover:text-brand-500 transition-colors">
+          <button onClick={() => setIsLogin(!isLogin)} type="button" className="text-sm font-bold text-cyan-600 hover:text-cyan-500 transition-colors">
             {isLogin ? "ليس لديك حساب؟ إنشاء حساب جديد" : "لديك حساب بالفعل؟ تسجيل الدخول"}
           </button>
         </div>

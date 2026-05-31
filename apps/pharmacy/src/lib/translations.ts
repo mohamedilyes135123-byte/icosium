@@ -1,0 +1,230 @@
+export const translations = {
+  ar: {
+    // Sidebar navigation
+    dashboard: "لوحة التحكم",
+    prescriptions: "الوصفات الطبية",
+    inventory: "المخزون والطلبات",
+    settings: "الإعدادات",
+    logout: "تسجيل الخروج",
+    platformTitle: "نظام الصيدلية",
+
+    // Dashboard stats
+    total: "الإجمالي",
+    pending: "انتظار",
+    processing: "تجهيز",
+    delivered: "مسلّمة",
+    recentOrders: "آخر الطلبات",
+    viewAll: "عرض الكل",
+    noOrders: "لا توجد طلبات بعد",
+    noOrdersDesc: "ستظهر هنا الوصفات الواردة من المرضى",
+    
+    // Actions
+    startPrep: "بدء التجهيز",
+    deliver: "تسليم ✅",
+    done: "مكتمل",
+    verifyPrescription: "التحقق من الوصفة",
+    scanQR: "مسح QR",
+    searchCode: "البحث بالرمز",
+    prescriptionValid: "وصفة صالحة",
+    prescriptionUsed: "وصفة مستخدمة مسبقاً",
+    notFound: "لم يُعثر على وصفة بهذا الرمز",
+    patient: "المريض",
+    doctor: "الطبيب",
+    medicinesCount: "عدد الأدوية",
+    
+    // Quick links
+    prescriptionsLink: "الوصفات",
+    inventoryLink: "المخزون",
+    manageMedicines: "إدارة الأدوية",
+    
+    // Greetings
+    morning: "صباح الخير ☀️",
+    afternoon: "مساء الخير 🌤️",
+    evening: "مساء النور 🌙",
+    approved: "صيدلية معتمدة ✅",
+    underReview: "قيد المراجعة",
+    
+    // RBAC card
+    rbacTitle: "محمي ومراقب بالكامل",
+    rbacDesc: "قراءة الوصفات وتجهيزها | تعديل مكونات الوصفة محظور تقنياً",
+
+    // Inventory page
+    inventoryTitle: "إدارة المخزون",
+    inventorySubtitle: "تتبع مستويات الأدوية ونبّهات النفاد",
+    addMedicine: "إضافة دواء",
+    totalItems: "إجمالي الأصناف",
+    outOfStock: "نفاد المخزون",
+    lowStock: "مخزون منخفض",
+    searchMedicine: "بحث عن دواء...",
+    filterAll: "الكل",
+    colMedicine: "الدواء",
+    colStock: "المخزون",
+    colMin: "الأدنى",
+    colStatus: "الحالة",
+    statusAvailable: "متوفر",
+    statusLow: "منخفض",
+    statusOut: "نفد",
+    alertReorder: "يُنصح بإعادة الطلب",
+    alertOutPrefix: "صنف نفد تماماً",
+    alertLowPrefix: "صنف بمخزون منخفض",
+    addToInventory: "إضافة للمخزون",
+    addModalTitle: "إضافة دواء للمخزون",
+    placeholderMedName: "✏️ اسم الدواء والجرعة (مثال: Paracetamol 500mg)",
+    placeholderCategory: "الفئة العلاجية",
+    placeholderUnit: "الوحدة (علبة، أمبول...)",
+    placeholderCurrentQty: "الكمية الحالية",
+    placeholderMinQty: "الحد الأدنى للتنبيه",
+    cancel: "إلغاء",
+
+    // Prescriptions page
+    prescriptionsTitle: "وصفاتي من المرضى",
+    prescriptionsSubtitle: "تظهر هنا فقط الوصفات التي أرسلها المرضى مباشرة إلى صيدليتك.",
+    rbacNoticeTitle: "صلاحياتك كصيدلي (RBAC)",
+    rbacNoticeLine1: "✅ يمكنك تحديث حالة الطلب (قيد التحضير / جاهز).",
+    rbacNoticeLine2: "❌ لا يمكنك تعديل محتوى الوصفة أو الأدوية بأي شكل.",
+    rbacNoticeLine3: "🔐 لا ترى وصفات مرضى آخرين — فقط ما أُرسل إليك.",
+    prescriptionContentLabel: "محتوى الوصفة (للقراءة فقط)",
+    showAll: "عرض الكل",
+    hide: "إخفاء",
+    moreItems: "أدوية أخرى",
+    doctorNote: "ملاحظة الطبيب",
+    verifyCode: "رمز التحقق",
+    startPreparation: "بدء التحضير",
+    readyForPickup: "جاهز للاستلام ✅",
+    deliveredSuccess: "تم التسليم بنجاح",
+    noRequestsNow: "لا توجد طلبات حالياً",
+    noRequestsSubtitle: "ستظهر هنا الوصفات التي يرسلها المرضى إلى صيدليتك مباشرة.",
+    statusPending: "قيد الانتظار",
+    statusProcessing: "جاري التحضير",
+    statusCompleted: "جاهز للاستلام",
+    statusCancelled: "ملغى",
+    qrEnterCode: "أدخل رمز QR للتحقق",
+    verifyBtn: "🔍 التحقق من الوصفة",
+    pharmacyPermissions: "صلاحيات الصيدلية",
+
+    // Settings page
+    settingsTitle: "الإعدادات",
+    settingsSubtitle: "إدارة حساب الصيدلية",
+    settingsWip: "الإعدادات قيد التطوير",
+    settingsWipDesc: "عذراً، صفحة الإعدادات للصيدلية لا تزال قيد التطوير في هذه النسخة. سيتم إضافة خيارات التحكم المتقدمة قريباً.",
+
+    // Dashboard QR modal
+    myPharmacy: "صيدليتي",
+    scanQRBtn: "مسح QR",
+  },
+  fr: {
+    // Sidebar navigation
+    dashboard: "Tableau de bord",
+    prescriptions: "Ordonnances médicales",
+    inventory: "Inventaire et commandes",
+    settings: "Paramètres",
+    logout: "Déconnexion",
+    platformTitle: "Système de Pharmacie",
+
+    // Dashboard stats
+    total: "Total",
+    pending: "En attente",
+    processing: "En préparation",
+    delivered: "Livrées",
+    recentOrders: "Dernières commandes",
+    viewAll: "Voir tout",
+    noOrders: "Aucune commande pour l'instant",
+    noOrdersDesc: "Les ordonnances des patients apparaîtront ici",
+    
+    // Actions
+    startPrep: "Commencer la préparation",
+    deliver: "Livrer ✅",
+    done: "Terminé",
+    verifyPrescription: "Vérifier l'ordonnance",
+    scanQR: "Scanner QR",
+    searchCode: "Rechercher par code",
+    prescriptionValid: "Ordonnance valide",
+    prescriptionUsed: "Ordonnance déjà utilisée",
+    notFound: "Aucune ordonnance trouvée avec ce code",
+    patient: "Patient",
+    doctor: "Médecin",
+    medicinesCount: "Nombre de médicaments",
+    
+    // Quick links
+    prescriptionsLink: "Ordonnances",
+    inventoryLink: "Inventaire",
+    manageMedicines: "Gérer les médicaments",
+    
+    // Greetings
+    morning: "Bonjour ☀️",
+    afternoon: "Bon après-midi 🌤️",
+    evening: "Bonsoir 🌙",
+    approved: "Pharmacie approuvée ✅",
+    underReview: "En cours de révision",
+    
+    // RBAC card
+    rbacTitle: "Sécurisé et surveillé",
+    rbacDesc: "Lecture et préparation des ordonnances | Modification du contenu interdite techniquement",
+
+    // Inventory page
+    inventoryTitle: "Gestion des stocks",
+    inventorySubtitle: "Suivez les niveaux de médicaments et les alertes de rupture",
+    addMedicine: "Ajouter un médicament",
+    totalItems: "Total des articles",
+    outOfStock: "Rupture de stock",
+    lowStock: "Stock faible",
+    searchMedicine: "Rechercher un médicament...",
+    filterAll: "Tout",
+    colMedicine: "Médicament",
+    colStock: "Stock",
+    colMin: "Minimum",
+    colStatus: "État",
+    statusAvailable: "Disponible",
+    statusLow: "Faible",
+    statusOut: "Épuisé",
+    alertReorder: "Il est conseillé de recommander",
+    alertOutPrefix: "article(s) en rupture totale",
+    alertLowPrefix: "article(s) en stock faible",
+    addToInventory: "Ajouter au stock",
+    addModalTitle: "Ajouter un médicament au stock",
+    placeholderMedName: "✏️ Nom du médicament et dosage (ex: Paracetamol 500mg)",
+    placeholderCategory: "Catégorie thérapeutique",
+    placeholderUnit: "Unité (boîte, ampoule...)",
+    placeholderCurrentQty: "Quantité actuelle",
+    placeholderMinQty: "Seuil minimum d'alerte",
+    cancel: "Annuler",
+
+    // Prescriptions page
+    prescriptionsTitle: "Mes ordonnances patients",
+    prescriptionsSubtitle: "Seules les ordonnances envoyées directement à votre pharmacie sont affichées ici.",
+    rbacNoticeTitle: "Vos autorisations en tant que pharmacien (RBAC)",
+    rbacNoticeLine1: "✅ Vous pouvez mettre à jour le statut (en préparation / prêt).",
+    rbacNoticeLine2: "❌ Vous ne pouvez pas modifier le contenu d'une ordonnance.",
+    rbacNoticeLine3: "🔐 Vous ne voyez que les ordonnances qui vous sont destinées.",
+    prescriptionContentLabel: "Contenu de l'ordonnance (lecture seule)",
+    showAll: "Voir tout",
+    hide: "Masquer",
+    moreItems: "médicament(s) supplémentaire(s)",
+    doctorNote: "Note du médecin",
+    verifyCode: "Code de vérification",
+    startPreparation: "Commencer la préparation",
+    readyForPickup: "Prêt à récupérer ✅",
+    deliveredSuccess: "Livraison effectuée avec succès",
+    noRequestsNow: "Aucune demande actuellement",
+    noRequestsSubtitle: "Les ordonnances envoyées par les patients à votre pharmacie apparaîtront ici.",
+    statusPending: "En attente",
+    statusProcessing: "En préparation",
+    statusCompleted: "Prêt à récupérer",
+    statusCancelled: "Annulé",
+    qrEnterCode: "Entrez le code QR pour vérifier",
+    verifyBtn: "🔍 Vérifier l'ordonnance",
+    pharmacyPermissions: "Autorisations Pharmacie",
+
+    // Settings page
+    settingsTitle: "Paramètres",
+    settingsSubtitle: "Gestion du compte pharmacie",
+    settingsWip: "Paramètres en cours de développement",
+    settingsWipDesc: "Désolé, la page des paramètres de la pharmacie est encore en cours de développement. Des options avancées seront ajoutées prochainement.",
+
+    // Dashboard QR modal
+    myPharmacy: "Ma Pharmacie",
+    scanQRBtn: "Scanner QR",
+  }
+};
+
+export type TranslationKey = keyof typeof translations.ar;

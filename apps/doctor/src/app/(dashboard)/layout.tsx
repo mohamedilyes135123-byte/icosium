@@ -1,10 +1,13 @@
-﻿"use client";
+"use client";
+
+import { useState, useEffect } from "react";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Stethoscope, LogOut, Users, FileText, Calendar, LayoutDashboard, Settings, PlusCircle } from "lucide-react";
+import { Home, LogOut, Users, ClipboardList, Calendar, Settings, PlusCircle, Globe, Activity } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import { useLanguage } from "@/components/LanguageContext";
 
 export default function DoctorLayout({
   children,
@@ -14,14 +17,38 @@ export default function DoctorLayout({
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const { t, lang, setLang } = useLanguage();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
   };
 
+  const [reqCount, setReqCount] = useState(0);
+  const [apptCount, setApptCount] = useState(0);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        supabase
+          .from("medical_requests")
+          .select("id", { count: "exact", head: true })
+          .or(`doctor_id.eq.${user.id},doctor_id.is.null`)
+          .eq("status", "PENDING")
+          .then(({ count }) => { setReqCount(count || 0); });
+          
+        supabase
+          .from("appointments")
+          .select("id", { count: "exact", head: true })
+          .eq("doctor_id", user.id)
+          .eq("status", "PENDING")
+          .then(({ count }) => { setApptCount(count || 0); });
+      }
+    });
+  }, [pathname, supabase]);
+
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-blue-500/20 relative">
+    <div key={lang} className="flex h-screen bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-blue-500/20 relative" dir={lang === "ar" ? "rtl" : "ltr"}>
       
       {/* Daylight Ambient Background */}
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-daylight">
@@ -29,41 +56,79 @@ export default function DoctorLayout({
          <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
-      {/* Bright Glass Sidebar (Desktop) */}
-      <aside className="hidden md:flex w-72 border-r rtl:border-l rtl:border-r-0 border-blue-100 flex-col z-20 h-screen glass-panel">
-        <div className="p-6 flex items-center gap-3 text-slate-800 font-bold text-xl border-b border-blue-100 bg-white/50">
-          <img src="/logo.png" alt="Ø¹Ù†Ø§ÙŠØ©" className="w-10 h-10 object-contain" />
-          <span className="tracking-wide">Ù…Ù†ØµØ© Ø§Ù„Ø·Ø¨ÙŠØ¨</span>
+      {/* ─── Premium Blue Gradient Sidebar ─── */}
+      <aside className="hidden md:flex w-72 flex-col z-20 h-screen relative overflow-hidden"
+        style={{ background: "linear-gradient(160deg, #1d4ed8 0%, #0369a1 45%, #06b6d4 100%)", boxShadow: "4px 0 40px 0 rgba(59,130,246,0.35), 8px 0 80px 0 rgba(6,182,212,0.15)" }}>
+
+        {/* Animated Stethoscope Background */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+          <motion.div
+            animate={{ y: [0, -18, 0], rotate: [0, 4, -4, 0], scale: [1, 1.04, 1] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -bottom-10 -right-10 text-white/5 text-[260px] leading-none"
+            style={{ fontFamily: "sans-serif" }}
+          >
+            🩺
+          </motion.div>
+          <motion.div
+            animate={{ y: [0, 12, 0], rotate: [0, -3, 3, 0] }}
+            transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute top-1/3 -left-16 text-white/5 text-[180px] leading-none"
+          >
+            🩺
+          </motion.div>
+        </div>
+
+        {/* Decorative blobs inside sidebar */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl translate-x-16 -translate-y-16 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-cyan-300/20 rounded-full blur-3xl -translate-x-10 translate-y-10 pointer-events-none" />
+
+        {/* Logo Header */}
+        <div className="relative z-10 p-6 flex items-center gap-3 border-b border-white/20">
+          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-black/20">
+            <img src="/logo.png" alt={t("platformTitle")} className="w-8 h-8 object-contain" />
+          </div>
+          <span className="text-white font-black text-xl tracking-wide drop-shadow-sm">{t("platformTitle")}</span>
         </div>
         
-        <nav className="flex-1 px-4 py-6 space-y-2 relative">
-          <NavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5"/>} label="Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…" current={pathname} />
-          <NavItem href="/requests" icon={<Calendar className="w-5 h-5"/>} label="Ø·Ù„Ø¨Ø§Øª Ø§Ù„Ù…Ø±Ø¶Ù‰" current={pathname} />
-          <NavItem href="/appointments" icon={<Calendar className="w-5 h-5"/>} label="المواعيد" current={pathname} />
-          <NavItem href="/prescriptions" icon={<FileText className="w-5 h-5"/>} label="ÙˆØµÙØ§ØªÙŠ ÙˆØªØ­Ø§Ù„ÙŠÙ„ÙŠ" current={pathname} />
-          <NavItem href="/patients" icon={<Users className="w-5 h-5"/>} label="Ù…Ù„ÙØ§Øª Ø§Ù„Ù…Ø±Ø¶Ù‰" current={pathname} />
-          <NavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label="Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª" current={pathname} />
+        {/* Nav Items */}
+        <nav className="flex-1 px-4 py-6 space-y-2 relative z-10">
+          <NavItem href="/dashboard" icon={<Home className="w-5 h-5"/>} label={t("dashboard")} current={pathname} />
+          <NavItem href="/requests" icon={<Activity className="w-5 h-5"/>} label={t("requests")} current={pathname} badge={reqCount > 0 ? reqCount : undefined} />
+          <NavItem href="/appointments" icon={<Calendar className="w-5 h-5"/>} label={t("appointments")} current={pathname} badge={apptCount > 0 ? apptCount : undefined} />
+          <NavItem href="/prescriptions" icon={<ClipboardList className="w-5 h-5"/>} label={t("prescriptions")} current={pathname} />
+          <NavItem href="/patients" icon={<Users className="w-5 h-5"/>} label={t("patients")} current={pathname} />
+          <NavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label={t("settings")} current={pathname} />
 
           {/* Quick action */}
-          <div className="pt-3 mt-3 border-t border-blue-100">
+          <div className="pt-4 mt-4 border-t border-white/20">
             <Link href="/prescriptions/new"
-              className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all">
+              className="flex items-center gap-3 px-4 py-4 rounded-2xl bg-white text-blue-700 font-black text-sm shadow-xl shadow-black/20 hover:shadow-black/30 hover:-translate-y-0.5 transition-all border border-white/80">
               <PlusCircle className="w-5 h-5 flex-shrink-0" />
-              ÙˆØµÙØ© Ø¬Ø¯ÙŠØ¯Ø©
+              {t("newPrescription")}
             </Link>
           </div>
         </nav>
 
-        <div className="p-4 border-t border-blue-100 bg-white/40">
-          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors text-sm font-bold border border-rose-100 bg-white/50 shadow-sm">
+        {/* Footer */}
+        <div className="relative z-10 p-4 border-t border-white/20 space-y-2">
+          <button 
+            onClick={() => setLang(lang === "ar" ? "fr" : "ar")}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white/90 hover:bg-white/15 transition-colors text-sm font-bold border border-white/20"
+          >
+            <Globe className="w-4 h-4"/>
+            {lang === "ar" ? "Français" : "العربية"}
+          </button>
+
+          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:bg-white/15 transition-colors text-sm font-bold border border-white/20">
             <LogOut className="w-4 h-4"/>
-            ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬
+            {t("logout")}
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative z-10 overflow-hidden text-right pb-24 md:pb-0">
+      <main className={`flex-1 flex flex-col relative z-10 overflow-hidden pb-24 md:pb-0 ${lang === "ar" ? "text-right" : "text-left"}`}>
          <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
@@ -79,52 +144,65 @@ export default function DoctorLayout({
             </motion.div>
           </AnimatePresence>
       </main>
-        </div>
+
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full glass-panel border-t border-blue-100 z-50 flex justify-around items-center px-2 py-3" style={{ paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
-        <MobileNavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5"/>} label="Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©" current={pathname} />
-        <MobileNavItem href="/requests" icon={<Calendar className="w-5 h-5"/>} label="Ø§Ù„Ø·Ù„Ø¨Ø§Øª" current={pathname} />
+        <MobileNavItem href="/dashboard" icon={<Home className="w-5 h-5"/>} label={t("dashboard")} current={pathname} />
+        <MobileNavItem href="/requests" icon={<Activity className="w-5 h-5"/>} label={t("requests")} current={pathname} badge={reqCount > 0 ? reqCount : undefined} />
         <Link href="/prescriptions/new" className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full text-white shadow-lg shadow-blue-500/30 -mt-8 border-4 border-slate-50">
           <PlusCircle className="w-6 h-6" />
         </Link>
-        <MobileNavItem href="/patients" icon={<Users className="w-5 h-5"/>} label="Ø§Ù„Ù…Ø±Ø¶Ù‰" current={pathname} />
-        <MobileNavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label="Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª" current={pathname} />
+        <MobileNavItem href="/appointments" icon={<Calendar className="w-5 h-5"/>} label={t("appointments")} current={pathname} badge={apptCount > 0 ? apptCount : undefined} />
+        <MobileNavItem href="/patients" icon={<Users className="w-5 h-5"/>} label={t("patients")} current={pathname} />
+        <MobileNavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label={t("settings")} current={pathname} />
       </nav>
     </div>
   );
 }
 
-function MobileNavItem({ href, icon, label, current }: { href: string; icon: React.ReactNode; label: string, current: string }) {
+function MobileNavItem({ href, icon, label, current, badge }: { href: string; icon: React.ReactNode; label: string, current: string, badge?: number }) {
   const isActive = current === href || (href !== '/dashboard' && current.startsWith(href));
   return (
-    <Link href={href} prefetch={true} className={`flex flex-col items-center gap-1 min-w-[60px] ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>
-      <div className={`p-1.5 rounded-xl ${isActive ? 'bg-blue-50' : ''}`}>
+    <Link href={href} prefetch={true} className={`flex flex-col items-center gap-1 min-w-[60px] ${isActive ? 'text-blue-600' : 'text-slate-400'} relative`}>
+      <div className={`p-1.5 rounded-xl ${isActive ? 'bg-blue-50' : ''} relative`}>
         {icon}
+        {badge !== undefined && (
+          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-white">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
       </div>
       <span className="text-[10px] font-bold">{label}</span>
     </Link>
   );
 }
 
-function NavItem({ href, icon, label, current }: { href: string; icon: React.ReactNode; label: string, current: string }) {
+function NavItem({ href, icon, label, current, badge }: { href: string; icon: React.ReactNode; label: string, current: string, badge?: number }) {
   const isActive = current === href || (href !== '/dashboard' && current.startsWith(href));
   
   return (
     <Link 
       href={href} 
-      className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-all duration-300 font-bold relative group overflow-hidden ${isActive ? 'text-blue-900' : 'text-slate-500 hover:text-slate-800'}`}
+      className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 font-bold relative group overflow-hidden ${isActive ? 'text-blue-800' : 'text-white/80 hover:text-white'}`}
     >
       {isActive && (
         <motion.div 
           layoutId="doctor-active-nav"
-          className="absolute inset-0 bg-white/80 border border-white rounded-xl shadow-[0_2px_15px_rgba(37,99,235,0.08)] backdrop-blur-sm"
+          className="absolute inset-0 bg-white rounded-2xl shadow-xl shadow-black/20"
         />
       )}
-      <div className={`relative z-10 transition-transform duration-300 ${isActive ? 'text-blue-600 scale-110 drop-shadow-[0_0_10px_rgba(37,99,235,0.2)]' : 'group-hover:scale-110'}`}>
+      {!isActive && (
+        <div className="absolute inset-0 rounded-2xl bg-white/0 group-hover:bg-white/10 transition-colors duration-200" />
+      )}
+      <div className={`relative z-10 transition-transform duration-300 ${isActive ? 'text-blue-600 scale-110' : 'group-hover:scale-110'}`}>
         {icon}
       </div>
-      <span className="relative z-10">{label}</span>
+      <span className={`relative z-10 flex-1 text-base ${isActive ? 'text-blue-800 font-black' : 'font-bold'}`}>{label}</span>
+      {badge !== undefined && (
+        <span className="relative z-10 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white shadow-sm">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </Link>
   );
 }
-

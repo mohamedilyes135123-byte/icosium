@@ -142,11 +142,11 @@ export default function PatientLoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" dir="rtl">
-      {/* BG */}
-      <div className="absolute inset-0">
-        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-emerald-200/40 rounded-full blur-[120px]" />
-        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-teal-200/30 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-emerald-50/30 to-white" />
+      {/* Animated Prominent Background */}
+      <div className="absolute inset-0 z-0 overflow-hidden bg-slate-50">
+        <div className="absolute top-[-10%] -right-[10%] w-[800px] h-[800px] bg-emerald-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft" />
+        <div className="absolute bottom-[-10%] -left-[10%] w-[600px] h-[600px] bg-green-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px]" />
       </div>
 
       {/* Glow keyframes */}
@@ -168,7 +168,7 @@ export default function PatientLoginPage() {
             </div>
           </div>
           <h1 className="text-3xl font-black text-slate-900">عناية</h1>
-          <p className="text-emerald-600 font-semibold text-sm mt-1">بوابة المرضى — طبيبك في بيتك</p>
+          <h2 className="text-xl md:text-2xl font-black mt-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-teal-500">بوابة المرضى — طبيبك في بيتك</h2>
           <p className="text-slate-400 text-xs mt-1">
             <Shield className="inline w-3.5 h-3.5 text-emerald-500 mx-1" />
             بياناتك مشفرة ومحمية بالكامل

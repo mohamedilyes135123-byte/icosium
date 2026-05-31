@@ -19,12 +19,18 @@ interface Profile {
   is_banned?: boolean; subscription_plan?: string;
 }
 
-const ROLE_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string }> = {
-  doctor:   { label: "طبيب",    icon: Stethoscope, color: "text-blue-700",   bg: "bg-blue-100" },
-  lab:      { label: "مختبر",   icon: FlaskConical, color: "text-cyan-700",  bg: "bg-cyan-100" },
-  pharmacy: { label: "صيدلية",  icon: Pill,         color: "text-purple-700", bg: "bg-purple-100" },
-  patient:  { label: "مريض",   icon: User,          color: "text-emerald-700", bg: "bg-emerald-100" },
-  admin:    { label: "إدارة",   icon: Shield,        color: "text-indigo-700", bg: "bg-indigo-100" },
+const ROLE_CONFIG: Record<string, { label: string; iconSrc: string; color: string; bg: string; border: string }> = {
+  doctor:   { label: "طبيب",    iconSrc: "/icon_role_doctor.png",   color: "text-blue-700",    bg: "bg-blue-50",    border: "border-blue-100" },
+  lab:      { label: "مختبر",   iconSrc: "/icon_role_lab.png",      color: "text-cyan-700",   bg: "bg-cyan-50",    border: "border-cyan-100" },
+  pharmacy: { label: "صيدلية",  iconSrc: "/icon_role_pharmacy.png", color: "text-purple-700", bg: "bg-purple-50", border: "border-purple-100" },
+  patient:  { label: "مريض",   iconSrc: "/icon_role_patient.png",  color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-100" },
+  admin:    { label: "إدارة",   iconSrc: "/icon_role_admin.png",    color: "text-indigo-700", bg: "bg-indigo-50",  border: "border-indigo-100" },
+};
+
+const STATUS_CFG: Record<string, { src: string; label: string; style: string }> = {
+  approved: { src: "/icon_status_approved.png", label: "معتمد",  style: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  rejected: { src: "/icon_status_rejected.png", label: "مرفوض",  style: "bg-rose-50 text-rose-700 border-rose-200" },
+  pending:  { src: "/icon_status_pending.png",  label: "انتظار", style: "bg-amber-50 text-amber-700 border-amber-200" },
 };
 
 export default function AdminUsers() {
@@ -174,15 +180,15 @@ export default function AdminUsers() {
             <p className="text-slate-400 text-sm">{profiles.length} مستخدم مسجّل في النظام</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-2xl bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-600/10 transition-colors">
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-500 hover:from-indigo-700 hover:to-violet-600 text-white shadow-[0_4px_16px_rgba(79,70,229,0.3)] transition-all">
               <Plus className="w-4 h-4" />
               إضافة مستخدم
-            </button>
-            <button onClick={fetchProfiles} disabled={loading}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-2xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">
+            </motion.button>
+            <motion.button whileHover={{ scale: 1.05, rotate: 15 }} whileTap={{ scale: 0.95 }} onClick={fetchProfiles} disabled={loading}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-2xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 shadow-sm">
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            </button>
+            </motion.button>
           </div>
         </div>
       </motion.div>
@@ -234,7 +240,6 @@ export default function AdminUsers() {
         <div className="divide-y divide-slate-50">
           {filtered.map((p, i) => {
             const conf = ROLE_CONFIG[p.role] || ROLE_CONFIG.patient;
-            const Icon = conf.icon;
             const isExpanded = expanded === p.id;
 
             return (
@@ -243,14 +248,18 @@ export default function AdminUsers() {
                 <div className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50/50 transition-colors cursor-pointer"
                   onClick={() => setExpanded(isExpanded ? null : p.id)}>
                   {/* Avatar */}
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${conf.bg}`}>
-                    <Icon className={`w-5 h-5 ${conf.color}`} />
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 border ${conf.bg} ${conf.border}`}>
+                    <img src={conf.iconSrc} className="w-8 h-8 object-contain" alt={conf.label} />
                   </div>
                   {/* Name & role */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-slate-800 text-sm truncate">{p.full_name}</p>
-                      {p.is_banned && <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-black">🚫 محظور</span>}
+                      {p.is_banned && (
+                        <span className="flex items-center gap-1 text-[10px] bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full font-black border border-rose-200">
+                          <img src="/icon_status_rejected.png" className="w-3.5 h-3.5 object-contain" alt="" /> محظور
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${conf.bg} ${conf.color}`}>{conf.label}</span>
@@ -258,13 +267,12 @@ export default function AdminUsers() {
                     </div>
                   </div>
                   {/* Status */}
-                  <span className={`text-[10px] font-black px-2.5 py-1 rounded-xl border flex-shrink-0 ${
-                    p.approval_status === "approved" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                    p.approval_status === "rejected" ? "bg-rose-50 text-rose-700 border-rose-200" :
-                    "bg-amber-50 text-amber-700 border-amber-200"
-                  }`}>
-                    {p.approval_status === "approved" ? "✅" : p.approval_status === "rejected" ? "❌" : "⏳"}
-                  </span>
+                  {(() => { const s = STATUS_CFG[p.approval_status] || STATUS_CFG.pending; return (
+                    <span className={`flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-xl border flex-shrink-0 ${s.style}`}>
+                      <img src={s.src} className="w-4 h-4 object-contain" alt="" />
+                      {s.label}
+                    </span>
+                  ); })()}
                   <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                 </div>
 
@@ -283,32 +291,32 @@ export default function AdminUsers() {
 
                         <div className="flex flex-wrap gap-2">
                           {p.role !== "patient" && p.approval_status !== "approved" && (
-                            <button onClick={() => updateApproval(p.id, "approved")} disabled={actioning === p.id}
-                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold disabled:opacity-50">
-                              <CheckCircle className="w-3.5 h-3.5" /> اعتماد
-                            </button>
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => updateApproval(p.id, "approved")} disabled={actioning === p.id}
+                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500 text-white text-xs font-bold disabled:opacity-50 shadow-sm">
+                              <img src="/icon_status_approved.png" className="w-4 h-4 object-contain" alt="" /> اعتماد
+                            </motion.button>
                           )}
                           {p.role !== "patient" && p.approval_status === "approved" && (
-                            <button onClick={() => updateApproval(p.id, "rejected")} disabled={actioning === p.id}
-                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-amber-200 text-amber-600 text-xs font-bold disabled:opacity-50 hover:bg-amber-50">
-                              <XCircle className="w-3.5 h-3.5" /> إلغاء الاعتماد
-                            </button>
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => updateApproval(p.id, "rejected")} disabled={actioning === p.id}
+                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-amber-200 text-amber-600 text-xs font-bold disabled:opacity-50 hover:bg-amber-50 shadow-sm">
+                              <img src="/icon_status_pending.png" className="w-4 h-4 object-contain" alt="" /> إلغاء الاعتماد
+                            </motion.button>
                           )}
                           {p.role !== "admin" && (
-                            <button onClick={() => toggleBan(p.id, !!p.is_banned)} disabled={actioning === p.id}
-                              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-50 border transition-colors ${
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => toggleBan(p.id, !!p.is_banned)} disabled={actioning === p.id}
+                              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-50 border transition-all shadow-sm ${
                                 p.is_banned ? "border-emerald-200 text-emerald-600 hover:bg-emerald-50" : "border-rose-200 text-rose-600 hover:bg-rose-50"
                               }`}>
-                              <Ban className="w-3.5 h-3.5" />
+                              <img src={p.is_banned ? "/icon_status_approved.png" : "/icon_status_rejected.png"} className="w-4 h-4 object-contain" alt="" />
                               {p.is_banned ? "رفع الحظر" : "حظر الحساب"}
-                            </button>
+                            </motion.button>
                           )}
                           {["doctor", "lab", "pharmacy"].includes(p.role) && (
-                            <button onClick={() => setShowDeleteConfirm(p.id)} disabled={actioning === p.id}
-                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-50 border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors">
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowDeleteConfirm(p.id)} disabled={actioning === p.id}
+                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-50 border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all shadow-sm">
                               <Trash2 className="w-3.5 h-3.5" />
                               حذف الحساب
-                            </button>
+                            </motion.button>
                           )}
                         </div>
                       </div>

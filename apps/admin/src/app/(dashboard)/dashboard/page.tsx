@@ -31,14 +31,28 @@ const ROLE_LABELS: Record<string, string> = {
   doctor: "طبيب", lab: "مختبر", pharmacy: "صيدلية", patient: "مريض",
 };
 
+const ROLE_ICON_SRC: Record<string, string> = {
+  doctor:   "/icon_role_doctor.png",
+  lab:      "/icon_role_lab.png",
+  pharmacy: "/icon_role_pharmacy.png",
+  patient:  "/icon_role_patient.png",
+};
+
 const ROLE_ICONS: Record<string, React.ReactNode> = {
-  doctor:   <Stethoscope className="w-4 h-4" />,
-  lab:      <FlaskConical className="w-4 h-4" />,
-  pharmacy: <Pill className="w-4 h-4" />,
-  patient:  <User className="w-4 h-4" />,
+  doctor:   <img src="/icon_role_doctor.png" className="w-7 h-7 object-contain drop-shadow-sm" alt="طبيب" />,
+  lab:      <img src="/icon_role_lab.png" className="w-7 h-7 object-contain drop-shadow-sm" alt="مختبر" />,
+  pharmacy: <img src="/icon_role_pharmacy.png" className="w-7 h-7 object-contain drop-shadow-sm" alt="صيدلية" />,
+  patient:  <img src="/icon_role_patient.png" className="w-7 h-7 object-contain drop-shadow-sm" alt="مريض" />,
 };
 
 const ROLE_COLORS: Record<string, string> = {
+  doctor:   "bg-blue-50 border-blue-100",
+  lab:      "bg-cyan-50 border-cyan-100",
+  pharmacy: "bg-purple-50 border-purple-100",
+  patient:  "bg-emerald-50 border-emerald-100",
+};
+
+const ROLE_BADGE_COLORS: Record<string, string> = {
   doctor:   "bg-blue-100 text-blue-700",
   lab:      "bg-cyan-100 text-cyan-700",
   pharmacy: "bg-purple-100 text-purple-700",
@@ -132,9 +146,20 @@ export default function AdminDashboard() {
     : allProfiles.filter(p => p.role === filterRole);
 
   const statusColor = (s: string) =>
-    s === "approved" ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
-    s === "rejected" ? "bg-rose-100 text-rose-700 border-rose-200" :
-    "bg-amber-100 text-amber-700 border-amber-200";
+    s === "approved" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+    s === "rejected" ? "bg-rose-50 text-rose-700 border-rose-200" :
+    "bg-amber-50 text-amber-700 border-amber-200";
+
+  const StatusBadge = ({ status }: { status: string }) => (
+    <span className={`flex items-center gap-1.5 text-xs font-black px-2.5 py-1.5 rounded-xl border ${statusColor(status)}`}>
+      <img
+        src={status === "approved" ? "/icon_status_approved.png" : status === "rejected" ? "/icon_status_rejected.png" : "/icon_status_pending.png"}
+        className="w-4 h-4 object-contain"
+        alt={status}
+      />
+      {status === "approved" ? "معتمد" : status === "rejected" ? "مرفوض" : "انتظار"}
+    </span>
+  );
 
   const auditStatusStyle = (s: string) =>
     s === "BLOCKED"   ? "bg-rose-100 text-rose-700 border-rose-200" :
@@ -159,8 +184,8 @@ export default function AdminDashboard() {
           <p className="text-slate-400 text-sm">منصة عناية — إدارة شاملة بصلاحيات كاملة</p>
         </div>
         <button onClick={fetchData} disabled={loading}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-600 border border-slate-200 rounded-2xl bg-white hover:bg-slate-50 transition-all">
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-indigo-500" : ""}`} />
+          className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold bg-gradient-to-l from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-2xl transition-all disabled:opacity-60">
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           تحديث
         </button>
       </motion.header>
@@ -195,12 +220,14 @@ export default function AdminDashboard() {
         ].map(t => (
           <button key={t.key} onClick={() => setActiveTab(t.key as any)}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              activeTab === t.key ? "bg-white text-indigo-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              activeTab === t.key
+                ? "bg-gradient-to-l from-indigo-600 to-violet-600 text-white"
+                : "text-slate-600 hover:bg-slate-200"
             }`}>
             {t.label}
             {t.count > 0 && (
               <span className={`text-xs px-2 py-0.5 rounded-full font-black ${
-                activeTab === t.key ? "bg-indigo-100 text-indigo-700" : "bg-slate-200 text-slate-500"
+                activeTab === t.key ? "bg-white/20 text-white" : "bg-slate-300 text-slate-700"
               }`}>{t.count}</span>
             )}
           </button>
@@ -223,41 +250,49 @@ export default function AdminDashboard() {
               {pendingProfiles.map((p, i) => (
                 <motion.div key={p.id}
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }}
-                  className="glass-panel rounded-3xl p-6">
+                  className="bg-white rounded-3xl p-6 shadow-md border-2 border-slate-100 hover:border-violet-200 hover:shadow-xl transition-all">
 
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="flex justify-between items-start mb-5">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${ROLE_COLORS[p.role] || "bg-slate-100"}`}>
-                        {ROLE_ICONS[p.role] || <User className="w-4 h-4" />}
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-2 ${ROLE_COLORS[p.role] || "bg-slate-50 border-slate-100"} shadow-sm`}>
+                        {ROLE_ICONS[p.role] || <User className="w-6 h-6 text-slate-400" />}
                       </div>
                       <div>
-                        <p className="font-black text-slate-800">{p.full_name}</p>
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ROLE_COLORS[p.role]}`}>
+                        <p className="font-black text-slate-800 text-lg leading-tight">{p.full_name}</p>
+                        <span className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-full mt-1 ${ROLE_BADGE_COLORS[p.role] || "bg-slate-100 text-slate-600"}`}>
                           {ROLE_LABELS[p.role] || p.role}
                         </span>
                       </div>
                     </div>
-                    <span className="text-xs text-slate-400">
-                      {new Date(p.created_at).toLocaleDateString("ar-DZ")}
-                    </span>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <StatusBadge status={p.approval_status} />
+                      <span className="text-xs text-slate-400">
+                        {new Date(p.created_at).toLocaleDateString("ar-DZ")}
+                      </span>
+                    </div>
                   </div>
 
                   {p.specialty && (
-                    <p className="text-sm text-slate-600 mb-2"><span className="font-bold">التخصص:</span> {p.specialty}</p>
+                    <div className="bg-slate-50 rounded-xl px-3 py-2 mb-3 border border-slate-100">
+                      <p className="text-sm text-slate-700"><span className="font-black text-slate-500 text-xs uppercase tracking-wide block mb-0.5">التخصص</span>{p.specialty}</p>
+                    </div>
                   )}
                   {p.address && (
-                    <p className="text-xs text-slate-400 mb-3">📍 {p.address}</p>
+                    <p className="text-xs text-slate-400 mb-3 flex items-center gap-1">📍 {p.address}</p>
+                  )}
+                  {p.phone && (
+                    <p className="text-xs text-slate-500 mb-4 flex items-center gap-1 font-bold">📞 {p.phone}</p>
                   )}
 
-                  <div className="flex gap-2 mt-4">
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100">
                     <button onClick={() => approve(p.id)} disabled={actioning === p.id}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold disabled:opacity-50 transition-colors">
-                      <CheckCircle className="w-4 h-4" />
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-gradient-to-l from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-sm font-black disabled:opacity-50 transition-all shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30">
+                      <img src="/icon_status_approved.png" className="w-5 h-5 object-contain" alt="اعتماد" />
                       {actioning === p.id ? "..." : "اعتماد"}
                     </button>
                     <button onClick={() => reject(p.id)} disabled={actioning === p.id}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-sm font-bold disabled:opacity-50 transition-colors">
-                      <XCircle className="w-4 h-4" />
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white text-rose-600 text-sm font-black disabled:opacity-50 transition-all border-2 border-rose-200 hover:bg-rose-50 hover:border-rose-300">
+                      <img src="/icon_status_rejected.png" className="w-5 h-5 object-contain" alt="رفض" />
                       رفض
                     </button>
                   </div>
@@ -276,8 +311,10 @@ export default function AdminDashboard() {
             <div className="flex gap-2 mb-5 flex-wrap">
               {["all", "doctor", "pharmacy", "lab", "patient"].map(role => (
                 <button key={role} onClick={() => setFilterRole(role)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-                    filterRole === role ? "bg-indigo-600 text-white border-transparent" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    filterRole === role
+                      ? "bg-gradient-to-l from-indigo-600 to-violet-600 text-white"
+                      : "bg-white text-slate-700 border border-slate-300 hover:border-indigo-400"
                   }`}>
                   {role === "all" ? "الكل" : ROLE_LABELS[role]}
                 </button>
@@ -294,39 +331,49 @@ export default function AdminDashboard() {
               </div>
               <div className="divide-y divide-slate-50">
                 {filteredProfiles.slice(0, 30).map(p => (
-                  <div key={p.id} className="grid grid-cols-12 px-5 py-4 items-center gap-3 hover:bg-slate-50/50 transition-colors">
-                    <div className="col-span-4">
-                      <p className="font-bold text-slate-800 text-sm truncate">{p.full_name}</p>
-                      {p.specialty && <p className="text-xs text-slate-400 truncate">{p.specialty}</p>}
+                  <div key={p.id} className="grid grid-cols-12 px-5 py-4 items-center gap-3 hover:bg-violet-50/30 transition-colors">
+                    <div className="col-span-4 flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${ROLE_COLORS[p.role] || "bg-slate-50 border-slate-100"}`}>
+                        {ROLE_ICONS[p.role] || <User className="w-5 h-5 text-slate-400" />}
+                      </div>
+                      <div>
+                        <p className="font-black text-slate-800 text-sm truncate">{p.full_name}</p>
+                        {p.specialty && <p className="text-xs text-slate-400 truncate">{p.specialty}</p>}
+                      </div>
                     </div>
                     <div className="col-span-2">
-                      <span className={`text-xs font-bold px-2 py-1 rounded-lg ${ROLE_COLORS[p.role] || "bg-slate-100 text-slate-600"}`}>
+                      <span className={`flex items-center gap-1 text-xs font-black px-2 py-1 rounded-lg ${ROLE_BADGE_COLORS[p.role] || "bg-slate-100 text-slate-600"}`}>
                         {ROLE_LABELS[p.role] || p.role}
                       </span>
                     </div>
                     <div className="col-span-3">
                       {p.is_banned ? (
-                        <span className="text-xs font-black px-2 py-1 rounded-lg bg-rose-100 text-rose-700 border border-rose-200">🚫 محظور</span>
-                      ) : (
-                        <span className={`text-xs font-bold px-2 py-1 rounded-lg border ${statusColor(p.approval_status)}`}>
-                          {p.approval_status === "approved" ? "✅ معتمد" :
-                           p.approval_status === "rejected" ? "❌ مرفوض" : "⏳ انتظار"}
+                        <span className="flex items-center gap-1 text-xs font-black px-2 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
+                          <img src="/icon_status_rejected.png" className="w-4 h-4 object-contain" alt="محظور" /> محظور
                         </span>
+                      ) : (
+                        <StatusBadge status={p.approval_status} />
                       )}
                     </div>
                     <div className="col-span-3 flex gap-2">
                       {p.role !== "patient" && p.approval_status === "pending" && (
                         <button onClick={() => approve(p.id)} disabled={actioning === p.id}
-                          className="text-xs px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-bold hover:bg-emerald-200 transition-colors">
-                          اعتماد
+                          className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl bg-gradient-to-l from-emerald-500 to-teal-500 text-white font-black hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-50 shadow-sm">
+                          <img src="/icon_status_approved.png" className="w-4 h-4 object-contain" alt="" /> اعتماد
                         </button>
                       )}
                       {p.role !== "patient" && (
                         <button onClick={() => toggleBan(p.id, !!p.is_banned)} disabled={actioning === p.id}
-                          className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors ${
-                            p.is_banned ? "bg-amber-100 text-amber-700 hover:bg-amber-200" : "bg-rose-100 text-rose-700 hover:bg-rose-200"
+                          className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl font-black text-white transition-all disabled:opacity-50 shadow-sm ${
+                            p.is_banned
+                              ? "bg-gradient-to-l from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                              : "bg-gradient-to-l from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600"
                           }`}>
-                          {p.is_banned ? "رفع الحظر" : "حظر"}
+                          {p.is_banned ? (
+                            <><img src="/icon_status_pending.png" className="w-4 h-4 object-contain" alt="" /> رفع الحظر</>
+                          ) : (
+                            <><img src="/icon_status_rejected.png" className="w-4 h-4 object-contain" alt="" /> حظر</>
+                          )}
                         </button>
                       )}
                     </div>

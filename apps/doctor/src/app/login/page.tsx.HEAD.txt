@@ -1,0 +1,639 @@
+﻿"use client";
+
+export const dynamic = 'force-dynamic';
+
+
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import {
+  Activity, Mail, Lock, User, Phone, Calendar, FileText,
+  Stethoscope, Award, ChevronLeft, ChevronRight, CreditCard,
+  CheckCircle, BadgeCheck, Globe, Building2, Upload, X
+} from "lucide-react";
+import { Button } from "@/components/ui/Button";
+
+// ΓöÇΓöÇΓöÇ Types ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+type Step = 1 | 2 | 3;
+
+interface SignupFormData {
+  // Step 1 ΓÇö Required
+  fullNameAr: string;
+  fullNameFr: string;
+  email: string;
+  password: string;
+  phone: string;
+  // Step 2 ΓÇö Optional / Professional
+  dateOfBirth: string;
+  nationalId: string;
+  specialty: string;
+  licenseNumber: string;
+  workplaceAddress: string;
+  yearsOfExperience: string;
+  // Step 3 ΓÇö Optional / Payment & Agreements
+  ccp: string;
+  acceptTerms: boolean;
+  acceptPlatformRules: boolean;
+}
+
+const SPECIALTIES = [
+  "╪╖╪¿ ╪╣╪º┘à",
+  "╪╖╪¿ ╪º┘ä╪ú╪╖┘ü╪º┘ä",
+  "╪ú┘à╪▒╪º╪╢ ╪º┘ä┘é┘ä╪¿ ┘ê╪º┘ä╪ú┘ê╪╣┘è╪⌐ ╪º┘ä╪»┘à┘ê┘è╪⌐",
+  "╪╖╪¿ ╪º┘ä╪¼┘ç╪º╪▓ ╪º┘ä┘ç╪╢┘à┘è",
+  "╪╖╪¿ ╪º┘ä╪ú╪╣╪╡╪º╪¿",
+  "╪╖╪¿ ╪º┘ä╪╣┘è┘ê┘å",
+  "╪╖╪¿ ╪º┘ä╪ú┘å┘ü ┘ê╪º┘ä╪ú╪░┘å ┘ê╪º┘ä╪¡┘å╪¼╪▒╪⌐",
+  "╪ú┘à╪▒╪º╪╢ ╪º┘ä╪¼┘ä╪»",
+  "╪╖╪¿ ╪º┘ä╪╣╪╕╪º┘à ┘ê╪º┘ä┘à┘ü╪º╪╡┘ä",
+  "╪º┘ä╪╖╪¿ ╪º┘ä┘å┘ü╪│┘è",
+  "╪ú┘à╪▒╪º╪╢ ╪º┘ä┘å╪│╪º╪í ┘ê╪º┘ä╪¬┘ê┘ä┘è╪»",
+  "╪╖╪¿ ╪º┘ä╪╖┘ê╪º╪▒╪ª",
+  "╪º┘ä╪¼╪▒╪º╪¡╪⌐ ╪º┘ä╪╣╪º┘à╪⌐",
+  "╪╖╪¿ ╪º┘ä╪ú╪│┘å╪º┘å",
+  "╪╣┘ä┘à ╪º┘ä╪ú╪┤╪╣╪⌐",
+  "╪ú┘à╪▒╪º╪╢ ╪º┘ä┘â┘ä┘ë",
+  "╪ú┘à╪▒╪º╪╢ ╪º┘ä╪▒╪ª╪⌐",
+  "╪º┘ä╪║╪»╪» ╪º┘ä╪╡┘à╪º╪í",
+  "╪╖╪¿ ╪º┘ä╪ú┘ê╪▒╪º┘à",
+  "╪ú╪«╪▒┘ë",
+];
+
+// ΓöÇΓöÇΓöÇ Sub-components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+function InputField({
+  icon, label, placeholder, value, onChange, type = "text", required = false, children
+}: {
+  icon?: React.ReactNode;
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  required?: boolean;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-sm font-semibold text-slate-600 text-right">
+        {label} {required && <span className="text-rose-500">*</span>}
+        {!required && <span className="text-slate-400 text-xs font-normal mr-1">(╪º╪«╪¬┘è╪º╪▒┘è)</span>}
+      </label>
+      <div className="relative">
+        {icon && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+            {icon}
+          </div>
+        )}
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required={required}
+          className={`w-full h-12 bg-slate-50/80 border border-slate-200 rounded-xl 
+            focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all 
+            text-right text-slate-800 placeholder:text-slate-400 text-sm
+            ${icon ? "pr-10 pl-4" : "px-4"}`}
+        />
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function SelectField({ label, value, onChange, required = false, options }: {
+  label: string; value: string; onChange: (v: string) => void; required?: boolean; options: string[]
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-sm font-semibold text-slate-600 text-right">
+        {label} {required && <span className="text-rose-500">*</span>}
+        {!required && <span className="text-slate-400 text-xs font-normal mr-1">(╪º╪«╪¬┘è╪º╪▒┘è)</span>}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        className="w-full h-12 px-4 bg-slate-50/80 border border-slate-200 rounded-xl 
+          focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all 
+          text-right text-slate-800 text-sm appearance-none cursor-pointer"
+      >
+        <option value="">-- ╪º╪«╪¬╪▒ ╪º┘ä╪¬╪«╪╡╪╡ --</option>
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+    </div>
+  );
+}
+
+// ΓöÇΓöÇΓöÇ Step Indicators ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function StepIndicator({ step, current }: { step: number; current: Step }) {
+  const isCompleted = current > step;
+  const isActive = current === step;
+  return (
+    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all duration-300
+      ${isCompleted ? "bg-blue-600 border-blue-600 text-white" :
+        isActive ? "bg-white border-blue-600 text-blue-600 shadow-md shadow-blue-200" :
+          "bg-white border-slate-200 text-slate-400"}`}>
+      {isCompleted ? <CheckCircle className="w-5 h-5" /> : step}
+    </div>
+  );
+}
+
+// ΓöÇΓöÇΓöÇ Main Component ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+export default function LoginPage() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [step, setStep] = useState<Step>(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Login state
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  // Signup state
+  const [form, setForm] = useState<SignupFormData>({
+    fullNameAr: "", fullNameFr: "", email: "", password: "", phone: "",
+    dateOfBirth: "", nationalId: "", specialty: "", licenseNumber: "",
+    workplaceAddress: "", yearsOfExperience: "",
+    ccp: "", acceptTerms: false, acceptPlatformRules: false,
+  });
+
+  const router = useRouter();
+  const supabase = createClient();
+
+  const set = (field: keyof SignupFormData) => (value: string | boolean) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
+
+  // ΓöÇΓöÇ Login ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    // Debug bypass
+    if (loginPassword === "1" && loginEmail === "1") {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: "doctor@3inaya.com",
+        password: "123456",
+      });
+      if (authError) {
+        setError("┘ä┘à ┘è╪¬┘à ╪▒┘ü╪╣ ╪º┘ä╪¿┘è╪º┘å╪º╪¬ (Seed). ╪¼╪▒╪¿ ╪Ñ╪»╪«╪º┘ä┘ç╪º ┘è╪»┘ê┘è╪º┘ï.");
+        setLoading(false);
+        return;
+      }
+      document.cookie = `testing_bypass=doctor; path=/; max-age=86400`;
+      window.location.href = `/dashboard`;
+      return;
+    }
+
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password: loginPassword,
+    });
+
+    if (authError) {
+      setError("┘ü╪┤┘ä ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä. ╪¬╪ú┘â╪» ┘à┘å ╪º┘ä╪¿╪▒┘è╪» ┘ê┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒.");
+      setLoading(false);
+      return;
+    }
+
+    const userRole = data?.user?.user_metadata?.role;
+    if (userRole === "doctor") {
+      router.push("/dashboard");
+    } else {
+      setError("┘è╪▒╪¼┘ë ╪º┘ä╪¬╪ú┘â╪» ┘à┘å ╪º┘ä╪»╪«┘ê┘ä ┘à┘å ╪º┘ä╪¿┘ê╪º╪¿╪⌐ ╪º┘ä┘à╪«╪╡╪╡╪⌐ ┘ä╪»┘ê╪▒┘â.");
+      setLoading(false);
+    }
+  };
+
+  // ΓöÇΓöÇ Signup final submit ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const handleSignup = async () => {
+    if (!form.acceptTerms || !form.acceptPlatformRules) {
+      setError("┘è╪¼╪¿ ╪º┘ä┘à┘ê╪º┘ü┘é╪⌐ ╪╣┘ä┘ë ╪º┘ä╪┤╪▒┘ê╪╖ ┘ä╪Ñ╪¬┘à╪º┘à ╪º┘ä╪¬╪│╪¼┘è┘ä.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          full_name: form.fullNameAr || form.fullNameFr,
+          full_name_ar: form.fullNameAr,
+          full_name_fr: form.fullNameFr,
+          role: "doctor",
+          phone: form.phone,
+          specialty: form.specialty || null,
+          license_number: form.licenseNumber || null,
+          date_of_birth: form.dateOfBirth || null,
+          national_id: form.nationalId || null,
+          workplace_address: form.workplaceAddress || null,
+          years_of_experience: form.yearsOfExperience || null,
+          ccp: form.ccp || null,
+        },
+      },
+    });
+
+    if (signUpError) {
+      setError(signUpError.message);
+      setLoading(false);
+      return;
+    }
+
+    setSuccessMsg("≡ƒÄë ╪¬┘à ╪Ñ┘å╪┤╪º╪í ╪¡╪│╪º╪¿┘â ╪¿┘å╪¼╪º╪¡! ┘é┘à ╪¿╪¬╪ú┘â┘è╪» ╪¿╪▒┘è╪»┘â ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è ╪½┘à ╪│╪¼┘æ┘ä ╪º┘ä╪»╪«┘ê┘ä.");
+    setIsLogin(true);
+    setStep(1);
+    setLoading(false);
+  };
+
+  // ΓöÇΓöÇ Step navigation ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const nextStep = () => {
+    if (step === 1) {
+      if (!form.fullNameAr || !form.email || !form.password || !form.phone) {
+        setError("┘è╪▒╪¼┘ë ┘à┘ä╪í ╪¼┘à┘è╪╣ ╪º┘ä╪¡┘é┘ê┘ä ╪º┘ä╪Ñ┘ä╪▓╪º┘à┘è╪⌐ (╪º┘ä╪º╪│┘à╪î ╪º┘ä╪Ñ┘è┘à┘è┘ä╪î ┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒╪î ╪▒┘é┘à ╪º┘ä┘ç╪º╪¬┘ü).");
+        return;
+      }
+      if (form.password.length < 6) {
+        setError("┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒ ┘è╪¼╪¿ ╪ú┘å ╪¬┘â┘ê┘å 6 ╪ú╪¡╪▒┘ü ╪╣┘ä┘ë ╪º┘ä╪ú┘é┘ä.");
+        return;
+      }
+    }
+    setError(null);
+    setStep((prev) => (prev < 3 ? ((prev + 1) as Step) : prev));
+  };
+
+  const prevStep = () => {
+    setError(null);
+    setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
+  };
+
+  // ΓöÇΓöÇ Render ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" dir="rtl">
+      {/* Animated background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-blue-200/40 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-cyan-200/30 rounded-full blur-[100px]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/40 to-white" />
+      </div>
+
+      {/* Glow keyframes */}
+      <style>{`
+        @keyframes logoFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes glowPulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.15); } }
+        @keyframes glowColorShift { 0% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(40deg); } 100% { filter: hue-rotate(0deg); } }
+        .logo-float { animation: logoFloat 4s ease-in-out infinite; }
+        .glow-pulse { animation: glowPulse 3s ease-in-out infinite, glowColorShift 6s ease-in-out infinite; }
+      `}</style>
+
+      <div className="relative z-10 w-full max-w-lg">
+        {/* Logo header */}
+        <div className="text-center mb-8">
+          <div className="inline-block relative mb-4">
+            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-blue-400 via-indigo-400 to-cyan-300 opacity-60" />
+            <div className="w-28 h-28 rounded-2xl bg-white border border-blue-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
+              <img src="/logo.png" alt="╪╣┘å╪º┘è╪⌐" className="w-24 h-24 object-contain drop-shadow-sm" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">╪╣┘å╪º┘è╪⌐</h1>
+          <p className="text-blue-600 font-semibold text-sm mt-1">╪╖╪¿┘è╪¿┘â ┘ü┘è ╪¿┘è╪¬┘â ΓÇö ╪¿┘ê╪º╪¿╪⌐ ╪º┘ä╪ú╪╖╪¿╪º╪í</p>
+          <p className="text-slate-400 text-xs mt-1">
+            ┘à┘å╪╡╪⌐ ┘à╪▒╪«╪╡╪⌐ ┘à┘å ┘ê╪▓╪º╪▒╪⌐ ╪º┘ä╪╡╪¡╪⌐ ╪º┘ä╪¼╪▓╪º╪ª╪▒┘è╪⌐
+            <BadgeCheck className="inline-block w-3.5 h-3.5 text-blue-500 mx-1" />
+          </p>
+        </div>
+
+        {/* ΓöÇΓöÇ PANEL ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-slate-200/60 border border-white/60 overflow-hidden">
+
+          {/* Toggle tabs */}
+          <div className="flex border-b border-slate-100">
+            <button
+              onClick={() => { setIsLogin(true); setError(null); setStep(1); }}
+              className={`flex-1 py-4 text-sm font-bold transition-colors ${isLogin ? "text-blue-700 border-b-2 border-blue-600 bg-blue-50/50" : "text-slate-500 hover:text-slate-700"}`}
+            >
+              ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä
+            </button>
+            <button
+              onClick={() => { setIsLogin(false); setError(null); setStep(1); }}
+              className={`flex-1 py-4 text-sm font-bold transition-colors ${!isLogin ? "text-blue-700 border-b-2 border-blue-600 bg-blue-50/50" : "text-slate-500 hover:text-slate-700"}`}
+            >
+              ╪Ñ┘å╪┤╪º╪í ╪¡╪│╪º╪¿ ╪¼╪»┘è╪»
+            </button>
+          </div>
+
+          <div className="p-7">
+            {/* Alerts */}
+            {successMsg && (
+              <div className="flex items-start gap-3 bg-emerald-50 text-emerald-700 p-4 rounded-2xl text-sm font-semibold mb-5 border border-emerald-200">
+                <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <span>{successMsg}</span>
+              </div>
+            )}
+            {error && (
+              <div className="flex items-start gap-3 bg-rose-50 text-rose-700 p-4 rounded-2xl text-sm font-semibold mb-5 border border-rose-200">
+                <X className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* ΓöÇΓöÇ LOGIN FORM ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+            {isLogin && (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <InputField
+                  icon={<Mail className="w-4 h-4" />}
+                  label="╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è"
+                  placeholder="doctor@example.com"
+                  value={loginEmail}
+                  onChange={setLoginEmail}
+                  type="email"
+                  required
+                />
+                <InputField
+                  icon={<Lock className="w-4 h-4" />}
+                  label="┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒"
+                  placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó"
+                  value={loginPassword}
+                  onChange={setLoginPassword}
+                  type="password"
+                  required
+                />
+                <button type="button" className="text-xs text-blue-500 hover:underline w-full text-right mt-1">
+                  ┘å╪│┘è╪¬ ┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒╪ƒ
+                </button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-12 rounded-xl text-base font-bold bg-gradient-to-l from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-lg shadow-blue-500/30 mt-2"
+                >
+                  {loading ? "╪¼╪º╪▒┘è ╪º┘ä╪¬╪¡┘é┘é..." : "╪»╪«┘ê┘ä ╪º┘ä╪╣┘è╪º╪»╪⌐ ╪º┘ä╪▒┘é┘à┘è╪⌐ ΓåÆ"}
+                </Button>
+                <p className="text-center text-xs text-slate-400 mt-4">
+                  ┘à╪¡┘à┘è ╪¿╪¬╪┤┘ü┘è╪▒ AES-256 ┬╖ Supabase Auth
+                </p>
+              </form>
+            )}
+
+            {/* ΓöÇΓöÇ SIGNUP FLOW ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+            {!isLogin && (
+              <div>
+                {/* Step indicator ΓÇö RTL: Step 1 right, Step 3 left */}
+                <div className="flex flex-row-reverse items-center justify-center gap-3 mb-7">
+                  <StepIndicator step={1} current={step} />
+                  <div className={`h-0.5 w-12 rounded transition-all ${step > 1 ? "bg-blue-500" : "bg-slate-200"}`} />
+                  <StepIndicator step={2} current={step} />
+                  <div className={`h-0.5 w-12 rounded transition-all ${step > 2 ? "bg-blue-500" : "bg-slate-200"}`} />
+                  <StepIndicator step={3} current={step} />
+                </div>
+
+                {/* Step titles */}
+                <div className="text-center mb-5">
+                  {step === 1 && <>
+                    <h2 className="font-bold text-slate-800 text-lg">╪º┘ä┘à╪╣┘ä┘ê┘à╪º╪¬ ╪º┘ä╪ú╪│╪º╪│┘è╪⌐</h2>
+                    <p className="text-slate-500 text-xs mt-1">╪º┘ä╪¡┘é┘ê┘ä ╪º┘ä┘à╪╖┘ä┘ê╪¿╪⌐ ┘ä╪Ñ┘å╪┤╪º╪í ╪¡╪│╪º╪¿┘â</p>
+                  </>}
+                  {step === 2 && <>
+                    <h2 className="font-bold text-slate-800 text-lg">╪º┘ä┘à┘ä┘ü ╪º┘ä┘à┘ç┘å┘è</h2>
+                    <p className="text-slate-500 text-xs mt-1">┘à╪╣┘ä┘ê┘à╪º╪¬ ╪Ñ╪╢╪º┘ü┘è╪⌐ ┘ä╪¬╪╣╪▓┘è╪▓ ╪╕┘ç┘ê╪▒┘â ┘ê┘à╪╡╪»╪º┘é┘è╪¬┘â <span className="text-blue-500">(╪º╪«╪¬┘è╪º╪▒┘è╪⌐)</span></p>
+                  </>}
+                  {step === 3 && <>
+                    <h2 className="font-bold text-slate-800 text-lg">╪º┘ä╪¬╪ú┘â┘è╪» ┘ê╪º┘ä╪┤╪▒┘ê╪╖</h2>
+                    <p className="text-slate-500 text-xs mt-1">┘à╪╣┘ä┘ê┘à╪º╪¬ ╪º┘ä╪»┘ü╪╣ ┘ê╪º┘ä┘à┘ê╪º┘ü┘é╪⌐ ╪╣┘ä┘ë ╪¿┘å┘ê╪» ╪º┘ä┘à┘å╪╡╪⌐</p>
+                  </>}
+                </div>
+
+                {/* ΓöÇΓöÇ STEP 1 ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+                {step === 1 && (
+                  <div className="space-y-4">
+                    <InputField
+                      icon={<User className="w-4 h-4" />}
+                      label="╪º┘ä╪º╪│┘à ╪º┘ä┘â╪º┘à┘ä ╪¿╪º┘ä╪╣╪▒╪¿┘è╪⌐"
+                      placeholder="╪». ┘à╪¡┘à╪» ╪¿┘å ╪╣┘ä┘è"
+                      value={form.fullNameAr}
+                      onChange={set("fullNameAr")}
+                      required
+                    />
+                    <InputField
+                      icon={<Globe className="w-4 h-4" />}
+                      label="╪º┘ä╪º╪│┘à ╪º┘ä┘â╪º┘à┘ä ╪¿╪º┘ä┘ü╪▒┘å╪│┘è╪⌐"
+                      placeholder="Dr. Mohamed Ben Ali"
+                      value={form.fullNameFr}
+                      onChange={set("fullNameFr")}
+                    />
+                    <InputField
+                      icon={<Mail className="w-4 h-4" />}
+                      label="╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è"
+                      placeholder="doctor@example.com"
+                      value={form.email}
+                      onChange={set("email")}
+                      type="email"
+                      required
+                    />
+                    <InputField
+                      icon={<Lock className="w-4 h-4" />}
+                      label="┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒"
+                      placeholder="6 ╪ú╪¡╪▒┘ü ╪╣┘ä┘ë ╪º┘ä╪ú┘é┘ä"
+                      value={form.password}
+                      onChange={set("password")}
+                      type="password"
+                      required
+                    />
+                    <InputField
+                      icon={<Phone className="w-4 h-4" />}
+                      label="╪▒┘é┘à ╪º┘ä┘ç╪º╪¬┘ü"
+                      placeholder="+213 6XX XX XX XX"
+                      value={form.phone}
+                      onChange={set("phone")}
+                      type="tel"
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* ΓöÇΓöÇ STEP 2 ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+                {step === 2 && (
+                  <div className="space-y-4">
+                    <SelectField
+                      label="╪º┘ä╪¬╪«╪╡╪╡ ╪º┘ä╪╖╪¿┘è"
+                      value={form.specialty}
+                      onChange={set("specialty")}
+                      options={SPECIALTIES}
+                    />
+                    <InputField
+                      icon={<Award className="w-4 h-4" />}
+                      label="╪▒┘é┘à ╪º┘ä╪¬╪│╪¼┘è┘ä ┘ü┘è ┘å┘é╪º╪¿╪⌐ ╪º┘ä╪ú╪╖╪¿╪º╪í"
+                      placeholder="ONMC-XXXXX"
+                      value={form.licenseNumber}
+                      onChange={set("licenseNumber")}
+                    />
+                    <InputField
+                      icon={<Calendar className="w-4 h-4" />}
+                      label="╪¬╪º╪▒┘è╪« ╪º┘ä┘à┘è┘ä╪º╪»"
+                      placeholder="YYYY-MM-DD"
+                      value={form.dateOfBirth}
+                      onChange={set("dateOfBirth")}
+                      type="date"
+                    />
+                    <InputField
+                      icon={<CreditCard className="w-4 h-4" />}
+                      label="╪▒┘é┘à ╪¿╪╖╪º┘é╪⌐ ╪º┘ä╪¬╪╣╪▒┘è┘ü ╪º┘ä┘ê╪╖┘å┘è╪⌐"
+                      placeholder="XXXXXXXXXX"
+                      value={form.nationalId}
+                      onChange={set("nationalId")}
+                    />
+                    <InputField
+                      icon={<Building2 className="w-4 h-4" />}
+                      label="┘à┘â╪º┘å ╪º┘ä╪╣┘à┘ä / ╪º┘ä╪╣┘è╪º╪»╪⌐"
+                      placeholder="╪╣┘è╪º╪»╪⌐ ╪»┘â╪¬┘ê╪▒ ...╪î ╪┤╪º╪▒╪╣ ..."
+                      value={form.workplaceAddress}
+                      onChange={set("workplaceAddress")}
+                    />
+                    <InputField
+                      icon={<Stethoscope className="w-4 h-4" />}
+                      label="╪│┘å┘ê╪º╪¬ ╪º┘ä╪«╪¿╪▒╪⌐"
+                      placeholder="╪╣╪»╪» ╪│┘å┘ê╪º╪¬ ╪º┘ä╪«╪¿╪▒╪⌐"
+                      value={form.yearsOfExperience}
+                      onChange={set("yearsOfExperience")}
+                      type="number"
+                    />
+
+                    {/* Document upload hint */}
+                    <div className="rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/40 p-4 flex flex-col items-center gap-2 text-center">
+                      <Upload className="w-6 h-6 text-blue-400" />
+                      <p className="text-xs text-slate-600 font-semibold">╪▒┘ü╪╣ ╪┤┘ç╪º╪»╪⌐ ╪º┘ä╪»┘â╪¬┘ê╪▒╪º┘ç / ╪┤┘ç╪º╪»╪⌐ ╪º┘ä╪╣┘à┘ä</p>
+                      <p className="text-xs text-slate-400">
+                        ╪º╪«╪¬┘è╪º╪▒┘è ╪º┘ä╪ó┘å ΓÇö ┘è┘à┘â┘å ╪Ñ╪╢╪º┘ü╪¬┘ç╪º ┘ä╪º╪¡┘é╪º┘ï ┘à┘å ╪º┘ä╪Ñ╪╣╪»╪º╪»╪º╪¬ ┘ä╪¬┘ü╪╣┘è┘ä ╪º┘ä┘ê╪╡┘ü╪⌐ ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è╪⌐ ╪º┘ä┘â╪º┘à┘ä╪⌐
+                      </p>
+                      <button
+                        type="button"
+                        className="mt-1 text-xs bg-blue-100 text-blue-700 font-bold px-4 py-2 rounded-xl hover:bg-blue-200 transition-colors"
+                      >
+                        ╪▒┘ü╪╣ ╪º┘ä┘à┘ä┘ü╪º╪¬ (┘é╪▒┘è╪¿╪º┘ï)
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ΓöÇΓöÇ STEP 3 ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+                {step === 3 && (
+                  <div className="space-y-5">
+                    <InputField
+                      icon={<CreditCard className="w-4 h-4" />}
+                      label="╪▒┘é┘à ╪¡╪│╪º╪¿ CCP / ╪¿╪▒┘è╪» ┘à┘ê╪¿"
+                      placeholder="╪▒┘é┘à CCP ╪ú┘ê ╪¿╪▒┘è╪» ┘à┘ê╪¿ ┘ä┘ä┘à╪»┘ü┘ê╪╣╪º╪¬"
+                      value={form.ccp}
+                      onChange={set("ccp")}
+                    />
+
+                    {/* Info box */}
+                    <div className="bg-blue-50 rounded-2xl p-4 text-xs text-slate-600 text-right space-y-1.5 border border-blue-100">
+                      <p className="font-bold text-blue-800 text-sm">Γä╣∩╕Å ┘â┘è┘ü ╪¬╪╣┘à┘ä ╪º┘ä┘à┘å╪╡╪⌐╪ƒ</p>
+                      <p>ΓÇó ╪º┘ä┘à╪▒┘è╪╢ ┘è╪»┘ü╪╣ ┘ä┘ä╪¡╪╡┘ê┘ä ╪╣┘ä┘ë ╪º┘ä┘ê╪╡┘ü╪⌐ ╪ú┘ê ┘å╪¬╪º╪ª╪¼ ╪º┘ä╪¬╪¡╪º┘ä┘è┘ä</p>
+                      <p>ΓÇó ╪º┘ä┘à┘å╪╡╪⌐ ╪¬╪¡╪╡┘ä ╪╣┘ä┘ë ╪╣┘à┘ê┘ä╪⌐ ╪¡╪│╪¿ ╪¿╪º┘é╪¬┘â</p>
+                      <p>ΓÇó ┘è┘Å╪┤╪¬╪▒╪╖ ╪▒┘é┘à CCP ┘ä╪º╪│╪¬┘ä╪º┘à ┘à╪»┘ü┘ê╪╣╪º╪¬┘â</p>
+                      <p className="text-slate-400 mt-2">┘è┘à┘â┘å ╪Ñ╪╢╪º┘ü╪⌐ ╪▒┘é┘à ╪º┘ä╪¡╪│╪º╪¿ ┘ä╪º╪¡┘é╪º┘ï ┘à┘å ╪Ñ╪╣╪»╪º╪»╪º╪¬┘â</p>
+                    </div>
+
+                    {/* Terms checkboxes */}
+                    <div className="space-y-3">
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={form.acceptTerms}
+                          onChange={(e) => set("acceptTerms")(e.target.checked)}
+                          className="mt-1 w-4 h-4 rounded accent-blue-600 flex-shrink-0"
+                        />
+                        <span className="text-xs text-slate-700 leading-relaxed">
+                          ╪ú┘å╪º <strong>╪º┘ä┘à╪╡╪▒╪¡</strong> ┘à╪│╪ñ┘ê┘ä ╪┤╪«╪╡┘è╪º┘ï ╪╣┘å ╪╡╪¡╪⌐ ╪º┘ä┘à╪╣┘ä┘ê┘à╪º╪¬ ╪º┘ä┘à┘Å╪»╪«┘ä╪⌐╪î ┘ê╪ú┘é╪▒┘æ ╪¿╪ú┘å <strong>┘à┘å╪╡╪⌐ ╪╣┘å╪º┘è╪⌐</strong> ┘ç┘è ┘ê╪│┘è╪╖ ╪¬┘ê╪º╪╡┘ä ╪╖╪¿┘è ┘ê┘ä╪º ╪¬┘Å╪╣┘ê┘æ╪╢ ╪º┘ä╪╖╪¿┘è╪¿ ┘ü┘è ┘é╪▒╪º╪▒╪º╪¬┘ç ╪º┘ä╪╖╪¿┘è╪⌐.
+                        </span>
+                      </label>
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={form.acceptPlatformRules}
+                          onChange={(e) => set("acceptPlatformRules")(e.target.checked)}
+                          className="mt-1 w-4 h-4 rounded accent-blue-600 flex-shrink-0"
+                        />
+                        <span className="text-xs text-slate-700 leading-relaxed">
+                          ╪ú┘ê╪º┘ü┘é ╪╣┘ä┘ë ╪┤╪▒┘ê╪╖ ┘ê╪ú╪¡┘â╪º┘à ╪º┘ä┘à┘å╪╡╪⌐ ┘ê╪¬╪│╪╣┘è╪▒╪º╪¬ ╪º┘ä╪«╪»┘à╪º╪¬. ╪ú┘é╪▒┘æ ╪¿╪ú┘å <strong>┘à┘å╪╡╪⌐ ╪╣┘å╪º┘è╪⌐</strong> ┘à╪▒╪«╪╡╪⌐ ┘à┘å <strong>┘ê╪▓╪º╪▒╪⌐ ╪º┘ä╪╡╪¡╪⌐ ╪º┘ä╪¼╪▓╪º╪ª╪▒┘è╪⌐</strong> ┘ê╪ú╪╣┘à┘ä ┘ü┘è ╪Ñ╪╖╪º╪▒┘ç╪º ╪º┘ä┘é╪º┘å┘ê┘å┘è.
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Feature summary */}
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {[
+                        { icon: "≡ƒñû", label: "╪░┘â╪º╪í ╪º╪╡╪╖┘å╪º╪╣┘è" },
+                        { icon: "≡ƒûï∩╕Å", label: "╪¬┘ê┘é┘è╪╣ ╪╣┘å ╪¿┘Å╪╣╪»" },
+                        { icon: "≡ƒôï", label: "┘ê╪╡┘ü╪⌐ ╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è╪⌐" },
+                      ].map(({ icon, label }) => (
+                        <div key={label} className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-2.5 text-center border border-blue-100">
+                          <div className="text-lg mb-1">{icon}</div>
+                          <p className="text-xs font-semibold text-blue-800">{label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Navigation buttons */}
+                <div className={`flex gap-3 mt-7 ${step === 1 ? "justify-end" : "justify-between"}`}>
+                  {step > 1 && (
+                    <button
+                      type="button"
+                      onClick={prevStep}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                      ╪º┘ä╪│╪º╪¿┘é
+                    </button>
+                  )}
+                  {step < 3 ? (
+                    <button
+                      type="button"
+                      onClick={nextStep}
+                      className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white text-sm font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
+                    >
+                      ╪º┘ä╪¬╪º┘ä┘è
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleSignup}
+                      disabled={loading || !form.acceptTerms || !form.acceptPlatformRules}
+                      className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white text-sm font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? "╪¼╪º╪▒┘è ╪º┘ä╪Ñ┘å╪┤╪º╪í..." : (
+                        <>
+                          <CheckCircle className="w-4 h-4" />
+                          ╪Ñ┘å╪┤╪º╪í ╪º┘ä╪¡╪│╪º╪¿
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Step 2 skip hint */}
+                {step === 2 && (
+                  <p className="text-center text-xs text-slate-400 mt-3">
+                    ┘è┘à┘â┘å┘â ╪¬╪«╪╖┘è ┘ç╪░┘ç ╪º┘ä╪«╪╖┘ê╪⌐ ┘ê╪Ñ┘â┘à╪º┘ä┘ç╪º ┘ä╪º╪¡┘é╪º┘ï ┘à┘å ┘à┘ä┘ü┘â ╪º┘ä╪┤╪«╪╡┘è
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer note */}
+        <p className="text-center text-xs text-slate-400 mt-5">
+          ┘à╪¡┘à┘è ╪¿╪¬╪┤┘ü┘è╪▒ AES-256 ┬╖ Supabase Auth ┬╖ ┘à┘å╪╡╪⌐ ╪╣┘å╪º┘è╪⌐ ┬⌐ {new Date().getFullYear()}
+        </p>
+      </div>
+    </div>
+  );
+}

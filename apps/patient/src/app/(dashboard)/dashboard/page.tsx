@@ -21,6 +21,7 @@ const METRICS = [
   { id: "heart_rate"     as MetricType, img: "/icon_weight.png",         label: "نبضات القلب",   unit: "bpm",   bg: "#fef2f2", color: "#dc2626", hasSecond: false },
   { id: "blood_pressure" as MetricType, img: "/icon_blood_pressure.png", label: "ضغط الدم",      unit: "mmHg",  bg: "#fff1f2", color: "#e11d48", hasSecond: true  },
   { id: "blood_sugar"    as MetricType, img: "/icon_blood_sugar.png",    label: "مستوى السكر",   unit: "mg/dL", bg: "#fffbeb", color: "#d97706", hasSecond: false },
+  { id: "oximetry"       as MetricType, img: "/icon_oximetry.png",       label: "تشبع الأكسجين", unit: "%",     bg: "#ecfeff", color: "#0891b2", hasSecond: false },
   { id: "weight"         as MetricType, img: "/icon_heart_rate.png",     label: "الوزن",          unit: "kg",    bg: "#eff6ff", color: "#2563eb", hasSecond: false },
 ];
 
@@ -304,27 +305,39 @@ export default function PatientDashboard() {
               return (
                 <button
                   key={m.id}
-                  className="glass-panel"
                   onClick={() => { setSelected(isSelected ? null : m.id); setVal1(""); setVal2(""); setNote(""); setMessage(null); }}
                   style={{
+                    background: "#fff",
                     borderRadius: "1.25rem",
                     padding: "1.25rem 0.75rem",
-                    border: isSelected ? `2px solid ${m.color} !important` : "2px solid transparent !important",
+                    border: isSelected ? `2px solid ${m.color}` : "1px solid #e5e7eb",
+                    boxShadow: isSelected ? `0 4px 16px ${m.color}30` : "0 4px 16px rgba(0,0,0,0.05)",
                     display: "flex", flexDirection: "column",
                     alignItems: "center", justifyContent: "center",
                     minHeight: 120, gap: "0.5rem", cursor: "pointer",
                     textAlign: "center",
+                    transition: "all 0.2s ease"
                   }}
                 >
                   <Image src={m.img} alt={m.label} width={90} height={90} style={{ objectFit: "contain", marginBottom: "0.5rem" }} />
 
                   {vital ? (
-                    <p style={{ margin: 0, fontSize: "1.3rem", fontWeight: 900, color: m.color, lineHeight: 1 }}>
-                      {vital.value1}{vital.value2 != null ? `/${vital.value2}` : ""}
-                      <span style={{ fontSize: "0.6rem", color: "#9ca3af", marginRight: 3, fontWeight: 600 }}>{m.unit}</span>
-                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <p style={{ margin: 0, fontSize: "1.3rem", fontWeight: 900, color: m.color, lineHeight: 1 }}>
+                        {vital.value1}{vital.value2 != null ? `/${vital.value2}` : ""}
+                        <span style={{ fontSize: "0.6rem", color: "#9ca3af", marginRight: 3, fontWeight: 600 }}>{m.unit}</span>
+                      </p>
+                      <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#9ca3af", marginTop: 4 }}>
+                        {new Date(vital.created_at).toDateString() === new Date().toDateString() ? "اليوم" : "آخر قياس"}
+                      </span>
+                    </div>
                   ) : (
-                    <p style={{ margin: 0, fontSize: "1.1rem", fontWeight: 900, color: "#e5e7eb" }}>—</p>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <p style={{ margin: 0, fontSize: "1.1rem", fontWeight: 900, color: "#e5e7eb" }}>—</p>
+                      <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#9ca3af", marginTop: 4 }}>
+                        غير مسجل
+                      </span>
+                    </div>
                   )}
 
                   <p style={{ margin: 0, fontSize: "0.68rem", fontWeight: 700, color: "#6b7280" }}>{m.label}</p>

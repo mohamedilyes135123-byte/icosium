@@ -55,11 +55,7 @@ export async function proxy(request: NextRequest) {
     }
 
     const role = user.user_metadata?.role;
-    if (role !== 'patient') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/unauthorized'
-      return NextResponse.redirect(url)
-    }
+    // RBAC removed
   }
 
   return supabaseResponse

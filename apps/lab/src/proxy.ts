@@ -52,9 +52,9 @@ export async function proxy(request: NextRequest) {
 
     const role = user.user_metadata?.role;
     if (role !== 'lab') {
-       const url = request.nextUrl.clone()
-       url.pathname = '/unauthorized'
-       return NextResponse.redirect(url)
+      const url = request.nextUrl.clone()
+      url.pathname = '/unauthorized'
+      return NextResponse.redirect(url)
     }
   }
 

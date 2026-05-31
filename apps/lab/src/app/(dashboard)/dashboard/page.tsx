@@ -2,17 +2,18 @@
 
 export const dynamic = 'force-dynamic';
 
-
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   FlaskConical, CheckCircle2, Clock, UploadCloud, TestTube2,
-  TrendingUp, Users, AlertCircle, Activity, ArrowRight
+  Activity, ArrowRight
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useLanguage } from "@/components/LanguageContext";
 
 export default function LabDashboard() {
+  const { t, lang } = useLanguage();
   const supabase = createClient();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [stats, setStats] = useState({ pending: 0, processing: 0, completed: 0, total: 0 });
@@ -57,10 +58,10 @@ export default function LabDashboard() {
 
   const now = new Date();
   const hour = now.getHours();
-  const greeting = hour < 12 ? "صباح الخير" : hour < 17 ? "مساء الخير" : "مساء النور";
+  const greeting = hour < 12 ? t("morning") : hour < 17 ? t("afternoon") : t("evening");
 
   return (
-    <div className="pb-32 w-full" dir="rtl">
+    <div className="pb-32 w-full" dir={lang === "ar" ? "rtl" : "ltr"}>
 
       {/* Header */}
       <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
@@ -69,12 +70,12 @@ export default function LabDashboard() {
           <div>
             <p className="text-cyan-600 font-semibold text-sm mb-1">{greeting} 👋</p>
             <h1 className="text-2xl font-black text-slate-800">
-              {labProfile?.full_name || "مختبر التحاليل"}
+              {labProfile?.full_name || t("myLab")}
             </h1>
             <p className="text-slate-400 text-sm mt-1">
               {stats.pending > 0
-                ? <span className="text-amber-600 font-bold">{stats.pending} طلب بانتظار المعالجة</span>
-                : "لا توجد طلبات جديدة حالياً"}
+                ? <span className="text-amber-600 font-bold">{stats.pending} {t("waitingProcessing")}</span>
+                : t("noNewRequests")}
             </p>
           </div>
           <div className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold border ${
@@ -83,7 +84,7 @@ export default function LabDashboard() {
               : "bg-amber-50 text-amber-700 border-amber-200"
           }`}>
             <span className={`w-2 h-2 rounded-full ${labProfile?.approval_status === "approved" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
-            {labProfile?.approval_status === "approved" ? "معتمد ✅" : "قيد المراجعة"}
+            {labProfile?.approval_status === "approved" ? t("approved") : t("underReview")}
           </div>
         </div>
       </motion.header>
@@ -92,10 +93,10 @@ export default function LabDashboard() {
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
         className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "إجمالي الطلبات", value: stats.total, color: "from-cyan-500 to-teal-400", icon: <FlaskConical className="w-6 h-6" /> },
-          { label: "بانتظار المعالجة", value: stats.pending, color: "from-amber-500 to-orange-400", icon: <Clock className="w-6 h-6" /> },
-          { label: "جاري التحليل", value: stats.processing, color: "from-blue-500 to-indigo-400", icon: <Activity className="w-6 h-6" /> },
-          { label: "مكتملة", value: stats.completed, color: "from-emerald-500 to-teal-400", icon: <CheckCircle2 className="w-6 h-6" /> },
+          { label: t("allRequests"),       value: stats.total,      color: "from-cyan-500 to-teal-400", icon: <FlaskConical className="w-6 h-6" /> },
+          { label: t("pendingRequests"),   value: stats.pending,    color: "from-amber-500 to-orange-400", icon: <Clock className="w-6 h-6" /> },
+          { label: t("processingRequests"), value: stats.processing, color: "from-blue-500 to-indigo-400", icon: <Activity className="w-6 h-6" /> },
+          { label: t("completedRequests"), value: stats.completed,  color: "from-emerald-500 to-teal-400", icon: <CheckCircle2 className="w-6 h-6" /> },
         ].map((s, i) => (
           <motion.div key={s.label} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.15 + i * 0.05 }}
@@ -110,10 +111,10 @@ export default function LabDashboard() {
       {/* Recent requests preview */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-black text-slate-800 text-lg">آخر الطلبات</h2>
+          <h2 className="font-black text-slate-800 text-lg">{t("recentRequests")}</h2>
           <Link href="/requests"
             className="flex items-center gap-1.5 text-cyan-600 text-sm font-bold hover:text-cyan-500">
-            عرض الكل <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+            {t("viewAll")} <ArrowRight className="w-4 h-4 rtl:rotate-180" />
           </Link>
         </div>
 
@@ -126,8 +127,8 @@ export default function LabDashboard() {
         {!loading && recentRequests.length === 0 && (
           <div className="glass-panel flex flex-col items-center justify-center py-16 rounded-3xl">
             <FlaskConical className="w-14 h-14 text-cyan-100 mb-3" />
-            <p className="text-slate-500 font-bold">لم تصل أي طلبات بعد</p>
-            <p className="text-slate-400 text-sm mt-1">ستظهر هنا طلبات المرضى عند إرسالها لمختبركم</p>
+            <p className="text-slate-500 font-bold">{t("noRequests")}</p>
+            <p className="text-slate-400 text-sm mt-1">{t("noRequestsDesc")}</p>
           </div>
         )}
 
@@ -142,17 +143,17 @@ export default function LabDashboard() {
                 req.status === "PROCESSING" ? "bg-blue-400 animate-pulse" : "bg-amber-400"
               }`} />
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-slate-800 truncate">{req.patient?.full_name || "مريض"}</p>
+                <p className="font-bold text-slate-800 truncate">{req.patient?.full_name || t("patientLabel")}</p>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {req.doctor?.full_name && `طلب: ${req.doctor.full_name} · `}
-                  {new Date(req.created_at).toLocaleString("ar-DZ", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  {req.doctor?.full_name && `${t("requestBy")} ${req.doctor.full_name} · `}
+                  {new Date(req.created_at).toLocaleString(lang === "ar" ? "ar-DZ" : "fr-DZ", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </p>
               </div>
               <span className={`text-xs font-black px-3 py-1.5 rounded-xl flex-shrink-0 ${
                 req.status === "COMPLETED" ? "bg-emerald-100 text-emerald-700" :
                 req.status === "PROCESSING" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
               }`}>
-                {req.status === "COMPLETED" ? "مكتمل" : req.status === "PROCESSING" ? "جاري" : "انتظار"}
+                {req.status === "COMPLETED" ? t("statusCompleted") : req.status === "PROCESSING" ? t("statusProcessing") : t("statusPending")}
               </span>
             </motion.div>
           ))}
@@ -162,7 +163,7 @@ export default function LabDashboard() {
       {/* Quick actions */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
         className="mt-8">
-        <h2 className="font-black text-slate-800 text-lg mb-4">إجراءات سريعة</h2>
+        <h2 className="font-black text-slate-800 text-lg mb-4">{t("quickActions")}</h2>
         <div className="grid grid-cols-2 gap-4">
           <Link href="/requests"
             className="glass-panel flex items-center gap-3 p-5 rounded-2xl">
@@ -170,8 +171,8 @@ export default function LabDashboard() {
               <TestTube2 className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-bold text-slate-800 text-sm">إدارة الطلبات</p>
-              <p className="text-xs text-slate-400 mt-0.5">{stats.pending} طلب جديد</p>
+              <p className="font-bold text-slate-800 text-sm">{t("manageRequests")}</p>
+              <p className="text-xs text-slate-400 mt-0.5">{stats.pending} {t("newRequests")}</p>
             </div>
           </Link>
           <Link href="/results"
@@ -180,8 +181,8 @@ export default function LabDashboard() {
               <UploadCloud className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-bold text-slate-800 text-sm">النتائج المرفوعة</p>
-              <p className="text-xs text-slate-400 mt-0.5">{stats.completed} مكتملة</p>
+              <p className="font-bold text-slate-800 text-sm">{t("uploadedResults")}</p>
+              <p className="text-xs text-slate-400 mt-0.5">{stats.completed} {t("completed")}</p>
             </div>
           </Link>
         </div>

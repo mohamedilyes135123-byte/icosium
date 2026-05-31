@@ -75,11 +75,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" dir="rtl">
-      {/* Animated background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-green-200/40 rounded-full blur-[120px]" />
-        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-green-50/40 to-white" />
+      {/* Animated Prominent Background */}
+      <div className="absolute inset-0 z-0 overflow-hidden bg-slate-50">
+        <div className="absolute top-[-10%] -right-[10%] w-[800px] h-[800px] bg-teal-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-70 animate-pulse-soft" />
+        <div className="absolute bottom-[-10%] -left-[10%] w-[600px] h-[600px] bg-teal-400 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px]" />
       </div>
 
       {/* Glow keyframes */}
@@ -94,8 +94,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-2xl border border-white relative z-10">
         <div className="flex flex-col items-center mb-8">
           <div className="inline-block relative mb-4">
-            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-green-400 via-emerald-400 to-lime-300 opacity-60" />
-            <div className="w-28 h-28 rounded-2xl bg-white border border-green-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
+            <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-teal-400 via-teal-300 to-cyan-300 opacity-60" />
+            <div className="w-28 h-28 rounded-2xl bg-white border border-teal-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
               <img src="/logo.png" alt="عناية" className="w-24 h-24 object-contain drop-shadow-sm" />
             </div>
           </div>
@@ -152,13 +152,13 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-lg font-bold shadow-lg shadow-brand-500/20 mt-4">
+          <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-lg font-bold shadow-[0_4px_16px_rgba(20,184,166,0.3)] mt-4 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 border-none text-white transition-all">
             {loading ? "جاري المعالجة..." : (isLogin ? "تأكيد الدخول" : "إنشاء الحساب")}
           </Button>
         </form>
 
         <div className="mt-6 text-center">
-          <button onClick={() => setIsLogin(!isLogin)} type="button" className="text-sm font-bold text-brand-600 hover:text-brand-500 transition-colors">
+          <button onClick={() => setIsLogin(!isLogin)} type="button" className="text-sm font-bold text-teal-600 hover:text-teal-500 transition-colors">
             {isLogin ? "ليس لديك حساب؟ إنشاء حساب جديد" : "لديك حساب بالفعل؟ تسجيل الدخول"}
           </button>
         </div>

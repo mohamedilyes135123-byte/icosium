@@ -32,21 +32,42 @@ export default function PatientAppointments() {
     supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
   }, []);
 
+  // Load doctors AFTER auth session is confirmed
+  useEffect(() => {
+    if (!currentUser) return;
+    const supabase = createClient();
+    supabase
+      .from("profiles")
+      .select("id,full_name,specialty,address")
+      .eq("role", "doctor")
+      .then(({ data, error }) => {
+        if (error) console.error("[appointments] doctors error:", error.message);
+        setDoctors(data || []);
+      });
+  }, [currentUser]);
+
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
   const fetchAll = useCallback(async () => {
     if (!currentUser) return;
     const supabase = createClient();
     setLoading(true);
+    setFetchError(null);
 
-    const [{ data: appts }, { data: docs }] = await Promise.all([
-      supabase.from("appointments").select(`
+    const { data: appts, error } = await supabase
+      .from("appointments")
+      .select(`
         *,
-        doctor:profiles!appointments_doctor_id_fkey(full_name, specialty, full_name_ar)
-      `).eq("patient_id", currentUser.id).order("created_at", { ascending: false }),
-      supabase.from("profiles").select("id,full_name,full_name_ar,specialty,address").eq("role", "doctor").eq("approval_status", "approved"),
-    ]);
+        doctor:profiles!doctor_id(full_name, specialty)
+      `)
+      .eq("patient_id", currentUser.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      setFetchError(error.message);
+    }
 
     setAppointments(appts || []);
-    setDoctors(docs || []);
     setLoading(false);
   }, [currentUser]);
 
@@ -99,6 +120,12 @@ export default function PatientAppointments() {
       </motion.header>
 
       {/* List */}
+      {fetchError && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200 mb-6 font-bold text-sm" dir="ltr">
+          <p>Error fetching appointments:</p>
+          <code className="block mt-2 text-xs">{fetchError}</code>
+        </div>
+      )}
       {loading ? (
         <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" /></div>
       ) : appointments.length === 0 ? (
@@ -116,20 +143,20 @@ export default function PatientAppointments() {
             const st = STATUS[appt.status] || STATUS.PENDING;
             return (
               <motion.div key={appt.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                className="bg-white/80 backdrop-blur-md border border-white shadow-sm rounded-3xl p-5 flex flex-col gap-4 relative overflow-hidden">
+                className="bg-white/90 backdrop-blur-md border border-white shadow-md rounded-3xl p-5 flex flex-col gap-4 relative overflow-hidden">
                 
                 {/* Background Gradient based on status */}
-                {appt.status === "APPROVED" && <div className="absolute top-0 right-0 w-32 h-32 bg-green-200/30 rounded-full blur-3xl -z-10" />}
-                {appt.status === "PENDING" && <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-200/30 rounded-full blur-3xl -z-10" />}
+                {appt.status === "APPROVED" && <div className="absolute top-0 right-0 w-32 h-32 bg-green-200/40 rounded-full blur-3xl -z-10" />}
+                {appt.status === "PENDING" && <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-200/40 rounded-full blur-3xl -z-10" />}
 
                 <div className="flex justify-between items-start">
                   <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 shrink-0">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-200 shrink-0 shadow-sm">
                       <Image src="/icon_calendar.png" alt="Calendar" width={32} height={32} style={{ mixBlendMode: "multiply" }} />
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-800 text-lg mb-0.5">الدكتور {getDoctorName(appt.doctor)}</h3>
-                      <p className="text-sm font-semibold text-slate-500 flex items-center gap-1">
+                      <h3 className="font-black text-slate-900 text-lg mb-0.5">الدكتور {getDoctorName(appt.doctor)}</h3>
+                      <p className="text-sm font-bold text-slate-600 flex items-center gap-1">
                          <UserRound className="w-3.5 h-3.5"/> {appt.doctor?.specialty || "عام"}
                       </p>
                     </div>
@@ -141,20 +168,20 @@ export default function PatientAppointments() {
                   </div>
                 </div>
 
-                <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 relative">
-                   <div className="absolute top-4 right-4 text-slate-300"><FileText className="w-5 h-5"/></div>
-                   <p className="text-sm font-bold text-slate-700 mb-1 pr-7">سبب الزيارة:</p>
-                   <p className="text-sm text-slate-600 leading-relaxed pr-7">{appt.reason}</p>
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 relative">
+                   <div className="absolute top-4 right-4 text-slate-400"><FileText className="w-5 h-5"/></div>
+                   <p className="text-sm font-black text-slate-800 mb-1 pr-7">سبب الزيارة:</p>
+                   <p className="text-sm font-medium text-slate-900 leading-relaxed pr-7">{appt.reason}</p>
                 </div>
 
                 {appt.status === "APPROVED" && appt.scheduled_at && (
-                  <div className="bg-gradient-to-l from-emerald-50 to-green-50 p-4 rounded-2xl border border-emerald-100 flex items-center gap-4">
-                     <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex flex-col items-center justify-center text-emerald-600 shrink-0 border border-emerald-100/50">
+                  <div className="bg-gradient-to-l from-emerald-50 to-green-50 p-4 rounded-2xl border border-emerald-200 flex items-center gap-4 shadow-sm">
+                     <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex flex-col items-center justify-center text-emerald-600 shrink-0 border border-emerald-100">
                         <Clock className="w-5 h-5 mb-0.5"/>
                      </div>
                      <div>
-                        <p className="text-xs font-bold text-emerald-600/80 mb-0.5">الموعد المحدد</p>
-                        <p className="text-emerald-900 font-black text-lg">
+                        <p className="text-xs font-bold text-emerald-700 mb-0.5">الموعد المحدد</p>
+                        <p className="text-emerald-950 font-black text-lg">
                           {new Date(appt.scheduled_at).toLocaleDateString("ar-DZ", { weekday: "long", day: "numeric", month: "long" })}
                           {" — "}
                           {new Date(appt.scheduled_at).toLocaleTimeString("ar-DZ", { hour: "2-digit", minute: "2-digit" })}
@@ -164,9 +191,9 @@ export default function PatientAppointments() {
                 )}
                 
                 {appt.notes && (
-                  <div className="bg-blue-50/50 p-4 rounded-2xl border-l-4 border-l-blue-400 border border-blue-100">
-                    <p className="text-xs font-bold text-blue-800 mb-1">ملاحظة من الطبيب:</p>
-                    <p className="text-sm text-blue-900">{appt.notes}</p>
+                  <div className="bg-emerald-50/80 p-4 rounded-2xl border-l-4 border-l-emerald-500 border border-emerald-100 shadow-sm">
+                    <p className="text-xs font-black text-emerald-800 mb-1">ملاحظة من الطبيب:</p>
+                    <p className="text-sm font-medium text-emerald-950">{appt.notes}</p>
                   </div>
                 )}
               </motion.div>

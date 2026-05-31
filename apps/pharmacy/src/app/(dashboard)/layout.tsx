@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Pill, LogOut, PackageSearch, FileSearch, LayoutDashboard, Settings, ShoppingBag } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
+import { Globe, Pill, LogOut, PackageSearch, FileSearch, LayoutDashboard, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function PharmacyLayout({
@@ -11,6 +12,7 @@ export default function PharmacyLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { t, lang, setLang } = useLanguage();
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-teal-500/20 relative">
@@ -21,24 +23,37 @@ export default function PharmacyLayout({
          <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-green-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
-      {/* Glass Sidebar */}
-      <aside className="w-72 border-r rtl:border-l rtl:border-r-0 border-teal-100 flex flex-col z-20 h-screen glass-panel">
-        <div className="p-6 flex items-center gap-3 text-slate-800 font-bold text-xl border-b border-teal-100 bg-white/50">
-          <img src="/logo.png" alt="Ø¹Ù†Ø§ÙŠØ©" className="w-10 h-10 object-contain" />
-          <span className="tracking-wide">Ù†Ø¸Ø§Ù… Ø§Ù„ØµÙŠØ¯Ù„ÙŠØ©</span>
+      {/* Distinctive Deep Daylight Sidebar */}
+      <aside className="w-72 border-r rtl:border-l rtl:border-r-0 border-teal-600/30 flex flex-col z-20 h-screen bg-gradient-to-b from-teal-600 to-teal-700 text-white shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-md pointer-events-none" />
+        
+        <div className="p-6 flex items-center gap-3 font-bold text-xl border-b border-white/10 relative z-10">
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
+            <img src="/logo.png" alt="عناية" className="w-7 h-7 object-contain" />
+          </div>
+          <span className="tracking-wide text-white drop-shadow-md">{t("platformTitle")}</span>
         </div>
         
-        <nav className="flex-1 px-4 py-6 space-y-2 relative">
-          <NavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5"/>} label="Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…" current={pathname} />
-          <NavItem href="/prescriptions" icon={<FileSearch className="w-5 h-5"/>} label="Ø§Ù„ÙˆØµÙØ§Øª Ø§Ù„Ø·Ø¨ÙŠØ©" current={pathname} />
-          <NavItem href="/inventory" icon={<PackageSearch className="w-5 h-5"/>} label="Ø§Ù„Ù…Ø®Ø²ÙˆÙ† ÙˆØ§Ù„Ø·Ù„Ø¨Ø§Øª" current={pathname} />
-          <NavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label="Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª" current={pathname} />
+        <nav className="flex-1 px-4 py-6 space-y-2 relative z-10">
+          <NavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5"/>} label={t("dashboard")} current={pathname} />
+          <NavItem href="/prescriptions" icon={<FileSearch className="w-5 h-5"/>} label={lang === "ar" ? "الوصفات الطبية" : "Ordonnances médicales"} current={pathname} />
+          <NavItem href="/inventory" icon={<PackageSearch className="w-5 h-5"/>} label={lang === "ar" ? "المخزون والطلبات" : "Inventaire et commandes"} current={pathname} />
+          <NavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label={t("settings")} current={pathname} />
         </nav>
 
-        <div className="p-4 border-t border-teal-100 bg-white/40">
-          <button className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-teal-600 hover:bg-teal-50 hover:text-teal-700 transition-colors text-sm font-bold border border-teal-100 bg-white/50 shadow-sm">
+        <div className="p-4 border-t border-white/10 relative z-10">
+          {/* Language Switcher */}
+          <button 
+            onClick={() => setLang(lang === "ar" ? "fr" : "ar")}
+            className="w-full mb-2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white hover:bg-white/10 transition-colors text-sm font-bold border border-white/20 shadow-sm"
+          >
+            <Globe className="w-4 h-4"/>
+            {lang === "ar" ? "Français" : "العربية"}
+          </button>
+
+          <button className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-rose-100 hover:bg-rose-500 hover:text-white transition-colors text-sm font-bold border border-white/20 shadow-sm">
             <LogOut className="w-4 h-4"/>
-            ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬
+            {t("logout")}
           </button>
         </div>
       </aside>
@@ -58,9 +73,8 @@ export default function PharmacyLayout({
                 {children}
               </div>
             </motion.div>
-          </AnimatePresence>
+         </AnimatePresence>
       </main>
-        </div>
     </div>
   );
 }
@@ -71,19 +85,18 @@ function NavItem({ href, icon, label, current }: { href: string; icon: React.Rea
   return (
     <Link 
       href={href} 
-      className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-all duration-300 font-bold relative group overflow-hidden ${isActive ? 'text-teal-900' : 'text-slate-500 hover:text-slate-800'}`}
+      className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-all duration-300 font-bold relative group overflow-hidden ${isActive ? 'text-teal-700' : 'text-teal-50 hover:text-white'}`}
     >
       {isActive && (
         <motion.div 
           layoutId="pharmacy-active-nav"
-          className="absolute inset-0 bg-white/80 border border-white rounded-xl shadow-[0_2px_15px_rgba(124,58,237,0.08)] backdrop-blur-sm"
+          className="absolute inset-0 bg-white shadow-lg backdrop-blur-sm rounded-xl"
         />
       )}
-      <div className={`relative z-10 transition-transform duration-300 ${isActive ? 'text-teal-600 scale-110 drop-shadow-[0_0_10px_rgba(124,58,237,0.2)]' : 'group-hover:scale-110'}`}>
+      <div className={`relative z-10 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
         {icon}
       </div>
       <span className="relative z-10">{label}</span>
     </Link>
   );
 }
-

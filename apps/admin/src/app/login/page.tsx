@@ -2,22 +2,17 @@
 
 export const dynamic = 'force-dynamic';
 
-
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Activity, Mail, Lock } from "lucide-react";
+import { Activity, Mail, Lock, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
-  const role = "admin";
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -25,143 +20,110 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSuccessMsg(null);
 
-    // --- QUICK DEBUG CREDENTIALS ---
-    if (password === "1" && email === '1') {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: 'admin@3inaya.com',
-        password: '123456',
-      });
-      if (authError) {
-         setError("لم يتم رفع البيانات (Seed) إلى قواعد البيانات بعد. جرب إدخالها.");
-         setLoading(false);
-         return;
-      }
-      document.cookie = `testing_bypass=admin; path=/; max-age=86400`;
-      window.location.href = `/dashboard`;
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      setError("فشل تسجيل الدخول. تأكد من البريد وكلمة المرور.");
+      setLoading(false);
       return;
     }
-    // -------------------------------
 
-    if (isLogin) {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (authError) {
-        setError("فشل تسجيل الدخول. تأكد من البريد وكلمة المرور.");
-        setLoading(false);
-        return;
-      }
-
-      const userRole = data?.user?.user_metadata?.role;
-      if (userRole === role) {
-        router.push(`/dashboard`);
-      } else {
-         setError("يرجى التأكد من الدخول من البوابة المخصصة لك.");
-         setLoading(false);
-      }
+    const userRole = data?.user?.user_metadata?.role;
+    if (userRole === "admin") {
+      router.push("/dashboard");
     } else {
-      // Signup flow
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            role: role,
-          }
-        }
-      });
-
-      if (signUpError) {
-        setError(signUpError.message);
-        setLoading(false);
-        return;
-      }
-      
-      setSuccessMsg("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.");
-      setIsLogin(true);
+      setError("هذه البوابة مخصصة لمسؤولي النظام فقط.");
+      await supabase.auth.signOut();
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-teal-100/50 via-slate-50 to-white"></div>
-      
-      <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-2xl border border-white relative z-10">
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden" dir="rtl">
+      {/* Background */}
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/30 via-slate-950 to-black" />
+      <div className="absolute top-[-10%] -right-[10%] w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] bg-indigo-600/30 rounded-full blur-[150px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] -left-[10%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-violet-600/30 rounded-full blur-[150px] pointer-events-none animate-pulse" style={{ animationDelay: '2s' }} />
+
+      {/* Fix browser autofill: force white bg + black text */}
+      <style>{`
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+          -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+          -webkit-text-fill-color: #111111 !important;
+          caret-color: #111111;
+        }
+      `}</style>
+
+      <div className="w-full max-w-md bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl border border-white/10 relative z-10">
+
+        {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-blue-400 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 mb-4 element-glow">
-             <Activity className="w-8 h-8" />
+          <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-violet-500 rounded-2xl flex items-center justify-center text-white shadow-[0_0_24px_rgba(99,102,241,0.5)] mb-4">
+            <Activity className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-black text-slate-800">مركز إدارة النظام</h1>
-          <p className="text-slate-500 text-sm mt-1">الولوج مقتصر على مسؤولي الدعم فقط</p>
+          <h1 className="text-2xl font-black text-white">مركز إدارة النظام</h1>
+          <p className="text-indigo-300/70 text-sm mt-1 flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4" />
+            الولوج مقتصر على مسؤولي الدعم فقط
+          </p>
         </div>
 
-        {successMsg && (
-          <div className="bg-emerald-50 text-emerald-600 p-3 rounded-xl text-sm font-bold mb-6 text-center border border-emerald-100">
-            {successMsg}
-          </div>
-        )}
-
+        {/* Error */}
         {error && (
-          <div className="bg-rose-50 text-rose-600 p-3 rounded-xl text-sm font-bold mb-6 text-center border border-rose-100">
+          <div className="bg-rose-500/10 text-rose-300 p-3 rounded-xl text-sm font-bold mb-6 text-center border border-rose-500/30">
             {error}
           </div>
         )}
 
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div className="relative">
-              <input 
-                type="text" 
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="الاسم الكامل" 
-                className="w-full h-12 px-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-right"
-                required={!isLogin} 
-              />
-            </div>
-          )}
+
+          {/* Email */}
           <div className="relative">
-            <Mail className="absolute right-4 top-3.5 w-5 h-5 text-slate-400" />
-            <input 
-              type="text" 
+            <Mail className="absolute right-4 top-3.5 w-5 h-5 text-gray-500 pointer-events-none z-10" />
+            <input
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="البريد الإلكتروني أو اسم المستخدم للخادم" 
-              className="w-full h-12 pl-4 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-left dir-ltr"
-              required 
-            />
-          </div>
-          
-          <div className="relative">
-            <Lock className="absolute right-4 top-3.5 w-5 h-5 text-slate-400" />
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="كلمة المرور" 
-              className="w-full h-12 pl-4 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-left dir-ltr"
-              required 
+              placeholder="admin@test.com"
+              autoComplete="email"
+              className="w-full h-12 pl-4 pr-12 bg-white border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-gray-900 placeholder:text-gray-400 text-sm font-medium"
+              required
             />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-lg font-bold shadow-lg shadow-brand-500/20 mt-4">
-            {loading ? "جاري المعالجة..." : (isLogin ? "تأكيد الدخول" : "إنشاء الحساب")}
+          {/* Password */}
+          <div className="relative">
+            <Lock className="absolute right-4 top-3.5 w-5 h-5 text-gray-500 pointer-events-none z-10" />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="كلمة المرور"
+              autoComplete="current-password"
+              className="w-full h-12 pl-4 pr-12 bg-white border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-gray-900 placeholder:text-gray-400 text-sm font-medium"
+              required
+            />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full h-12 rounded-xl text-base font-bold mt-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 border-none text-white transition-all shadow-[0_4px_20px_rgba(79,70,229,0.4)]"
+          >
+            {loading ? "جاري التحقق..." : "دخول لوحة الإدارة →"}
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
-          <button onClick={() => setIsLogin(!isLogin)} type="button" className="text-sm font-bold text-brand-600 hover:text-brand-500 transition-colors">
-            {isLogin ? "ليس لديك حساب؟ إنشاء حساب جديد" : "لديك حساب بالفعل؟ تسجيل الدخول"}
-          </button>
-        </div>
-
-        <p className="text-center text-xs text-slate-400 mt-8">الوصول للمنصات محمي بتشفير Supabase AES-256</p>
+        <p className="text-center text-xs text-slate-600 mt-8">
+          الوصول للمنصات محمي بتشفير Supabase AES-256
+        </p>
       </div>
     </div>
   );

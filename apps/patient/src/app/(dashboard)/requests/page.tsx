@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 
@@ -62,9 +63,9 @@ export default function PatientRequests() {
         prescriptions(id,qr_token,medications,is_used),
         lab_requests(id,qr_token,tests_list,status,lab_id)
       `).eq("patient_id", currentUser.id).order("created_at", { ascending: false }),
-      supabase.from("profiles").select("id,full_name,specialty,address").eq("role", "doctor").eq("approval_status", "approved"),
-      supabase.from("profiles").select("id,full_name,address").eq("role", "lab").eq("approval_status", "approved"),
-      supabase.from("profiles").select("id,full_name,address").eq("role", "pharmacy").eq("approval_status", "approved"),
+      supabase.from("profiles").select("id,full_name,specialty,address").eq("role", "doctor").eq("approval_status", "approved").neq("is_banned", true),
+      supabase.from("profiles").select("id,full_name,address").eq("role", "lab").eq("approval_status", "approved").neq("is_banned", true),
+      supabase.from("profiles").select("id,full_name,address").eq("role", "pharmacy").eq("approval_status", "approved").neq("is_banned", true),
     ]);
 
     setRequests(reqs || []);
@@ -121,7 +122,7 @@ export default function PatientRequests() {
   const statusCfg = (s: string) => STATUS[s] || STATUS.PENDING;
 
   return (
-    <div dir="rtl" style={{ paddingBottom: 32 }}>
+    <div dir="rtl" style={{ paddingBottom: 120 }}>
       {/* Header */}
       <div className="green-header" style={{ marginBottom: 0 }}>
         <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff", margin: 0 }}>🩺 طلباتي الطبية</h1>
@@ -349,8 +350,8 @@ export default function PatientRequests() {
       </div>
 
       {/* Provider Modal */}
-      {modal && (
-        <div onClick={() => setModal(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 50, display: "flex", alignItems: "flex-end" }}>
+      {modal && typeof window !== "undefined" && createPortal(
+        <div onClick={() => setModal(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 999, display: "flex", alignItems: "flex-end" }}>
           <div onClick={e => e.stopPropagation()} style={{ width: "100%", background: "#fff", borderRadius: "24px 24px 0 0", padding: 24, maxHeight: "70vh", overflowY: "auto" }}>
             <div style={{ width: 48, height: 4, background: "#e5e7eb", borderRadius: 999, margin: "0 auto 20px" }} />
             <h3 style={{ fontWeight: 900, fontSize: 18, textAlign: "center", marginBottom: 6 }}>
@@ -378,7 +379,8 @@ export default function PatientRequests() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

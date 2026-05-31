@@ -2,14 +2,15 @@
 
 export const dynamic = 'force-dynamic';
 
-
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import {
-  CheckCircle, XCircle, Edit3, AlertCircle, FileSignature,
-  FlaskConical, ChevronDown, User, Clock, Pill, TestTube, BrainCircuit
+  CheckCircle, XCircle, Edit3, AlertCircle,
+  Clock, Pill, TestTube, User
 } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ───────────────────────────────────────────────────────
@@ -26,6 +27,7 @@ interface ActionPanelState {
 
 // ─────────────────────────────────────────────────────────────────
 export default function DoctorRequests() {
+  const { lang, t } = useLanguage();
   const supabase = createClient();
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -124,7 +126,7 @@ export default function DoctorRequests() {
     if (panel.action === "APPROVE" && (panel.requestType === "LAB" || panel.requestType === "ROUTINE_LAB")) {
       const tests = panel.testsRequested.length > 0
         ? panel.testsRequested
-        : [{ name: "تحليل روتيني عام", code: "GENERAL" }];
+        : [{ name: lang === "ar" ? "تحليل روتيني عام" : "Analyse de routine générale", code: "GENERAL" }];
 
       await supabase.from("lab_requests").insert([{
         request_id: panel.requestId,
@@ -132,7 +134,6 @@ export default function DoctorRequests() {
         doctor_id: currentUser.id,
         tests_list: tests,
         doctor_notes: doctorNotes || null,
-        // lab_id is NULL — patient chooses the lab
       }]);
     }
 
@@ -149,7 +150,7 @@ export default function DoctorRequests() {
 
   // ─────────────────────────────────────────────────────────────
   return (
-    <div className="w-full pb-32" dir="rtl">
+    <div key={lang} className="w-full pb-32" dir={lang === "ar" ? "rtl" : "ltr"}>
 
       {/* ── Header ── */}
       <motion.header initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
@@ -159,71 +160,68 @@ export default function DoctorRequests() {
             <AlertCircle className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-slate-800 leading-none mb-1">طلبات المرضى</h1>
-            <p className="text-xs font-bold text-blue-500">تحتاج لموافقتك</p>
+            <h1 className="text-xl font-black text-slate-800 leading-none mb-1">{t("medicalRequests")}</h1>
+            <p className="text-xs font-bold text-blue-500">{t("reqRequiresAppr")}</p>
           </div>
         </div>
         <span className="bg-rose-100 text-rose-700 font-black text-sm px-3 py-1.5 rounded-xl border border-rose-200">
-          {requests.length} طلب
+          {requests.length} {t("demands")}
         </span>
       </motion.header>
 
       {/* ── Requests List ── */}
-      <div className="space-y-5">
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
         <AnimatePresence>
           {requests.map((req, i) => (
             <motion.div key={req.id}
               initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1, transition: { delay: i * 0.05 } }}
               exit={{ opacity: 0, height: 0, overflow: "hidden" }}
-              className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-6 shadow-xl shadow-blue-500/5 relative">
+              className="bg-white rounded-3xl p-6 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all flex flex-col relative overflow-hidden border-2 border-slate-200 hover:border-blue-300">
 
               {/* ── Request header ── */}
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                      <User className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-800">{req.patient?.full_name || "مريض"}</h3>
-                      {req.patient?.phone && <p className="text-xs text-slate-400">{req.patient.phone}</p>}
-                    </div>
+              <div className="flex justify-between items-start mb-5">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                    <User className="w-6 h-6 text-blue-600" />
                   </div>
-                  <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {new Date(req.created_at).toLocaleString("ar-DZ")}
-                  </p>
+                  <div>
+                    <h3 className="font-black text-slate-800 text-xl leading-tight mb-1">{req.patient?.full_name || t("patientNamePlaceholder")}</h3>
+                    <p className="text-sm font-semibold text-slate-400">{req.patient?.phone || t("noPhoneNumber")}</p>
+                  </div>
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
-                    req.type === "PRESCRIPTION" ? "bg-purple-100 text-purple-700" :
-                    req.type === "LAB" ? "bg-cyan-100 text-cyan-700" : "bg-teal-100 text-teal-700"
+                  <span className={`text-xs font-black px-3.5 py-2 rounded-full border ${
+                    req.type === "PRESCRIPTION" ? "bg-purple-50/50 text-purple-600 border-purple-100" :
+                    req.type === "LAB" ? "bg-cyan-50/50 text-cyan-600 border-cyan-100" : "bg-teal-50/50 text-teal-600 border-teal-100"
                   }`}>
-                    {req.type === "PRESCRIPTION" ? "🩺 وصفة" : req.type === "LAB" ? "🧪 تحليل" : "🔁 روتيني"}
+                    {req.type === "PRESCRIPTION" ? (lang === "ar" ? "🩺 وصفة" : "🩺 Ordonnance") : req.type === "LAB" ? (lang === "ar" ? "🧪 تحليل" : "🧪 Analyse") : (lang === "ar" ? "🔁 روتيني" : "🔁 Routine")}
                   </span>
                   {req.priority === "urgent" && (
-                    <span className="text-xs font-black text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-200 animate-pulse">
-                      🚨 عاجل
-                    </span>
+                    <span className="text-xs font-black text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-200 animate-pulse">{t("urgentTag")}</span>
                   )}
                   {!req.doctor_id && (
-                    <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-100 font-bold">
-                      بث عام
-                    </span>
+                    <span className="text-xs text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 font-bold">{t("diffusionGeneral")}</span>
                   )}
                 </div>
               </div>
 
+              <div className="flex items-center gap-2 mb-5 text-sm text-slate-400 font-medium">
+                 <Clock className="w-4 h-4" /> {new Date(req.created_at).toLocaleString(lang === "ar" ? "ar-DZ" : "fr-DZ")}
+              </div>
+
+              <hr className="border-slate-50 mb-5" />
+
               {/* ── Symptoms / Tests ── */}
-              <div className="bg-slate-50 rounded-2xl p-4 mb-4 border border-slate-100">
+              <div className="mb-5 flex-grow">
                 {req.symptoms && (
-                  <p className="text-slate-700 font-medium text-sm leading-relaxed">{req.symptoms}</p>
+                  <p className="text-slate-700 font-medium text-base leading-relaxed mb-4">{req.symptoms}</p>
                 )}
                 {req.tests_requested && req.tests_requested.length > 0 && (
-                  <div>
-                    <p className="text-xs font-bold text-slate-500 mb-2">التحاليل المطلوبة:</p>
-                    <div className="flex flex-wrap gap-1.5">
+                  <div className="mb-5">
+                    <p className="text-sm font-bold text-slate-400 mb-2.5 uppercase tracking-wide">{lang === "ar" ? "التحاليل المطلوبة:" : "Analyses demandées :"}</p>
+                    <div className="flex flex-wrap gap-2">
                       {req.tests_requested.map((t: any, idx: number) => (
-                        <span key={idx} className="text-xs bg-cyan-100 text-cyan-700 px-2 py-1 rounded-lg font-bold">
+                        <span key={idx} className="text-sm bg-cyan-50 border border-cyan-100 text-cyan-700 px-3 py-1.5 rounded-xl font-bold">
                           {t.name}
                         </span>
                       ))}
@@ -231,28 +229,24 @@ export default function DoctorRequests() {
                   </div>
                 )}
                 {req.patient_notes && (
-                  <div className="mt-3 pt-3 border-t border-slate-200">
-                    <p className="text-xs text-slate-500 font-medium">
-                      <span className="font-bold">ملاحظة المريض: </span>{req.patient_notes}
-                    </p>
+                  <div className="bg-slate-50/80 rounded-2xl p-5 border border-slate-100/80 mt-3">
+                    <p className="text-xs text-slate-400 font-bold mb-2 uppercase tracking-wide">{lang === "ar" ? "ملاحظة المريض: " : "Note du patient : "}</p>
+                    <p className="text-base font-medium text-slate-600 italic">"{req.patient_notes}"</p>
                   </div>
                 )}
               </div>
 
               {/* ── Action Buttons ── */}
-              <div className="grid grid-cols-3 gap-2">
-                <Button onClick={() => openPanel(req, "APPROVE")}
-                  className="flex flex-col items-center gap-1.5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-sm shadow-md shadow-emerald-500/20">
-                  <CheckCircle className="w-5 h-5" /> موافقة
-                </Button>
-                <Button onClick={() => openPanel(req, "MODIFY")}
-                  className="flex flex-col items-center gap-1.5 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-bold text-sm shadow-md shadow-blue-500/20">
-                  <Edit3 className="w-5 h-5" /> تعديل
-                </Button>
+              <div className="mt-auto grid grid-cols-3 gap-3 pt-3">
                 <Button onClick={() => openPanel(req, "REJECT")}
-                  className="flex flex-col items-center gap-1.5 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl font-bold text-sm shadow-md shadow-rose-500/20">
-                  <XCircle className="w-5 h-5" /> رفض
-                </Button>
+                  className="flex flex-col items-center justify-center gap-1.5 py-4 h-auto bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-xl font-bold text-sm border border-slate-200 hover:border-rose-200 transition-colors shadow-none">
+                  <XCircle className="w-5 h-5" />{t("rejectBtn")}</Button>
+                <Button onClick={() => openPanel(req, "MODIFY")}
+                  className="flex flex-col items-center justify-center gap-1.5 py-4 h-auto bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-xl font-bold text-sm border border-slate-200 hover:border-blue-200 transition-colors shadow-none">
+                  <Edit3 className="w-5 h-5" />{t("modifyBtn")}</Button>
+                <Button onClick={() => openPanel(req, "APPROVE")}
+                  className="flex flex-col items-center justify-center gap-1.5 py-4 h-auto bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-black text-sm shadow-md shadow-blue-500/20 transition-all border-none">
+                  <CheckCircle className="w-5 h-5" />{t("approveBtn")}</Button>
               </div>
             </motion.div>
           ))}
@@ -260,142 +254,140 @@ export default function DoctorRequests() {
           {requests.length === 0 && (
             <div className="flex flex-col items-center justify-center p-10 bg-white/40 backdrop-blur-sm rounded-[2rem] border border-white/60 shadow-inner">
               <CheckCircle className="w-12 h-12 text-slate-300 mb-4" />
-              <h4 className="text-slate-600 font-bold mb-1">لا توجد طلبات في الانتظار</h4>
-              <p className="text-slate-400 text-sm text-center">
-                أنت متصل بالشبكة. أي طلب جديد من مريض سيظهر هنا فوراً.
-              </p>
+              <h4 className="text-slate-600 font-bold mb-1">{t("noPendingRequests")}</h4>
+              <p className="text-slate-400 text-sm text-center">{t("onlinePatientQueueDesc")}</p>
             </div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════ */}
       {/* ── Action Panel (Bottom Sheet) ── */}
-      {/* ═══════════════════════════════════════════════════════════ */}
-      <AnimatePresence>
-        {panel?.open && (
+      {typeof window !== "undefined" && createPortal(
+        <AnimatePresence>
+          {panel?.open && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-[999] flex items-center justify-center p-4"
             onClick={() => setPanel(null)}>
             <motion.div
-              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 22 }}
-              className="w-full bg-white rounded-t-[2rem] p-6 max-h-[85vh] overflow-y-auto"
+              initial={{ scale: 0.9, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              transition={{ type: "spring", damping: 25 }}
+              className="w-full max-w-2xl bg-gradient-to-br from-blue-600 to-cyan-500 rounded-[2rem] p-8 shadow-2xl border border-blue-400 text-white relative overflow-hidden"
               onClick={e => e.stopPropagation()}>
 
-              <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-4" />
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 blur-2xl rounded-full translate-x-10 -translate-y-10"></div>
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-cyan-400/20 blur-2xl rounded-full -translate-x-10 translate-y-10"></div>
 
-              {/* Panel Header */}
-              <div className={`flex items-center gap-3 mb-6 p-4 rounded-2xl ${
-                panel.action === "APPROVE" ? "bg-emerald-50 border border-emerald-200" :
-                panel.action === "REJECT"  ? "bg-rose-50 border border-rose-200" :
-                "bg-blue-50 border border-blue-200"
-              }`}>
-                {panel.action === "APPROVE" && <CheckCircle className="w-6 h-6 text-emerald-600" />}
-                {panel.action === "REJECT"  && <XCircle className="w-6 h-6 text-rose-600" />}
-                {panel.action === "MODIFY"  && <Edit3 className="w-6 h-6 text-blue-600" />}
-                <div>
-                  <h3 className="font-black text-slate-800">
-                    {panel.action === "APPROVE" ? "تأكيد الموافقة" :
-                     panel.action === "REJECT"  ? "تأكيد الرفض" : "تعديل الطلب"}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    {panel.action === "APPROVE" && panel.requestType === "PRESCRIPTION" ? "أدخل الأدوية المناسبة للمريض" :
-                     panel.action === "APPROVE" ? "سيتم إرسال طلب التحليل للمريض" :
-                     panel.action === "REJECT"  ? "أدخل سبب الرفض" : "عدّل وصف الحالة"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Prescription form (APPROVE + PRESCRIPTION) */}
-              {panel.action === "APPROVE" && panel.requestType === "PRESCRIPTION" && (
-                <div className="mb-5">
-                  <label className="text-sm font-black text-slate-700 mb-3 block flex items-center gap-2">
-                    <Pill className="w-4 h-4" /> الأدوية الموصوفة
-                  </label>
-                  {medications.map((med, i) => (
-                    <div key={i} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-3">
-                      <div className="grid grid-cols-2 gap-2 mb-2">
-                        <input value={med.name} onChange={e => updateMed(i, "name", e.target.value)}
-                          placeholder="اسم الدواء *" className="p-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:border-blue-400 outline-none" />
-                        <input value={med.dose} onChange={e => updateMed(i, "dose", e.target.value)}
-                          placeholder="الجرعة (مثال: 500mg)" className="p-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:border-blue-400 outline-none" />
-                        <input value={med.frequency} onChange={e => updateMed(i, "frequency", e.target.value)}
-                          placeholder="التكرار (مثال: 3x يومياً)" className="p-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:border-blue-400 outline-none" />
-                        <input value={med.duration} onChange={e => updateMed(i, "duration", e.target.value)}
-                          placeholder="المدة (مثال: 7 أيام)" className="p-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:border-blue-400 outline-none" />
-                      </div>
-                      <input value={med.notes} onChange={e => updateMed(i, "notes", e.target.value)}
-                        placeholder="ملاحظات إضافية (اختياري)" className="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:border-blue-400 outline-none" />
-                      {medications.length > 1 && (
-                        <button onClick={() => removeMed(i)} className="mt-2 text-xs text-rose-500 font-bold">
-                          ✕ حذف هذا الدواء
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button onClick={addMed} className="text-sm text-blue-600 font-bold flex items-center gap-1.5 hover:underline">
-                    + إضافة دواء آخر
-                  </button>
-                </div>
-              )}
-
-              {/* Lab tests confirmation (APPROVE + LAB) */}
-              {panel.action === "APPROVE" && panel.requestType !== "PRESCRIPTION" && panel.testsRequested.length > 0 && (
-                <div className="mb-5 bg-cyan-50 border border-cyan-200 rounded-2xl p-4">
-                  <p className="text-sm font-bold text-cyan-800 mb-3 flex items-center gap-2">
-                    <TestTube className="w-4 h-4" /> التحاليل المطلوبة (ستُرسل للمختبر بعد أن يختاره المريض)
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {panel.testsRequested.map((t: any, i: number) => (
-                      <span key={i} className="text-xs bg-cyan-100 text-cyan-700 px-2.5 py-1.5 rounded-lg font-bold border border-cyan-200">
-                        {t.name}
-                      </span>
-                    ))}
+              <div className="relative z-10">
+                {/* Panel Header */}
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-black/10">
+                     {panel.action === "APPROVE" && <img src="/icon_confirm_action.png" alt="" className="w-8 h-8 object-contain" />}
+                     {panel.action === "REJECT"  && <XCircle className="w-8 h-8 text-rose-600" />}
+                     {panel.action === "MODIFY"  && <Edit3 className="w-8 h-8 text-blue-600" />}
+                  </div>
+                  <div>
+                    <h3 className="font-black text-2xl text-white">
+                      {panel.action === "APPROVE" ? t("confirmApprove") :
+                       panel.action === "REJECT"  ? t("confirmReject") :
+                       t("modifyRequest")}
+                    </h3>
+                    <p className="text-sm font-bold text-blue-100">
+                      {panel.action === "APPROVE" && panel.requestType === "PRESCRIPTION" ? t("enterMedsDesc") :
+                       panel.action === "APPROVE" ? t("sendLabDesc") :
+                       panel.action === "REJECT"  ? t("enterReasonRejectDesc") :
+                       t("editCaseDesc")}
+                    </p>
                   </div>
                 </div>
-              )}
 
-              {/* Modify: edit symptoms */}
-              {panel.action === "MODIFY" && (
-                <div className="mb-5">
-                  <label className="text-sm font-black text-slate-700 mb-2 block">تعديل وصف الحالة</label>
-                  <textarea value={modifiedSymptoms} onChange={e => setModifiedSymptoms(e.target.value)}
-                    className="w-full p-4 rounded-2xl bg-slate-50 border border-blue-200 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none h-24 text-slate-700 font-medium" />
+                {/* Prescription form (APPROVE + PRESCRIPTION) */}
+                {panel.action === "APPROVE" && panel.requestType === "PRESCRIPTION" && (
+                  <div className="mb-6 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <label className="text-sm font-black text-white mb-3 block flex items-center gap-2">
+                      <img src="/icon_prescription.png" className="w-6 h-6 object-contain filter drop-shadow-md" /> {t("prescribedMeds")}
+                    </label>
+                    {medications.map((med, i) => (
+                      <div key={i} className="bg-white rounded-2xl p-5 mb-4 shadow-xl shadow-black/10 border border-white">
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <input value={med.name} onChange={e => updateMed(i, "name", e.target.value)}
+                            placeholder={t("medNamePlaceholder")} className="p-3.5 rounded-xl border-2 border-slate-100 text-sm font-black text-slate-800 placeholder-slate-400 bg-slate-50 focus:border-cyan-300 focus:bg-white focus:ring-4 focus:ring-cyan-300/30 outline-none transition-all" />
+                          <input value={med.dose} onChange={e => updateMed(i, "dose", e.target.value)}
+                            placeholder={t("dosagePlaceholder")} className="p-3.5 rounded-xl border-2 border-slate-100 text-sm font-black text-slate-800 placeholder-slate-400 bg-slate-50 focus:border-cyan-300 focus:bg-white focus:ring-4 focus:ring-cyan-300/30 outline-none transition-all" />
+                          <input value={med.frequency} onChange={e => updateMed(i, "frequency", e.target.value)}
+                            placeholder={t("frequencyPlaceholder")} className="p-3.5 rounded-xl border-2 border-slate-100 text-sm font-black text-slate-800 placeholder-slate-400 bg-slate-50 focus:border-cyan-300 focus:bg-white focus:ring-4 focus:ring-cyan-300/30 outline-none transition-all" />
+                          <input value={med.duration} onChange={e => updateMed(i, "duration", e.target.value)}
+                            placeholder={t("durationPlaceholder")} className="p-3.5 rounded-xl border-2 border-slate-100 text-sm font-black text-slate-800 placeholder-slate-400 bg-slate-50 focus:border-cyan-300 focus:bg-white focus:ring-4 focus:ring-cyan-300/30 outline-none transition-all" />
+                        </div>
+                        <input value={med.notes} onChange={e => updateMed(i, "notes", e.target.value)}
+                          placeholder={t("addNotesPlaceholder")} className="w-full p-3.5 rounded-xl border-2 border-slate-100 text-sm font-black text-slate-800 placeholder-slate-400 bg-slate-50 focus:border-cyan-300 focus:bg-white focus:ring-4 focus:ring-cyan-300/30 outline-none transition-all" />
+                        {medications.length > 1 && (
+                          <button onClick={() => removeMed(i)} className="mt-3 text-sm text-rose-500 font-bold hover:text-rose-600 transition-colors">
+                            ✕ {t("deleteMedRow")}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button onClick={addMed} className="text-sm text-white font-bold flex items-center gap-1.5 hover:text-cyan-100 transition-colors bg-white/10 px-4 py-2 rounded-xl">
+                      + {t("addAnotherMed")}
+                    </button>
+                  </div>
+                )}
+
+                {/* Lab tests confirmation (APPROVE + LAB) */}
+                {panel.action === "APPROVE" && panel.requestType !== "PRESCRIPTION" && panel.testsRequested.length > 0 && (
+                  <div className="mb-6 bg-white rounded-2xl p-5 shadow-xl shadow-black/10 border border-white">
+                    <p className="text-base font-black text-slate-800 mb-4 flex items-center gap-2">
+                      <img src="/icon_lab_test.png" className="w-6 h-6 object-contain" /> {t("labTestsRequestedWarning")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {panel.testsRequested.map((t: any, i: number) => (
+                        <span key={i} className="text-sm bg-blue-50 border border-blue-100 text-blue-700 px-3 py-1.5 rounded-xl font-black shadow-sm">
+                          {t.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Modify: edit symptoms */}
+                {panel.action === "MODIFY" && (
+                  <div className="mb-6">
+                    <label className="text-sm font-black text-white mb-2 block">{t("modifyCaseDescription")}</label>
+                    <textarea value={modifiedSymptoms} onChange={e => setModifiedSymptoms(e.target.value)}
+                      className="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-300/30 outline-none resize-none h-28 text-slate-800 font-bold placeholder-slate-400 shadow-xl shadow-black/5" />
+                  </div>
+                )}
+
+                {/* Doctor notes */}
+                <div className="mb-8">
+                  <label className="text-sm font-black text-white mb-2 block">
+                    {panel.action === "REJECT" ? t("rejectionReasonLabelRequired") : t("patientNotesOptional")}
+                  </label>
+                  <textarea value={doctorNotes} onChange={e => setDoctorNotes(e.target.value)}
+                    placeholder={panel.action === "REJECT" ? t("rejectionReasonPlaceholder") : t("patientNotesPlaceholderEx")}
+                    className="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-300/30 outline-none resize-none h-28 text-slate-800 font-bold placeholder-slate-400 shadow-xl shadow-black/5" />
                 </div>
-              )}
 
-              {/* Doctor notes */}
-              <div className="mb-6">
-                <label className="text-sm font-black text-slate-700 mb-2 block">
-                  {panel.action === "REJECT" ? "سبب الرفض (مطلوب)" : "ملاحظات للمريض (اختياري)"}
-                </label>
-                <textarea value={doctorNotes} onChange={e => setDoctorNotes(e.target.value)}
-                  placeholder={panel.action === "REJECT" ? "مثال: الأعراض لا تستدعي هذا الدواء..." : "مثال: تناول الدواء مع الطعام..."}
-                  className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none h-24 text-slate-700 font-medium" />
-              </div>
-
-              <div className="flex gap-3">
-                <Button onClick={confirmAction} disabled={loading || (panel.action === "REJECT" && !doctorNotes.trim())}
-                  className={`flex-1 h-12 rounded-2xl text-white font-bold shadow-md ${
-                    panel.action === "APPROVE" ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20" :
-                    panel.action === "REJECT"  ? "bg-rose-500 hover:bg-rose-600 shadow-rose-500/20" :
-                    "bg-blue-500 hover:bg-blue-600 shadow-blue-500/20"
-                  }`}>
-                  {loading ? "جاري الحفظ..." : (
-                    panel.action === "APPROVE" ? "✅ تأكيد الموافقة" :
-                    panel.action === "REJECT"  ? "❌ تأكيد الرفض" : "✏️ تأكيد التعديل"
-                  )}
-                </Button>
-                <Button onClick={() => setPanel(null)}
-                  className="h-12 px-5 rounded-2xl border border-slate-200 bg-white text-slate-500 font-bold">
-                  إلغاء
-                </Button>
+                <div className="flex gap-4">
+                  <Button onClick={confirmAction} disabled={loading || (panel.action === "REJECT" && !doctorNotes.trim())}
+                    className="flex-1 h-14 rounded-2xl bg-white text-blue-600 hover:bg-cyan-50 font-black text-base shadow-lg shadow-black/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
+                    {loading ? t("saving") : (
+                      panel.action === "APPROVE" ? <><img src="/icon_confirm_action.png" className="w-5 h-5 object-contain" /> {t("confirmApprove")}</> :
+                      panel.action === "REJECT"  ? <><XCircle className="w-5 h-5" /> {t("confirmReject")}</> :
+                      <><Edit3 className="w-5 h-5" /> {t("modifyRequest")}</>
+                    )}
+                  </Button>
+                  <Button onClick={() => setPanel(null)}
+                    className="h-14 px-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-black text-base border border-white/20 transition-all">{t("cancelBtn")}</Button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

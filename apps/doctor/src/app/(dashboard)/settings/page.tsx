@@ -2,16 +2,16 @@
 
 export const dynamic = 'force-dynamic';
 
-
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   Settings, User, Phone, Mail, Stethoscope, Award, Building2,
-  CreditCard, Lock, LogOut, Bell, Shield, BadgeCheck, ChevronRight,
-  Globe, Calendar, Save, CheckCircle, AlertCircle, Package
+  CreditCard, Lock, LogOut, Bell, Shield, BadgeCheck,
+  Save, CheckCircle, AlertCircle, Package, Globe
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/components/LanguageContext";
 
 const SPECIALTIES = [
   "طب عام", "طب الأطفال", "أمراض القلب والأوعية الدموية", "طب الجهاز الهضمي",
@@ -21,7 +21,16 @@ const SPECIALTIES = [
   "أمراض الكلى", "أمراض الرئة", "الغدد الصماء", "طب الأورام", "أخرى",
 ];
 
+const SPECIALTIES_FR = [
+  "Médecine générale", "Pédiatrie", "Cardiologie", "Gastro-entérologie",
+  "Neurologie", "Ophtalmologie", "Otorhinolaryngologie (ORL)", "Dermatologie",
+  "Orthopédie", "Psychiatrie", "Gynécologie-obstétrique",
+  "Médecine d'urgence", "Chirurgie générale", "Dentisterie", "Radiologie",
+  "Néphrologie", "Pneumologie", "Endocrinologie", "Oncologie", "Autre",
+];
+
 export default function DoctorSettings() {
+  const { lang, t } = useLanguage();
   const supabase = createClient();
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -101,13 +110,12 @@ export default function DoctorSettings() {
     router.push("/login");
   };
 
-  // ── Sidebar sections ─────────────────────────────────────────────────────────
   const sections = [
-    { id: "profile", icon: <User className="w-4 h-4" />, label: "الملف الشخصي" },
-    { id: "professional", icon: <Stethoscope className="w-4 h-4" />, label: "المعلومات المهنية" },
-    { id: "subscription", icon: <Package className="w-4 h-4" />, label: "الاشتراك والباقة" },
-    { id: "security", icon: <Shield className="w-4 h-4" />, label: "الأمان والخصوصية" },
-    { id: "notifications", icon: <Bell className="w-4 h-4" />, label: "الإشعارات" },
+    { id: "profile", icon: <User className="w-4 h-4" />, label: t("profileTab") },
+    { id: "professional", icon: <Stethoscope className="w-4 h-4" />, label: t("professionalTab") },
+    { id: "subscription", icon: <Package className="w-4 h-4" />, label: t("subscriptionTab") },
+    { id: "security", icon: <Shield className="w-4 h-4" />, label: t("securityTab") },
+    { id: "notifications", icon: <Bell className="w-4 h-4" />, label: t("notificationsTab") },
   ];
 
   if (loading) return (
@@ -117,7 +125,7 @@ export default function DoctorSettings() {
   );
 
   return (
-    <div className="w-full pb-20" dir="rtl">
+    <div key={lang} className="w-full pb-20" dir={lang === "ar" ? "rtl" : "ltr"}>
       {/* Header */}
       <motion.header initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
         className="flex items-center gap-4 mb-8">
@@ -125,8 +133,8 @@ export default function DoctorSettings() {
           <Settings className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-xl font-black text-slate-800">الإعدادات</h1>
-          <p className="text-xs font-bold text-blue-500">إدارة حسابك وملفك المهني</p>
+          <h1 className="text-xl font-black text-slate-800">{t("settingsTitle")}</h1>
+          <p className="text-xs font-bold text-blue-500">{t("settingsDesc")}</p>
         </div>
       </motion.header>
 
@@ -138,17 +146,17 @@ export default function DoctorSettings() {
             <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white font-black text-2xl mb-3 border border-white/30">
               {(fullNameAr || "د")[0]}
             </div>
-            <h3 className="font-black text-base leading-tight">{fullNameAr || "الطبيب"}</h3>
-            <p className="text-blue-100 text-xs mt-1">{specialty || "طبيب عام"}</p>
+            <h3 className="font-black text-base leading-tight">{fullNameAr || (lang === "ar" ? "الطبيب" : "Médecin")}</h3>
+            <p className="text-blue-100 text-xs mt-1">{specialty || (lang === "ar" ? "طبيب عام" : "Généraliste")}</p>
             <div className="mt-3 flex items-center gap-1.5">
               <button
                 onClick={() => setIsOnline(!isOnline)}
                 className={`w-8 h-4 rounded-full transition-colors relative ${isOnline ? "bg-emerald-400" : "bg-white/30"}`}
               >
-                <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${isOnline ? "right-0.5" : "left-0.5"}`} />
+                <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${isOnline ? (lang === "ar" ? "right-0.5" : "left-0.5") : (lang === "ar" ? "left-0.5" : "right-0.5")}`} />
               </button>
               <span className="text-xs font-bold text-blue-100">
-                {isOnline ? "متاح للمرضى" : "خارج الخدمة"}
+                {isOnline ? t("onlineStatus") : t("offlineStatus")}
               </span>
             </div>
           </div>
@@ -177,7 +185,7 @@ export default function DoctorSettings() {
             className="mt-4 w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-rose-600 hover:bg-rose-50 transition-all border border-rose-100"
           >
             <LogOut className="w-4 h-4" />
-            تسجيل الخروج
+            {t("logout")}
           </button>
         </div>
 
@@ -187,7 +195,7 @@ export default function DoctorSettings() {
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
               className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-2xl mb-5 text-sm font-bold">
               <CheckCircle className="w-5 h-5" />
-              تم حفظ التغييرات بنجاح
+              {t("saveSuccess")}
             </motion.div>
           )}
 
@@ -195,78 +203,86 @@ export default function DoctorSettings() {
           {activeSection === "profile" && (
             <div className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl p-6 shadow-lg shadow-slate-200/40">
               <h2 className="font-black text-slate-800 text-lg mb-6 flex items-center gap-2">
-                <User className="w-5 h-5 text-blue-600" /> المعلومات الأساسية
+                <User className="w-5 h-5 text-blue-600" /> {t("basicInfo")}
               </h2>
               <div className="space-y-4">
-                <FieldGroup label="الاسم الكامل بالعربية" icon={<User className="w-4 h-4" />}>
+                <FieldGroup label={t("fullNameArLabel")} icon={<User className="w-4 h-4" />}>
                   <input value={fullNameAr} onChange={e => setFullNameAr(e.target.value)}
                     className={inputCls} placeholder="د. محمد بن علي" />
                 </FieldGroup>
-                <FieldGroup label="الاسم الكامل بالفرنسية" icon={<Globe className="w-4 h-4" />}>
+                <FieldGroup label={t("fullNameFrLabel")} icon={<Globe className="w-4 h-4" />}>
                   <input value={fullNameFr} onChange={e => setFullNameFr(e.target.value)}
                     className={inputCls} placeholder="Dr. Mohamed Ben Ali" />
                 </FieldGroup>
-                <FieldGroup label="رقم الهاتف" icon={<Phone className="w-4 h-4" />}>
+                <FieldGroup label={t("phoneLabel")} icon={<Phone className="w-4 h-4" />}>
                   <input value={phone} onChange={e => setPhone(e.target.value)}
                     className={inputCls} placeholder="+213 6XX XX XX XX" />
                 </FieldGroup>
-                <FieldGroup label="البريد الإلكتروني" icon={<Mail className="w-4 h-4" />}>
+                <FieldGroup label={t("emailLabel")} icon={<Mail className="w-4 h-4" />}>
                   <input value={currentUser?.email || ""} readOnly
                     className={`${inputCls} opacity-60 cursor-not-allowed`} />
                 </FieldGroup>
               </div>
-              <SaveButton saving={saving} onClick={handleSave} />
+              <SaveButton saving={saving} onClick={handleSave} lang={lang} t={t} />
             </div>
           )}
-
-          {/* ── PROFESSIONAL ────────────────────────────────────────────────── */}
           {activeSection === "professional" && (
             <div className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl p-6 shadow-lg shadow-slate-200/40">
               <h2 className="font-black text-slate-800 text-lg mb-6 flex items-center gap-2">
-                <Stethoscope className="w-5 h-5 text-blue-600" /> المعلومات المهنية
+                <Stethoscope className="w-5 h-5 text-blue-600" /> {t("professionalTab")}
               </h2>
               <div className="space-y-4">
-                <FieldGroup label="التخصص الطبي" icon={<Stethoscope className="w-4 h-4" />}>
+                <FieldGroup label={t("specialtyLabel")} icon={<Stethoscope className="w-4 h-4" />}>
                   <select value={specialty} onChange={e => setSpecialty(e.target.value)} className={inputCls}>
-                    <option value="">-- اختر التخصص --</option>
-                    {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+                    <option value="">{t("selectSpecialty")}</option>
+                    {SPECIALTIES.map((s, idx) => (
+                      <option key={s} value={s}>
+                        {lang === "ar" ? s : SPECIALTIES_FR[idx]}
+                      </option>
+                    ))}
                   </select>
                 </FieldGroup>
-                <FieldGroup label="رقم نقابة الأطباء" icon={<Award className="w-4 h-4" />}>
+                <FieldGroup label={t("licenseNumberLabel")} icon={<Award className="w-4 h-4" />}>
                   <input value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)}
                     className={inputCls} placeholder="ONMC-XXXXX" />
                 </FieldGroup>
-                <FieldGroup label="مكان العمل / العيادة" icon={<Building2 className="w-4 h-4" />}>
+                <FieldGroup label={t("workplaceLabel")} icon={<Building2 className="w-4 h-4" />}>
                   <input value={workplaceAddress} onChange={e => setWorkplaceAddress(e.target.value)}
-                    className={inputCls} placeholder="عيادة دكتور...، شارع..." />
+                    className={inputCls} placeholder={lang === "ar" ? "عيادة دكتور...، شارع..." : "Cabinet Dr..., Rue..."} />
                 </FieldGroup>
-                <FieldGroup label="رقم CCP / بريد موب" icon={<CreditCard className="w-4 h-4" />}>
+                <FieldGroup label={t("ccpLabel")} icon={<CreditCard className="w-4 h-4" />}>
                   <input value={ccp} onChange={e => setCcp(e.target.value)}
-                    className={inputCls} placeholder="رقم CCP أو بريد موب" />
+                    className={inputCls} placeholder={lang === "ar" ? "رقم CCP أو بريد موب" : "Numéro CCP ou BaridiMob"} />
                 </FieldGroup>
 
                 {/* Document upload notice */}
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                  <p className="text-sm font-bold text-amber-800 mb-2">⚠️ الوثائق المطلوبة</p>
+                  <p className="text-sm font-bold text-amber-800 mb-2">⚠️ {t("requiredDocs")}</p>
                   <div className="space-y-2">
                     {[
-                      { label: "شهادة الدكتوراه في الطب", status: "مطلوبة لتفعيل الوصفة الرقمية" },
-                      { label: "شهادة العمل", status: "تُجدَّد كل 6 أشهر" },
+                      {
+                        label: t("phdDoc"),
+                        status: t("phdDocDesc")
+                      },
+                      {
+                        label: t("workDoc"),
+                        status: t("workDocDesc")
+                      },
                     ].map(doc => (
                       <div key={doc.label} className="flex items-center justify-between bg-white/70 rounded-xl p-3 border border-amber-100">
-                        <div>
+                        <div className={lang === "ar" ? "text-right" : "text-left"}>
                           <p className="text-sm font-bold text-slate-700">{doc.label}</p>
                           <p className="text-xs text-amber-600">{doc.status}</p>
                         </div>
                         <button className="text-xs bg-blue-100 text-blue-700 font-bold px-3 py-1.5 rounded-xl hover:bg-blue-200 transition-colors">
-                          رفع
+                          {t("upload")}
                         </button>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-              <SaveButton saving={saving} onClick={handleSave} />
+              <SaveButton saving={saving} onClick={handleSave} lang={lang} t={t} />
             </div>
           )}
 
@@ -274,55 +290,67 @@ export default function DoctorSettings() {
           {activeSection === "subscription" && (
             <div className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl p-6 shadow-lg shadow-slate-200/40">
               <h2 className="font-black text-slate-800 text-lg mb-2 flex items-center gap-2">
-                <Package className="w-5 h-5 text-blue-600" /> الاشتراك والباقة
+                <Package className="w-5 h-5 text-blue-600" /> {t("subscriptionTitle")}
               </h2>
-              <p className="text-xs text-slate-500 mb-6">اختر الباقة المناسبة لممارستك الطبية</p>
-
+              <p className="text-xs text-slate-500 mb-6">{t("subscriptionDesc")}</p>
+ 
               <div className="space-y-4">
                 {[
                   {
-                    name: "المجانية", price: "0 دج", tag: "مجاني",
+                    name: t("freePlan"),
+                    price: lang === "ar" ? "0 دج" : "0 DA",
+                    tag: t("freeTag"),
                     color: "border-slate-200 bg-slate-50",
                     tagColor: "bg-slate-100 text-slate-600",
-                    features: ["30 مريض/شهر", "20 وصفة/شهر", "10 تحاليل/شهر", "ذكاء اصطناعي أساسي"],
-                    commission: "عمولة 15%",
+                    features: lang === "ar"
+                      ? ["30 مريض/شهر", "20 وصفة/شهر", "10 تحاليل/شهر", "ذكاء اصطناعي أساسي"]
+                      : ["30 patients/mois", "20 ordonnances/mois", "10 analyses/mois", "IA de base"],
+                    commission: lang === "ar" ? "عمولة 15%" : "Commission 15%",
                     current: profile?.subscription_plan === "free" || !profile?.subscription_plan,
                   },
                   {
-                    name: "الأساسية", price: "3,000 دج", tag: "شهرياً",
+                    name: t("basicPlan"),
+                    price: lang === "ar" ? "3,000 دج" : "3 000 DA",
+                    tag: lang === "ar" ? "شهرياً" : "/mois",
                     color: "border-blue-200 bg-blue-50",
                     tagColor: "bg-blue-100 text-blue-700",
-                    features: ["300 مريض/شهر", "300 وصفة/شهر", "300 تحليل/شهر", "دعم عادي", "أولوية الظهور"],
-                    commission: "عمولة 5%",
+                    features: lang === "ar"
+                      ? ["300 مريض/شهر", "300 وصفة/شهر", "300 تحليل/شهر", "دعم عادي", "أولوية الظهور"]
+                      : ["300 patients/mois", "300 ordonnances/mois", "300 analyses/mois", "Support standard", "Affichage prioritaire"],
+                    commission: lang === "ar" ? "عمولة 5%" : "Commission 5%",
                     current: profile?.subscription_plan === "basic",
                   },
                   {
-                    name: "الاحترافية", price: "8,000 دج", tag: "شهرياً",
+                    name: t("proPlan"),
+                    price: lang === "ar" ? "8,000 دج" : "8 000 DA",
+                    tag: lang === "ar" ? "شهرياً" : "/mois",
                     color: "border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50",
                     tagColor: "bg-purple-100 text-purple-700",
-                    features: ["مرضى غير محدودين", "وصفات & تحاليل غير محدودة", "AI متقدم + تقارير", "Gestion de cabinet", "أولوية ظهور قصوى"],
-                    commission: "عمولة 1% — ثم 0% بعد شهرين متتاليين",
+                    features: lang === "ar"
+                      ? ["مرضى غير محدودين", "وصفات & تحاليل غير محدودة", "AI متقدم + تقارير", "Gestion de cabinet", "أولوية ظهور قصوى"]
+                      : ["Patients illimités", "Ordonnances/analyses illimitées", "IA avancée + rapports", "Gestion de cabinet", "Affichage prioritaire max"],
+                    commission: lang === "ar" ? "عمولة 1% — ثم 0% بعد شهرين متتاليين" : "Commission 1% — puis 0% après 2 mois consécutifs",
                     current: profile?.subscription_plan === "pro",
                     recommended: true,
                   },
                 ].map(plan => (
                   <div key={plan.name} className={`border-2 rounded-3xl p-5 relative ${plan.color} ${plan.current ? "ring-2 ring-blue-500 ring-offset-2" : ""}`}>
                     {plan.recommended && (
-                      <span className="absolute -top-3 right-6 text-xs font-black bg-gradient-to-l from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full shadow-md">
-                        ⭐ الأفضل
+                      <span className={`absolute -top-3 ${lang === "ar" ? "right-6" : "left-6"} text-xs font-black bg-gradient-to-l from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full shadow-md`}>
+                        {t("bestChoice")}
                       </span>
                     )}
                     {plan.current && (
-                      <span className="absolute -top-3 left-6 text-xs font-black bg-emerald-500 text-white px-3 py-1 rounded-full shadow-md flex items-center gap-1">
-                        <BadgeCheck className="w-3 h-3" /> باقتك الحالية
+                      <span className={`absolute -top-3 ${lang === "ar" ? "left-6" : "right-6"} text-xs font-black bg-emerald-500 text-white px-3 py-1 rounded-full shadow-md flex items-center gap-1`}>
+                        <BadgeCheck className="w-3 h-3" /> {t("currentPlan")}
                       </span>
                     )}
                     <div className="flex justify-between items-start mb-3">
-                      <div>
+                      <div className={lang === "ar" ? "text-right" : "text-left"}>
                         <h3 className="font-black text-slate-800 text-lg">{plan.name}</h3>
                         <p className="text-xs text-rose-600 font-bold mt-0.5">{plan.commission}</p>
                       </div>
-                      <div className="text-left">
+                      <div className={lang === "ar" ? "text-left" : "text-right"}>
                         <span className="text-2xl font-black text-slate-900">{plan.price}</span>
                         <div>
                           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${plan.tagColor}`}>{plan.tag}</span>
@@ -339,49 +367,47 @@ export default function DoctorSettings() {
                     </ul>
                     {!plan.current && (
                       <button className="w-full py-2.5 rounded-2xl text-sm font-bold bg-gradient-to-l from-blue-600 to-cyan-500 text-white shadow-md hover:shadow-lg transition-all">
-                        الاشتراك في هذه الباقة
+                        {t("subscribeToPlan")}
                       </button>
                     )}
                   </div>
                 ))}
               </div>
             </div>
-          )}
-
-          {/* ── SECURITY ────────────────────────────────────────────────────── */}
+          )}            {/* ── SECURITY ────────────────────────────────────────────────────── */}
           {activeSection === "security" && (
             <div className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl p-6 shadow-lg shadow-slate-200/40">
               <h2 className="font-black text-slate-800 text-lg mb-6 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-blue-600" /> الأمان والخصوصية
+                <Shield className="w-5 h-5 text-blue-600" /> {t("securityTitle")}
               </h2>
               <div className="space-y-3">
                 {[
                   {
                     icon: <Lock className="w-5 h-5 text-slate-600" />,
-                    label: "تغيير كلمة المرور",
-                    description: "يُنصح بتغييرها كل 3 أشهر",
-                    action: "تغيير",
+                    label: t("changePassword"),
+                    description: t("passwordDesc"),
+                    action: t("changeAction"),
                     color: "text-blue-600",
                   },
                   {
                     icon: <Shield className="w-5 h-5 text-slate-600" />,
-                    label: "تشفير البيانات",
-                    description: "AES-256 — كل بياناتك مشفرة",
-                    action: "فعّال ✅",
+                    label: t("dataEncryption"),
+                    description: t("dataEncryptionDesc"),
+                    action: t("encryptionAction"),
                     color: "text-emerald-600",
                   },
                   {
                     icon: <AlertCircle className="w-5 h-5 text-slate-600" />,
-                    label: "تجميد الحساب مؤقتاً",
-                    description: "يمكن إعادة التفعيل بنفس الحساب",
-                    action: "تجميد",
+                    label: t("deactivateAccount"),
+                    description: t("deactivateDesc"),
+                    action: t("deactivateAction"),
                     color: "text-amber-600",
                   },
                 ].map(item => (
                   <div key={item.label} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                     <div className="flex items-center gap-3">
                       {item.icon}
-                      <div>
+                      <div className={lang === "ar" ? "text-right" : "text-left"}>
                         <p className="font-bold text-slate-800 text-sm">{item.label}</p>
                         <p className="text-xs text-slate-500">{item.description}</p>
                       </div>
@@ -392,14 +418,14 @@ export default function DoctorSettings() {
                   </div>
                 ))}
               </div>
-
+ 
               <div className="mt-6 bg-blue-50 border border-blue-100 rounded-2xl p-4">
-                <p className="text-sm font-bold text-blue-800 mb-2">🔐 معلومات الأمان</p>
+                <p className="text-sm font-bold text-blue-800 mb-2">🔐 {t("securityInfo")}</p>
                 <div className="space-y-1.5 text-xs text-slate-600">
-                  <p>• الخروج التلقائي بعد 10 دقائق من عدم النشاط</p>
-                  <p>• الجلسة مقيّدة بجهازين كحد أقصى</p>
-                  <p>• كل العمليات مؤرشفة في سجل التدقيق</p>
-                  <p>• منصة عناية مشفرة ومحمية وفق معايير HIPAA</p>
+                  <p>• {t("securityInfoRule1")}</p>
+                  <p>• {t("securityInfoRule2")}</p>
+                  <p>• {t("securityInfoRule3")}</p>
+                  <p>• {t("securityInfoRule4")}</p>
                 </div>
               </div>
             </div>
@@ -409,17 +435,37 @@ export default function DoctorSettings() {
           {activeSection === "notifications" && (
             <div className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl p-6 shadow-lg shadow-slate-200/40">
               <h2 className="font-black text-slate-800 text-lg mb-6 flex items-center gap-2">
-                <Bell className="w-5 h-5 text-blue-600" /> تفضيلات الإشعارات
+                <Bell className="w-5 h-5 text-blue-600" /> {t("notificationTitle")}
               </h2>
               <div className="space-y-4">
                 {[
-                  { label: "طلب جديد من مريض", desc: "تنبيه فوري عند وصول طلب", default: true },
-                  { label: "نتائج التحاليل", desc: "عند رفع نتائج تحاليل مريضك", default: true },
-                  { label: "تجديد الاشتراك", desc: "قبل يومين من انتهاء الشهر", default: true },
-                  { label: "تقرير أسبوعي", desc: "ملخص نشاطك الأسبوعي", default: false },
-                  { label: "رسائل النظام", desc: "تحديثات المنصة والصيانة", default: true },
+                  {
+                    label: t("newRequestNotif"),
+                    desc: t("newRequestNotifDesc"),
+                    default: true
+                  },
+                  {
+                    label: t("labResultsNotif"),
+                    desc: t("labResultsNotifDesc"),
+                    default: true
+                  },
+                  {
+                    label: t("subRenewalNotif"),
+                    desc: t("subRenewalNotifDesc"),
+                    default: true
+                  },
+                  {
+                    label: t("weeklyReportNotif"),
+                    desc: t("weeklyReportNotifDesc"),
+                    default: false
+                  },
+                  {
+                    label: t("systemMessagesNotif"),
+                    desc: t("systemMessagesNotifDesc"),
+                    default: true
+                  },
                 ].map(item => (
-                  <NotifToggle key={item.label} label={item.label} desc={item.desc} defaultOn={item.default} />
+                  <NotifToggle key={item.label} label={item.label} desc={item.desc} defaultOn={item.default} lang={lang} />
                 ))}
               </div>
             </div>
@@ -433,7 +479,7 @@ export default function DoctorSettings() {
 // ── Helper components ──────────────────────────────────────────────────────────
 const inputCls = `w-full h-12 px-4 bg-slate-50/80 border border-slate-200 rounded-xl 
   focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all 
-  text-right text-slate-800 text-sm`;
+  text-slate-800 text-sm`;
 
 function FieldGroup({ label, icon, children }: { label: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -447,24 +493,24 @@ function FieldGroup({ label, icon, children }: { label: string; icon: React.Reac
   );
 }
 
-function SaveButton({ saving, onClick }: { saving: boolean; onClick: () => void }) {
+function SaveButton({ saving, onClick, lang, t }: { saving: boolean; onClick: () => void; lang: string; t: any }) {
   return (
     <button
       onClick={onClick}
       disabled={saving}
-      className="mt-6 flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white text-sm font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all disabled:opacity-60"
+      className={`mt-6 flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white text-sm font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all disabled:opacity-60`}
     >
       <Save className="w-4 h-4" />
-      {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
+      {saving ? t("saving") : t("saveChanges")}
     </button>
   );
 }
 
-function NotifToggle({ label, desc, defaultOn }: { label: string; desc: string; defaultOn: boolean }) {
+function NotifToggle({ label, desc, defaultOn, lang }: { label: string; desc: string; defaultOn: boolean; lang: string }) {
   const [on, setOn] = useState(defaultOn);
   return (
     <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-      <div>
+      <div className={lang === "ar" ? "text-right" : "text-left"}>
         <p className="font-bold text-slate-800 text-sm">{label}</p>
         <p className="text-xs text-slate-500">{desc}</p>
       </div>
@@ -472,7 +518,7 @@ function NotifToggle({ label, desc, defaultOn }: { label: string; desc: string; 
         onClick={() => setOn(!on)}
         className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${on ? "bg-blue-500" : "bg-slate-300"}`}
       >
-        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${on ? "right-1" : "left-1"}`} />
+        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${on ? (lang === "ar" ? "right-1" : "left-1") : (lang === "ar" ? "left-1" : "right-1")}`} />
       </button>
     </div>
   );

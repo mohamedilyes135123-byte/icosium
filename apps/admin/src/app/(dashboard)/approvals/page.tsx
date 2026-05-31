@@ -33,6 +33,26 @@ const ROLE_BG: Record<string, string> = {
   lab:      "bg-cyan-50 text-cyan-700 border-cyan-200",
   pharmacy: "bg-purple-50 text-purple-700 border-purple-200",
 };
+const ROLE_ICON_SRC: Record<string, string> = {
+  doctor:   "/icon_role_doctor.png",
+  lab:      "/icon_role_lab.png",
+  pharmacy: "/icon_role_pharmacy.png",
+};
+const STATUS_ICON_SRC: Record<string, string> = {
+  approved: "/icon_status_approved.png",
+  rejected: "/icon_status_rejected.png",
+  pending:  "/icon_status_pending.png",
+};
+const STATUS_LABEL: Record<string, string> = {
+  approved: "معتمد",
+  rejected: "مرفوض",
+  pending:  "انتظار",
+};
+const STATUS_STYLE: Record<string, string> = {
+  approved: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  rejected: "bg-rose-50 text-rose-700 border-rose-200",
+  pending:  "bg-amber-50 text-amber-700 border-amber-200",
+};
 
 type FilterStatus = "pending" | "approved" | "rejected" | "all";
 
@@ -109,11 +129,21 @@ export default function AdminApprovals() {
       <div className="flex gap-2 mb-5 flex-wrap">
         {(["pending","approved","rejected","all"] as FilterStatus[]).map(f => (
           <button key={f} onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-2xl text-sm font-bold border transition-all ${
-              filter === f ? "bg-indigo-600 text-white border-transparent shadow-lg" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
+            className={`px-4 py-2 rounded-2xl text-sm font-bold transition-all ${
+              filter === f
+                ? "bg-gradient-to-l from-indigo-600 to-violet-600 text-white"
+                : "bg-white text-slate-700 border border-slate-300 hover:border-indigo-400"
             }`}>
-            {f === "pending" ? "⏳ انتظار" : f === "approved" ? "✅ معتمد" : f === "rejected" ? "❌ مرفوض" : "الكل"}
-            <span className={`mr-2 text-xs px-2 py-0.5 rounded-full font-black ${filter === f ? "bg-white/20" : "bg-slate-100"}`}>
+            {f === "pending" ? (
+              <span className="flex items-center gap-1"><img src="/icon_status_pending.png" className="w-4 h-4 object-contain" alt="" /> انتظار</span>
+            ) : f === "approved" ? (
+              <span className="flex items-center gap-1"><img src="/icon_status_approved.png" className="w-4 h-4 object-contain" alt="" /> معتمد</span>
+            ) : f === "rejected" ? (
+              <span className="flex items-center gap-1"><img src="/icon_status_rejected.png" className="w-4 h-4 object-contain" alt="" /> مرفوض</span>
+            ) : "الكل"}
+            <span className={`mr-2 text-xs px-2 py-0.5 rounded-full font-black ${
+              filter === f ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
+            }`}>
               {counts[f]}
             </span>
           </button>
@@ -124,8 +154,10 @@ export default function AdminApprovals() {
       <div className="flex gap-2 mb-6">
         {["all","doctor","lab","pharmacy"].map(r => (
           <button key={r} onClick={() => setRoleFilter(r)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              roleFilter === r ? `bg-gradient-to-l ${r !== "all" ? ROLE_COLORS[r] : "from-slate-700 to-slate-600"} text-white border-transparent` : "bg-white text-slate-500 border-slate-200"
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              roleFilter === r
+                ? `bg-gradient-to-l ${r !== "all" ? ROLE_COLORS[r] : "from-slate-700 to-slate-600"} text-white`
+                : "bg-white text-slate-700 border border-slate-300 hover:border-indigo-400"
             }`}>
             {r === "all" ? "كل الأدوار" : ROLE_LABELS[r]}
           </button>
@@ -163,10 +195,10 @@ export default function AdminApprovals() {
                 {/* Profile header */}
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center bg-gradient-to-br ${ROLE_COLORS[p.role]} text-white shadow-md`}>
-                      {p.role === "doctor" ? <Stethoscope className="w-5 h-5" /> :
-                       p.role === "lab"    ? <FlaskConical className="w-5 h-5" /> :
-                                             <Pill className="w-5 h-5" />}
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-white border-2 ${
+                      p.role === 'doctor' ? 'border-blue-100' : p.role === 'lab' ? 'border-cyan-100' : 'border-purple-100'
+                    } shadow-md`}>
+                      <img src={ROLE_ICON_SRC[p.role] || "/icon_role_patient.png"} className="w-8 h-8 object-contain" alt={ROLE_LABELS[p.role]} />
                     </div>
                     <div>
                       <p className="font-black text-slate-800 text-sm">{p.full_name}</p>
@@ -175,14 +207,16 @@ export default function AdminApprovals() {
                       </span>
                     </div>
                   </div>
-                  <span className={`text-[10px] font-black px-2.5 py-1 rounded-xl border ${
-                    p.approval_status === "approved" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                    p.approval_status === "rejected" ? "bg-rose-50 text-rose-700 border-rose-200" :
-                    "bg-amber-50 text-amber-700 border-amber-200"
-                  }`}>
-                    {p.approval_status === "approved" ? "✅ معتمد" :
-                     p.approval_status === "rejected" ? "❌ مرفوض" : "⏳ انتظار"}
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className={`flex items-center gap-1.5 text-[10px] font-black px-2.5 py-1 rounded-xl border ${STATUS_STYLE[p.approval_status] || STATUS_STYLE.pending}`}>
+                      <img src={STATUS_ICON_SRC[p.approval_status] || STATUS_ICON_SRC.pending} className="w-4 h-4 object-contain" alt="" />
+                      {STATUS_LABEL[p.approval_status] || "انتظار"}
+                    </span>
+                    <button onClick={() => setDetailModal(p)}
+                      className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg hover:bg-indigo-100 transition-colors">
+                      <Eye className="w-3 h-3" /> مراجعة الملف
+                    </button>
+                  </div>
                 </div>
 
                 {/* Info */}
@@ -234,26 +268,26 @@ export default function AdminApprovals() {
                 {p.approval_status === "pending" && (
                   <div className="flex gap-2">
                     <button onClick={() => updateStatus(p.id, "approved")} disabled={actioning === p.id}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold disabled:opacity-50 transition-colors shadow-md shadow-emerald-500/20">
-                      <CheckCircle className="w-3.5 h-3.5" />
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-l from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-xs font-bold disabled:opacity-50 transition-all">
+                      <img src="/icon_status_approved.png" className="w-4 h-4 object-contain" alt="" />
                       {actioning === p.id ? "..." : "اعتماد الحساب"}
                     </button>
                     <button onClick={() => updateStatus(p.id, "rejected")} disabled={actioning === p.id}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold disabled:opacity-50 transition-colors">
-                      <XCircle className="w-3.5 h-3.5" />
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white text-rose-600 border-2 border-rose-200 hover:bg-rose-50 text-xs font-bold disabled:opacity-50 transition-all">
+                      <img src="/icon_status_rejected.png" className="w-4 h-4 object-contain" alt="" />
                       رفض
                     </button>
                   </div>
                 )}
                 {p.approval_status === "approved" && (
                   <button onClick={() => updateStatus(p.id, "rejected")} disabled={actioning === p.id}
-                    className="w-full py-2.5 rounded-xl border border-rose-200 text-rose-500 hover:bg-rose-50 text-xs font-bold transition-colors">
-                    إلغاء الاعتماد
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-l from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600 text-white text-xs font-bold disabled:opacity-50 transition-all">
+                    إلغاء الاعتماد (رفض)
                   </button>
                 )}
                 {p.approval_status === "rejected" && (
                   <button onClick={() => updateStatus(p.id, "approved")} disabled={actioning === p.id}
-                    className="w-full py-2.5 rounded-xl border border-emerald-200 text-emerald-600 hover:bg-emerald-50 text-xs font-bold transition-colors">
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-l from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-xs font-bold disabled:opacity-50 transition-all">
                     اعتماد الحساب
                   </button>
                 )}
@@ -262,6 +296,82 @@ export default function AdminApprovals() {
           ))}
         </AnimatePresence>
       </div>
+
+      {/* Profile Detail Modal */}
+      <AnimatePresence>
+        {detailModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setDetailModal(null)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden"
+            >
+              <div className={`h-2 w-full bg-gradient-to-l ${ROLE_COLORS[detailModal.role] || "from-slate-400 to-slate-300"}`} />
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h3 className="text-xl font-black text-slate-800">{detailModal.full_name}</h3>
+                    <p className="text-sm font-bold text-slate-500 mt-1">{ROLE_LABELS[detailModal.role]} {detailModal.specialty ? `— ${detailModal.specialty}` : ""}</p>
+                  </div>
+                  <button onClick={() => setDetailModal(null)} className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4 bg-slate-50 rounded-2xl p-5 border border-slate-100 mb-6 text-sm">
+                  <div className="flex justify-between border-b border-slate-200 pb-2">
+                    <span className="text-slate-500">تاريخ التسجيل</span>
+                    <span className="font-bold text-slate-700">{new Date(detailModal.created_at).toLocaleDateString("ar-DZ")}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-200 pb-2">
+                    <span className="text-slate-500">رقم الهاتف</span>
+                    <span className="font-bold text-slate-700">{detailModal.phone || "غير متوفر"}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-200 pb-2">
+                    <span className="text-slate-500">العنوان</span>
+                    <span className="font-bold text-slate-700 text-left max-w-[200px] truncate">{detailModal.address || "غير متوفر"}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-200 pb-2">
+                    <span className="text-slate-500">رقم الهوية الوطنية</span>
+                    <span className="font-bold text-slate-700">{detailModal.national_id || "غير متوفر"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">الرقم المهني / النقابة</span>
+                    <span className="font-bold text-slate-700">{detailModal.medical_license || "غير متوفر"}</span>
+                  </div>
+                </div>
+
+                {detailModal.approval_status === "pending" && (
+                  <div className="flex gap-3">
+                    <button onClick={() => { updateStatus(detailModal.id, "approved"); setDetailModal(null); }} disabled={actioning === detailModal.id}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-l from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold disabled:opacity-50 transition-all">
+                      <img src="/icon_status_approved.png" className="w-5 h-5 object-contain" alt="" />
+                      اعتماد الحساب
+                    </button>
+                    <button onClick={() => { updateStatus(detailModal.id, "rejected"); setDetailModal(null); }} disabled={actioning === detailModal.id}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-rose-600 border-2 border-rose-200 hover:bg-rose-50 font-bold disabled:opacity-50 transition-all">
+                      <img src="/icon_status_rejected.png" className="w-5 h-5 object-contain" alt="" />
+                      رفض الحساب
+                    </button>
+                  </div>
+                )}
+                {detailModal.approval_status === "approved" && (
+                  <button onClick={() => { updateStatus(detailModal.id, "rejected"); setDetailModal(null); }} disabled={actioning === detailModal.id}
+                    className="w-full py-3 rounded-xl bg-gradient-to-l from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600 text-white font-bold disabled:opacity-50 transition-all">
+                    إلغاء الاعتماد (رفض)
+                  </button>
+                )}
+                {detailModal.approval_status === "rejected" && (
+                  <button onClick={() => { updateStatus(detailModal.id, "approved"); setDetailModal(null); }} disabled={actioning === detailModal.id}
+                    className="w-full py-3 rounded-xl bg-gradient-to-l from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold disabled:opacity-50 transition-all">
+                    استعادة الحساب (اعتماد)
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

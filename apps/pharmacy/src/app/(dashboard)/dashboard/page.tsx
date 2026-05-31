@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useLanguage } from "@/components/LanguageContext";
 
 export default function PharmacyDashboard() {
+  const { t, lang } = useLanguage();
   const supabase = createClient();
   const [user, setUser]       = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
@@ -78,11 +80,11 @@ export default function PharmacyDashboard() {
   };
 
   const hour  = new Date().getHours();
-  const greet = hour < 12 ? "صباح الخير ☀️" : hour < 17 ? "مساء الخير 🌤️" : "مساء النور 🌙";
-  const pharmacyName = profile?.full_name || "صيدليتي";
+  const greet = hour < 12 ? t("morning") : hour < 17 ? t("afternoon") : t("evening");
+  const pharmacyName = profile?.full_name || t("myPharmacy");
 
   return (
-    <div className="pb-32 w-full" dir="rtl">
+    <div className="pb-32 w-full" dir={lang === "ar" ? "rtl" : "ltr"}>
 
       {/* ── Header ── */}
       <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
@@ -93,23 +95,23 @@ export default function PharmacyDashboard() {
           <div className="flex items-center gap-2 mt-1">
             <span className={`w-2 h-2 rounded-full ${profile?.approval_status === "approved" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
             <span className={`text-xs font-bold ${profile?.approval_status === "approved" ? "text-emerald-600" : "text-amber-600"}`}>
-              {profile?.approval_status === "approved" ? "صيدلية معتمدة ✅" : "قيد المراجعة"}
+              {profile?.approval_status === "approved" ? t("approved") : t("underReview")}
             </span>
           </div>
         </div>
         <button onClick={() => { setScanModal(true); setScanInput(""); setScanResult(null); setScanSearched(false); }}
           className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-l from-purple-600 to-fuchsia-500 text-white font-bold shadow-xl shadow-purple-500/30 text-sm">
-          <ScanLine className="w-5 h-5" /> مسح QR
+          <ScanLine className="w-5 h-5" /> {t("scanQRBtn")}
         </button>
       </motion.header>
 
       {/* ── Stats grid ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "الإجمالي",    value: stats.total,      icon: <Package className="w-6 h-6" />,      color: "from-slate-600 to-slate-500" },
-          { label: "انتظار",      value: stats.pending,    icon: <Clock className="w-6 h-6" />,         color: "from-amber-500 to-orange-400" },
-          { label: "تجهيز",       value: stats.processing, icon: <Activity className="w-6 h-6" />,      color: "from-blue-500 to-indigo-400" },
-          { label: "مسلّمة",      value: stats.completed,  icon: <CheckCircle2 className="w-6 h-6" />, color: "from-emerald-500 to-teal-400" },
+          { label: t("total"),      value: stats.total,      icon: <Package className="w-6 h-6" />,      color: "from-slate-600 to-slate-500" },
+          { label: t("pending"),    value: stats.pending,    icon: <Clock className="w-6 h-6" />,         color: "from-amber-500 to-orange-400" },
+          { label: t("processing"), value: stats.processing, icon: <Activity className="w-6 h-6" />,      color: "from-blue-500 to-indigo-400" },
+          { label: t("delivered"),  value: stats.completed,  icon: <CheckCircle2 className="w-6 h-6" />, color: "from-emerald-500 to-teal-400" },
         ].map((s, i) => (
           <motion.div key={s.label}
             initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1, transition: { delay: 0.1 + i * 0.05 } }}
@@ -128,11 +130,11 @@ export default function PharmacyDashboard() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
             <ShieldCheck className="w-4 h-4 text-purple-300" />
-            <span className="text-xs font-bold text-purple-200">RBAC — صلاحيات الصيدلية</span>
+            <span className="text-xs font-bold text-purple-200">RBAC — {t("pharmacyPermissions")}</span>
           </div>
-          <h3 className="text-lg font-black mb-1">محمي ومراقب بالكامل</h3>
+          <h3 className="text-lg font-black mb-1">{t("rbacTitle")}</h3>
           <p className="text-sm text-purple-100/80 leading-snug">
-            ✅ قراءة الوصفات وتجهيزها &nbsp;|&nbsp; ❌ تعديل مكونات الوصفة محظور تقنياً
+            {t("rbacDesc")}
           </p>
         </div>
       </motion.div>
@@ -140,10 +142,10 @@ export default function PharmacyDashboard() {
       {/* ── Recent orders ── */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-black text-slate-800">آخر الطلبات</h2>
+          <h2 className="font-black text-slate-800">{t("recentOrders")}</h2>
           <Link href="/prescriptions"
             className="flex items-center gap-1 text-purple-600 text-sm font-bold hover:text-purple-500">
-            عرض الكل <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+            {t("viewAll")} <ArrowRight className="w-4 h-4 rtl:rotate-180" />
           </Link>
         </div>
 
@@ -152,8 +154,8 @@ export default function PharmacyDashboard() {
         {!loading && recentOrders.length === 0 && (
           <div className="flex flex-col items-center py-14 bg-white/60 border border-white rounded-3xl">
             <Pill className="w-14 h-14 text-purple-100 mb-3" />
-            <p className="text-slate-500 font-bold">لا توجد طلبات بعد</p>
-            <p className="text-xs text-slate-400 mt-1">ستظهر هنا الوصفات الواردة من المرضى</p>
+            <p className="text-slate-500 font-bold">{t("noOrders")}</p>
+            <p className="text-xs text-slate-400 mt-1">{t("noOrdersDesc")}</p>
           </div>
         )}
 
@@ -169,7 +171,7 @@ export default function PharmacyDashboard() {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-slate-800 text-sm truncate">{order.patient?.full_name}</p>
                 <p className="text-xs text-slate-400">
-                  {order.prescription?.medications?.length || "—"} دواء
+                  {order.prescription?.medications?.length || "—"} {t("medicinesCount")}
                   {order.prescription?.doctor?.full_name && ` · ${order.prescription.doctor.full_name}`}
                 </p>
               </div>
@@ -177,17 +179,17 @@ export default function PharmacyDashboard() {
               {order.status === "PENDING" && (
                 <button onClick={() => updateStatus(order.id, "PROCESSING")}
                   className="text-xs font-bold px-3 py-1.5 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0">
-                  بدء التجهيز
+                  {t("startPrep")}
                 </button>
               )}
               {order.status === "PROCESSING" && (
                 <button onClick={() => updateStatus(order.id, "COMPLETED")}
                   className="text-xs font-bold px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-700 hover:bg-emerald-200 flex-shrink-0">
-                  تسليم ✅
+                  {t("deliver")}
                 </button>
               )}
               {order.status === "COMPLETED" && (
-                <span className="text-xs font-black px-3 py-1.5 rounded-xl bg-slate-100 text-slate-500 flex-shrink-0">مكتمل</span>
+                <span className="text-xs font-black px-3 py-1.5 rounded-xl bg-slate-100 text-slate-500 flex-shrink-0">{t("done")}</span>
               )}
             </motion.div>
           ))}
@@ -202,8 +204,8 @@ export default function PharmacyDashboard() {
             <Pill className="w-5 h-5" />
           </div>
           <div>
-            <p className="font-bold text-slate-800 text-sm">الوصفات</p>
-            <p className="text-xs text-slate-400">{stats.pending} انتظار</p>
+            <p className="font-bold text-slate-800 text-sm">{t("prescriptionsLink")}</p>
+            <p className="text-xs text-slate-400">{stats.pending} {t("pending")}</p>
           </div>
         </Link>
         <Link href="/inventory"
@@ -212,8 +214,8 @@ export default function PharmacyDashboard() {
             <Package className="w-5 h-5" />
           </div>
           <div>
-            <p className="font-bold text-slate-800 text-sm">المخزون</p>
-            <p className="text-xs text-slate-400">إدارة الأدوية</p>
+            <p className="font-bold text-slate-800 text-sm">{t("inventoryLink")}</p>
+            <p className="text-xs text-slate-400">{t("manageMedicines")}</p>
           </div>
         </Link>
       </div>
@@ -233,8 +235,8 @@ export default function PharmacyDashboard() {
                     <QrCode className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-black text-slate-800">التحقق من الوصفة</h3>
-                    <p className="text-xs text-slate-400">أدخل رمز QR للتحقق</p>
+                    <h3 className="font-black text-slate-800">{t("verifyPrescription")}</h3>
+                    <p className="text-xs text-slate-400">{t("qrEnterCode")}</p>
                   </div>
                 </div>
                 <button onClick={() => setScanModal(false)} className="text-slate-400 hover:text-slate-700">
@@ -244,27 +246,27 @@ export default function PharmacyDashboard() {
 
               <input value={scanInput} onChange={e => setScanInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleScan()}
-                placeholder="رمز التحقق من الوصفة..."
+                placeholder={t("searchCode")}
                 className="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl mb-3 text-sm focus:ring-2 focus:ring-purple-400 outline-none" />
               <button onClick={handleScan}
                 className="w-full py-3 rounded-xl bg-gradient-to-l from-purple-600 to-fuchsia-500 text-white font-bold mb-4 text-sm">
-                🔍 التحقق من الوصفة
+                {t("verifyBtn")}
               </button>
 
               {scanSearched && !scanResult && (
                 <div className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm font-bold">
                   <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                  لم يُعثر على وصفة بهذا الرمز
+                  {t("notFound")}
                 </div>
               )}
               {scanResult && (
                 <div className={`rounded-2xl p-4 border ${scanResult.is_used ? "bg-rose-50 border-rose-200" : "bg-emerald-50 border-emerald-200"}`}>
                   <p className={`font-black text-sm mb-2 flex items-center gap-1.5 ${scanResult.is_used ? "text-rose-700" : "text-emerald-700"}`}>
-                    {scanResult.is_used ? <><AlertTriangle className="w-4 h-4" /> وصفة مستخدمة مسبقاً</> : <><CheckCircle2 className="w-4 h-4" /> وصفة صالحة</>}
+                    {scanResult.is_used ? <><AlertTriangle className="w-4 h-4" /> {t("prescriptionUsed")}</> : <><CheckCircle2 className="w-4 h-4" /> {t("prescriptionValid")}</>}
                   </p>
-                  <p className="text-xs text-slate-700"><span className="font-bold">المريض:</span> {scanResult.patient?.full_name}</p>
-                  <p className="text-xs text-slate-700"><span className="font-bold">الطبيب:</span> {scanResult.doctor?.full_name}</p>
-                  <p className="text-xs text-slate-700"><span className="font-bold">عدد الأدوية:</span> {scanResult.medications?.length}</p>
+                  <p className="text-xs text-slate-700"><span className="font-bold">{t("patient")}:</span> {scanResult.patient?.full_name}</p>
+                  <p className="text-xs text-slate-700"><span className="font-bold">{t("doctor")}:</span> {scanResult.doctor?.full_name}</p>
+                  <p className="text-xs text-slate-700"><span className="font-bold">{t("medicinesCount")}:</span> {scanResult.medications?.length}</p>
                 </div>
               )}
             </motion.div>

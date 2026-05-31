@@ -2,30 +2,31 @@
 
 export const dynamic = 'force-dynamic';
 
-
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
   TestTube, CheckCircle2, FlaskConical, AlertTriangle,
-  User, QrCode, Clock, Upload, Eye, ShieldAlert
+  User, QrCode, Clock, Upload, ShieldAlert
 } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 
-const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  PENDING:    { label: "قيد الانتظار",  color: "bg-amber-100 text-amber-700 border-amber-200" },
-  PROCESSING: { label: "جاري التحليل", color: "bg-blue-100 text-blue-700 border-blue-200" },
-  COMPLETED:  { label: "النتائج جاهزة", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  CANCELLED:  { label: "ملغى",          color: "bg-slate-100 text-slate-500 border-slate-200" },
-};
-
 export default function LabRequests() {
+  const { lang, t } = useLanguage();
   const supabase = createClient();
   const [labRequests, setLabRequests] = useState<any[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [processing, setProcessing] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  const STATUS_MAP: Record<string, { label: string; color: string }> = {
+    PENDING:    { label: t("reqStatusPending"),    color: "bg-amber-100 text-amber-700 border-amber-200" },
+    PROCESSING: { label: t("reqStatusProcessing"), color: "bg-blue-100 text-blue-700 border-blue-200" },
+    COMPLETED:  { label: t("reqStatusCompleted"),  color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+    CANCELLED:  { label: t("reqStatusCancelled"),  color: "bg-slate-100 text-slate-500 border-slate-200" },
+  };
 
   // Result upload panel
   const [uploadPanel, setUploadPanel] = useState<{ open: boolean; requestId: string; patientId: string } | null>(null);
@@ -33,12 +34,10 @@ export default function LabRequests() {
   const [resultFileUrl, setResultFileUrl] = useState("");
   const [uploading, setUploading] = useState(false);
 
-  // ── Get current user ──────────────────────────────────────────
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
   }, [supabase]);
 
-  // ── Fetch lab requests (ONLY assigned to THIS lab by patient) ──
   const fetchRequests = useCallback(async () => {
     if (!currentUser) return;
     const { data } = await supabase
@@ -65,33 +64,27 @@ export default function LabRequests() {
     return () => { supabase.removeChannel(channel); };
   }, [supabase, fetchRequests]);
 
-  // ── Update lab request status ─────────────────────────────────
   const updateStatus = async (id: string, status: string) => {
     setProcessing(id);
-    // Lab can ONLY update status — cannot modify tests_list
     await supabase.from("lab_requests").update({ status }).eq("id", id);
     setProcessing(null);
   };
 
-  // ── Delete lab request ────────────────────────────────────────
   const handleDeleteRequest = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+    if (!confirm(t("deleteConfirm"))) return;
     setIsDeleting(id);
     const { error } = await supabase.from("lab_requests").delete().eq("id", id);
     if (!error) {
       setLabRequests(prev => prev.filter(req => req.id !== id));
     } else {
-      alert("حدث خطأ أثناء الحذف: " + error.message);
+      alert(t("deleteError") + error.message);
     }
     setIsDeleting(null);
   };
 
-  // ── Upload lab results ────────────────────────────────────────
   const submitResults = async () => {
     if (!uploadPanel || !currentUser) return;
     setUploading(true);
-
-    // Insert into lab_results (trigger notifies patient automatically)
     const { error } = await supabase.from("lab_results").insert([{
       lab_request_id: uploadPanel.requestId,
       lab_id: currentUser.id,
@@ -99,7 +92,6 @@ export default function LabRequests() {
       result_notes: resultNotes || null,
       file_url: resultFileUrl || null,
     }]);
-
     if (!error) {
       setUploadPanel(null);
       setResultNotes("");
@@ -108,37 +100,34 @@ export default function LabRequests() {
     setUploading(false);
   };
 
-  // ─────────────────────────────────────────────────────────────
   return (
-    <div className="pb-32 w-full" dir="rtl">
+    <div className="pb-32 w-full" dir={lang === "ar" ? "rtl" : "ltr"}>
 
-      {/* ── Header ── */}
+      {/* Header */}
       <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
         className="mb-8 pb-6 border-b border-cyan-100/50">
         <h1 className="text-3xl font-extrabold text-slate-800 mb-2 tracking-tight">
-          طلبات التحاليل
+          {t("requestsTitle")}
         </h1>
-        <p className="text-slate-500">
-          تظهر هنا فقط الطلبات التي أرسلها المرضى مباشرة إلى مختبركm.
-        </p>
+        <p className="text-slate-500">{t("requestsSubtitle")}</p>
       </motion.header>
 
-      {/* ── RBAC Notice ── */}
+      {/* RBAC Notice */}
       <div className="bg-cyan-50/50 border border-cyan-200 rounded-2xl p-4 mb-8 flex items-start gap-4 shadow-sm">
         <div className="bg-white p-2 rounded-full text-cyan-500 border border-cyan-100 shrink-0">
           <ShieldAlert className="w-5 h-5" />
         </div>
         <div>
-          <h4 className="font-bold text-cyan-900">صلاحياتك كمختبر (RBAC)</h4>
+          <h4 className="font-bold text-cyan-900">{t("rbacNoticeTitle")}</h4>
           <p className="text-sm text-slate-600 mt-1">
-            ✅ يمكنك تحديث الحالة ورفع النتائج.<br />
-            ❌ لا يمكنك تعديل قائمة التحاليل المطلوبة.<br />
-            🔐 لا ترى طلبات مختبرات أخرى — فقط ما أُرسل إليك مباشرة.
+            {t("rbacNoticeLine1")}<br />
+            {t("rbacNoticeLine2")}<br />
+            {t("rbacNoticeLine3")}
           </p>
         </div>
       </div>
 
-      {/* ── Requests Grid ── */}
+      {/* Requests Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
           {labRequests.map((req) => {
@@ -164,14 +153,14 @@ export default function LabRequests() {
                       <div>
                         <CardTitle className="text-slate-800 text-base font-bold flex items-center gap-2">
                           <User className="w-4 h-4 text-cyan-500" />
-                          {req.patient?.full_name || "مريض"}
+                          {req.patient?.full_name || t("patientLabel")}
                         </CardTitle>
                         {req.patient?.phone && (
                           <p className="text-xs text-slate-400 mt-0.5">{req.patient.phone}</p>
                         )}
                         <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          {new Date(req.created_at).toLocaleString("ar-DZ")}
+                          {new Date(req.created_at).toLocaleString(lang === "ar" ? "ar-DZ" : "fr-DZ")}
                         </p>
                       </div>
                       <span className={`text-xs font-bold px-2.5 py-1.5 rounded-xl border ${st.color}`}>
@@ -185,7 +174,7 @@ export default function LabRequests() {
                     {/* Doctor info */}
                     {req.doctor && (
                       <div className="text-xs text-slate-500 mb-3 flex items-center gap-1.5">
-                        <span className="font-bold text-slate-600">طلب بواسطة: {req.doctor.full_name}</span>
+                        <span className="font-bold text-slate-600">{t("requestedBy")} {req.doctor.full_name}</span>
                       </div>
                     )}
 
@@ -199,7 +188,7 @@ export default function LabRequests() {
                         />
                         <div>
                           <p className="text-xs font-bold text-cyan-700 mb-1 flex items-center gap-1">
-                            <QrCode className="w-3.5 h-3.5" /> رمز التحقق
+                            <QrCode className="w-3.5 h-3.5" /> {t("verifyCode")}
                           </p>
                           <p className="text-xs font-mono text-cyan-600 break-all">
                             {req.qr_token?.substring(0, 16)}...
@@ -208,16 +197,16 @@ export default function LabRequests() {
                       </div>
                     )}
 
-                    {/* Tests list (READ ONLY — cannot be modified by lab) */}
+                    {/* Tests list (READ ONLY) */}
                     <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-4 flex-1 shadow-inner">
                       <h4 className="text-slate-500 text-xs font-bold mb-2 flex items-center gap-1.5">
-                        <TestTube className="w-3.5 h-3.5" /> التحاليل المطلوبة (للقراءة فقط)
+                        <TestTube className="w-3.5 h-3.5" /> {t("testsListLabel")}
                       </h4>
                       <div className="space-y-1.5">
-                        {req.tests_list?.map((t: any, i: number) => (
+                        {req.tests_list?.map((test: any, i: number) => (
                           <div key={i} className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200">
-                            <span className="text-xs font-mono text-cyan-600">{t.code}</span>
-                            <span className="text-sm font-bold text-slate-700">{t.name}</span>
+                            <span className="text-xs font-mono text-cyan-600">{test.code}</span>
+                            <span className="text-sm font-bold text-slate-700">{test.name}</span>
                           </div>
                         ))}
                       </div>
@@ -234,7 +223,7 @@ export default function LabRequests() {
                     {hasResults && (
                       <div className="mb-3 bg-emerald-50 border border-emerald-200 rounded-2xl p-3">
                         <p className="text-xs font-bold text-emerald-700 mb-1 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> تم رفع النتائج
+                          <CheckCircle2 className="w-3.5 h-3.5" /> {t("resultsUploaded")}
                         </p>
                         {req.lab_results[0].result_notes && (
                           <p className="text-xs text-slate-600">{req.lab_results[0].result_notes}</p>
@@ -242,13 +231,13 @@ export default function LabRequests() {
                       </div>
                     )}
 
-                    {/* ── Action Buttons ── */}
+                    {/* Action Buttons */}
                     {req.status === "PENDING" && (
                       <Button onClick={() => updateStatus(req.id, "PROCESSING")}
                         disabled={processing === req.id}
                         className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 h-11 rounded-2xl text-white font-bold flex items-center justify-center gap-2 mb-2 shadow-sm">
                         <FlaskConical className="w-4 h-4" />
-                        {processing === req.id ? "..." : "بدء التحليل"}
+                        {processing === req.id ? "..." : t("startAnalysis")}
                       </Button>
                     )}
 
@@ -256,22 +245,16 @@ export default function LabRequests() {
                       <Button
                         onClick={() => setUploadPanel({ open: true, requestId: req.id, patientId: req.patient_id })}
                         className="w-full bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-600 hover:to-teal-500 h-11 rounded-2xl text-white font-bold flex items-center justify-center gap-2 shadow-sm">
-                        <Upload className="w-4 h-4" /> رفع النتائج
+                        <Upload className="w-4 h-4" /> {t("uploadResults")}
                       </Button>
                     )}
 
                     {req.status === "COMPLETED" && (
                       <div className="flex items-center justify-center gap-2 py-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-700 font-bold text-sm mb-2">
-                        <CheckCircle2 className="w-4 h-4" /> النتائج أُرسلت للمريض
+                        <CheckCircle2 className="w-4 h-4" /> {t("resultsSentToPatient")}
                       </div>
                     )}
 
-                    <Button onClick={(e) => { e.stopPropagation(); handleDeleteRequest(req.id); }}
-                      variant="outline"
-                      disabled={isDeleting === req.id}
-                      className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 h-11 rounded-2xl font-bold flex items-center justify-center shadow-sm">
-                      {isDeleting === req.id ? "جاري الحذف..." : "حذف الطلب"}
-                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -281,16 +264,14 @@ export default function LabRequests() {
           {labRequests.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/40 border border-white rounded-3xl shadow-sm text-slate-400">
               <FlaskConical className="w-16 h-16 mb-4 text-cyan-200" />
-              <h3 className="text-lg font-bold text-slate-600">لا توجد طلبات تحاليل حالياً</h3>
-              <p className="text-sm">ستظهر هنا الطلبات التي يرسلها المرضى إلى مختبركم مباشرة.</p>
+              <h3 className="text-lg font-bold text-slate-600">{t("noAnalysisRequests")}</h3>
+              <p className="text-sm">{t("noAnalysisSubtitle")}</p>
             </div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════ */}
-      {/* ── Upload Results Panel ── */}
-      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* Upload Results Panel */}
       <AnimatePresence>
         {uploadPanel?.open && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -309,22 +290,22 @@ export default function LabRequests() {
                   <Upload className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-800">رفع نتائج التحليل</h3>
-                  <p className="text-xs text-slate-400">ستُرسل للمريض فوراً بعد الرفع</p>
+                  <h3 className="font-black text-slate-800">{t("uploadModalTitle")}</h3>
+                  <p className="text-xs text-slate-400">{t("uploadModalSubtitle")}</p>
                 </div>
               </div>
 
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="text-sm font-black text-slate-700 mb-2 block">ملخص النتائج</label>
+                  <label className="text-sm font-black text-slate-700 mb-2 block">{t("resultSummaryLabel")}</label>
                   <textarea value={resultNotes} onChange={e => setResultNotes(e.target.value)}
-                    placeholder="مثال: سكر الدم الصائم 110 mg/dL — في النطاق الطبيعي..."
+                    placeholder={t("resultSummaryPlaceholder")}
                     className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-emerald-400 outline-none resize-none h-28 text-slate-700 font-medium" />
                 </div>
                 <div>
-                  <label className="text-sm font-black text-slate-700 mb-2 block">رابط ملف النتائج (اختياري)</label>
+                  <label className="text-sm font-black text-slate-700 mb-2 block">{t("resultFileLinkLabel")}</label>
                   <input value={resultFileUrl} onChange={e => setResultFileUrl(e.target.value)}
-                    placeholder="https://... (رابط PDF أو صورة)"
+                    placeholder={t("resultFileLinkPlaceholder")}
                     className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-emerald-400 outline-none text-slate-700 font-medium" />
                 </div>
               </div>
@@ -332,11 +313,11 @@ export default function LabRequests() {
               <div className="flex gap-3">
                 <Button onClick={submitResults} disabled={uploading || !resultNotes.trim()}
                   className="flex-1 h-12 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-sm">
-                  {uploading ? "جاري الرفع..." : "✅ رفع النتائج وإرسالها للمريض"}
+                  {uploading ? t("uploading") : t("uploadAndSendBtn")}
                 </Button>
                 <Button onClick={() => setUploadPanel(null)}
                   className="h-12 px-5 rounded-2xl border border-slate-200 bg-white text-slate-500 font-bold">
-                  إلغاء
+                  {t("cancel")}
                 </Button>
               </div>
             </motion.div>

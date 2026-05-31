@@ -10,11 +10,11 @@
     "apps/pharmacy"
   ],
   "scripts": {
-    "dev:admin": "npm run dev -w apps/admin",
-    "dev:doctor": "npm run dev -w apps/doctor",
-    "dev:lab": "npm run dev -w apps/lab",
-    "dev:patient": "npm run dev -w apps/patient",
-    "dev:pharmacy": "npm run dev -w apps/pharmacy",
+    "dev:admin": "npm run dev -w apps/admin -- -p 3000",
+    "dev:doctor": "npm run dev -w apps/doctor -- -p 3001",
+    "dev:lab": "npm run dev -w apps/lab -- -p 3002",
+    "dev:patient": "npm run dev -w apps/patient -- -p 3004",
+    "dev:pharmacy": "npm run dev -w apps/pharmacy -- -p 3003",
     "dev:mobile-patient": "npm run start -w apps/mobile-patient -- --port 8085 --lan",
     "dev:mobile-doctor": "npm run start -w apps/mobile-doctor -- --port 8086 --lan"
   },
