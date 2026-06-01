@@ -155,9 +155,9 @@ export default function DoctorDashboardMobile() {
         transition={{ delay: 0.3 }}
         className="grid grid-cols-2 gap-4 mb-8"
       >
-        <QuickStat icon={<Users />} title={t("todayPatients")} value={loading ? "..." : stats.todayPatients} color="from-indigo-500 to-blue-400" />
-        <QuickStat icon={<Calendar />} title={t("upcomingAppointments")} value={loading ? "..." : stats.upcomingAppts} color="from-teal-500 to-cyan-400" />
-        <QuickStat icon={<FileText />} title={t("completedPrescriptions")} value={loading ? "..." : stats.prescriptions} color="from-purple-500 to-fuchsia-400" />
+        <QuickStat icon={<Users />} title={t("todayPatients")} value={loading ? "..." : stats.todayPatients} color="from-blue-500 to-indigo-400" />
+        <QuickStat icon={<Calendar />} title={t("upcomingAppointments")} value={loading ? "..." : stats.upcomingAppts} color="from-cyan-500 to-teal-400" />
+        <QuickStat icon={<FileText />} title={t("completedPrescriptions")} value={loading ? "..." : stats.prescriptions} color="from-indigo-500 to-violet-400" />
         <QuickStat icon={<Activity />} title={t("labResults")} value={loading ? "..." : stats.labResults} color="from-rose-500 to-orange-400" notification={stats.labResults > 0} />
       </motion.div>
 
@@ -168,14 +168,14 @@ export default function DoctorDashboardMobile() {
         transition={{ delay: 0.4 }}
         className="mb-8"
       >
-         <div className="w-full glass-panel rounded-3xl p-5 flex items-center justify-between group cursor-pointer transition-colors">
+         <div className="w-full bg-white shadow-lg rounded-3xl p-5 flex items-center justify-between group cursor-pointer border border-slate-100 transition-all hover:border-blue-200 hover:shadow-xl">
             <div className="flex items-center gap-4">
                <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 border border-blue-100/50 group-hover:scale-105 transition-transform">
                   <ScanBarcode className="w-6 h-6" />
                </div>
                <div>
-                  <h4 className="font-bold text-slate-800 text-sm mb-1">{t("scanId")}</h4>
-                  <p className="text-[10px] text-slate-500 font-medium">{t("scanIdDesc")}</p>
+                  <h4 className="font-black text-slate-800 text-sm mb-1">{t("scanId")}</h4>
+                  <p className="text-xs text-slate-500 font-bold">{t("scanIdDesc")}</p>
                </div>
             </div>
          </div>
@@ -186,17 +186,13 @@ export default function DoctorDashboardMobile() {
 
 function QuickStat({ title, icon, value, color, notification }: any) {
   return (
-    <Card className="glass-panel relative overflow-hidden rounded-3xl border-0 min-h-[140px] flex items-center justify-center">
-      {notification && <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white z-20 animate-pulse"></span>}
-      <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 relative z-10 w-full">
-        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${color} text-white flex items-center justify-center shadow-md mb-1`}>
-          {icon}
-        </div>
-        <div className="flex flex-col items-center">
-           <h4 className="font-black text-slate-800 text-3xl">{value}</h4>
-           <h5 className="font-bold text-slate-500 text-xs mt-0.5 leading-tight w-full truncate px-1">{title}</h5>
-        </div>
-      </CardContent>
-    </Card>
+    <motion.div className={`rounded-3xl p-4 bg-gradient-to-br ${color} text-white shadow-lg relative overflow-hidden flex flex-col justify-between aspect-square md:aspect-auto md:min-h-[140px]`}>
+      {notification && <span className="absolute top-3 left-3 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white z-20 animate-pulse"></span>}
+      <div className="absolute -right-3 -top-3 opacity-20 w-16 h-16">{icon}</div>
+      <div className="flex flex-col relative z-10 h-full justify-center mt-2">
+         <h4 className="font-black text-4xl mb-1">{value}</h4>
+         <h5 className="font-bold text-white/90 text-xs leading-tight">{title}</h5>
+      </div>
+    </motion.div>
   )
 }

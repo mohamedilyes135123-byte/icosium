@@ -204,7 +204,9 @@ export default function LoginPage() {
     const userRole = data?.user?.user_metadata?.role;
     if (userRole === "doctor") {
       document.cookie = `testing_bypass=doctor; path=/; max-age=86400`;
-      window.location.href = `/dashboard`;
+      setTimeout(() => {
+        window.location.href = `/dashboard`;
+      }, 500);
     } else {
       setError("يرجى التأكد من الدخول من البوابة المخصصة لدورك.");
       setLoading(false);

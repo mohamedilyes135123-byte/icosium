@@ -91,7 +91,9 @@ export default function PatientLoginPage() {
     const { data, error: err } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
     if (err) { setError("فشل تسجيل الدخول. تحقق من بياناتك."); setLoading(false); return; }
     if (data?.user?.user_metadata?.role === "patient") {
-      window.location.href = "/dashboard";
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 500);
     } else { 
       setError("هذه البوابة مخصصة للمرضى فقط."); 
       setLoading(false); 
