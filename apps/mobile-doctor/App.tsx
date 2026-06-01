@@ -40,6 +40,7 @@ export default function App() {
         }}
         allowsBackForwardNavigationGestures
         sharedCookiesEnabled
+        thirdPartyCookiesEnabled={true}
         originWhitelist={['*']}
         javaScriptEnabled={true}
         domStorageEnabled={true}
