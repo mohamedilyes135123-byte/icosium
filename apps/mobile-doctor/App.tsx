@@ -1,8 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { 
-  StyleSheet, SafeAreaView, BackHandler, Platform
-} from 'react-native';
+import { StyleSheet, SafeAreaView, BackHandler, Platform, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 export default function App() {
@@ -60,12 +58,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? 30 : 0,
   },
   webview: {
-    position: 'absolute',
-    top: Platform.OS === 'android' ? 30 : 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    flex: 1,
     backgroundColor: '#ffffff',
-    opacity: 0.99,
   }
 });

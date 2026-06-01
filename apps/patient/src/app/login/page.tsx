@@ -90,8 +90,12 @@ export default function PatientLoginPage() {
     }
     const { data, error: err } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
     if (err) { setError("فشل تسجيل الدخول. تحقق من بياناتك."); setLoading(false); return; }
-    if (data?.user?.user_metadata?.role === "patient") router.push("/dashboard");
-    else { setError("هذه البوابة مخصصة للمرضى فقط."); setLoading(false); }
+    if (data?.user?.user_metadata?.role === "patient") {
+      window.location.href = "/dashboard";
+    } else { 
+      setError("هذه البوابة مخصصة للمرضى فقط."); 
+      setLoading(false); 
+    }
   };
 
   // ── Signup ───
@@ -141,7 +145,7 @@ export default function PatientLoginPage() {
   const cls = `w-full h-12 px-4 bg-white/70 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 outline-none text-right text-slate-800 text-sm transition-all`;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" dir="rtl">
+    <div className="min-h-screen flex items-center justify-center p-2 sm:p-4 relative overflow-y-auto" dir="rtl">
       {/* Animated Prominent Background */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-slate-50">
         <div className="absolute top-[-10%] -right-[10%] w-[800px] h-[800px] bg-emerald-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft" />
@@ -160,17 +164,17 @@ export default function PatientLoginPage() {
 
       <div className="relative z-10 w-full max-w-lg">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-block relative mb-4">
+        <div className="text-center mb-4 sm:mb-8 mt-4 sm:mt-0">
+          <div className="inline-block relative mb-2 sm:mb-4">
             <div className="absolute inset-[-8px] z-0 glow-pulse rounded-3xl blur-xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-green-300 opacity-60" />
-            <div className="w-28 h-28 rounded-2xl bg-white border border-emerald-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
-              <img src="/logo.png" alt="عناية" className="w-24 h-24 object-contain drop-shadow-sm" />
+            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-white border border-emerald-100 shadow-xl flex items-center justify-center relative z-10 logo-float">
+              <img src="/logo.png" alt="عناية" className="w-16 h-16 sm:w-24 sm:h-24 object-contain drop-shadow-sm" />
             </div>
           </div>
-          <h1 className="text-3xl font-black text-slate-900">عناية</h1>
-          <h2 className="text-xl md:text-2xl font-black mt-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-teal-500">بوابة المرضى — طبيبك في بيتك</h2>
-          <p className="text-slate-400 text-xs mt-1">
-            <Shield className="inline w-3.5 h-3.5 text-emerald-500 mx-1" />
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900">عناية</h1>
+          <h2 className="text-lg sm:text-2xl font-black mt-1 sm:mt-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-teal-500">بوابة المرضى — طبيبك في بيتك</h2>
+          <p className="text-slate-400 text-[10px] sm:text-xs mt-1">
+            <Shield className="inline w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-500 mx-1" />
             بياناتك مشفرة ومحمية بالكامل
           </p>
         </div>
@@ -189,7 +193,7 @@ export default function PatientLoginPage() {
             ))}
           </div>
 
-          <div className="p-7">
+          <div className="p-4 sm:p-7">
             {/* Alerts */}
             {successMsg && (
               <div className="flex items-start gap-3 bg-green-50 text-green-800 p-4 rounded-2xl text-sm font-semibold mb-5 border border-green-200">

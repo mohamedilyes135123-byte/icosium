@@ -186,15 +186,15 @@ export default function DoctorDashboardMobile() {
 
 function QuickStat({ title, icon, value, color, notification }: any) {
   return (
-    <Card className="glass-panel relative overflow-hidden rounded-3xl border-0">
+    <Card className="glass-panel relative overflow-hidden rounded-3xl border-0 min-h-[140px] flex items-center justify-center">
       {notification && <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white z-20 animate-pulse"></span>}
-      <CardContent className="p-5 flex flex-col gap-3 relative z-10">
-        <div className={`w-10 h-10 rounded-2xl bg-gradient-to-tr ${color} text-white flex items-center justify-center shadow-sm`}>
+      <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 relative z-10 w-full">
+        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${color} text-white flex items-center justify-center shadow-md mb-1`}>
           {icon}
         </div>
-        <div>
-           <h4 className="font-black text-slate-800 text-2xl">{value}</h4>
-           <h5 className="font-bold text-slate-500 text-[10px]">{title}</h5>
+        <div className="flex flex-col items-center">
+           <h4 className="font-black text-slate-800 text-3xl">{value}</h4>
+           <h5 className="font-bold text-slate-500 text-xs mt-0.5 leading-tight w-full truncate px-1">{title}</h5>
         </div>
       </CardContent>
     </Card>
