@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, SafeAreaView, BackHandler, Platform, View } from 'react-native';
+import { StyleSheet, BackHandler, Platform, View, ActivityIndicator, Text } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
 export default function App() {
@@ -8,7 +9,7 @@ export default function App() {
   const [canGoBack, setCanGoBack] = useState(false);
 
   // Doctor App URI
-  const uri = 'https://3inaya-doctor.vercel.app';
+  const uri = 'https://3inaya-doctor.vercel.app/';
 
   useEffect(() => {
     const backAction = () => {
@@ -28,10 +29,11 @@ export default function App() {
   }, [canGoBack]);
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="dark" backgroundColor="#ffffff" />
-      
-      <WebView 
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
+        <StatusBar style="dark" backgroundColor="#ffffff" />
+        
+        <WebView 
         ref={webViewRef}
         source={{ uri }} 
         style={styles.webview}
@@ -47,8 +49,21 @@ export default function App() {
         mixedContentMode="always"
         textZoom={100}
         defaultTextEncodingName="utf-8"
+        startInLoadingState={true}
+        renderLoading={() => (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#0000ff" />
+          </View>
+        )}
+        renderError={(errorDomain, errorCode, errorDesc) => (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>حدث خطأ أثناء تحميل التطبيق</Text>
+            <Text style={styles.errorSubText}>{errorDesc} ({errorCode})</Text>
+          </View>
+        )}
       />
-    </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -56,10 +71,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
-    paddingTop: Platform.OS === 'android' ? 30 : 0,
   },
   webview: {
     flex: 1,
     backgroundColor: '#ffffff',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'red',
+    marginBottom: 10,
+  },
+  errorSubText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   }
 });

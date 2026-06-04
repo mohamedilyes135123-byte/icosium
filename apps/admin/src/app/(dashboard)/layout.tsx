@@ -31,7 +31,7 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="flex h-screen overflow-hidden text-slate-800 font-sans selection:bg-violet-500/20 relative" dir="rtl">
+    <div className="flex h-[100dvh] overflow-hidden text-slate-800 font-sans selection:bg-violet-500/20 relative" dir="rtl">
       
       {/* Bright Ambient Background */}
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden" style={{ background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0fdfa 100%)" }}>
@@ -41,7 +41,7 @@ export default function AdminLayout({
       </div>
 
       {/* ─── Premium Daylight Sidebar ─── */}
-      <aside className="w-72 flex-col z-20 h-screen relative overflow-hidden hidden md:flex"
+      <aside className="fixed top-0 right-0 w-72 flex-col z-40 h-screen overflow-hidden hidden md:flex"
         style={{ 
           background: "linear-gradient(170deg, #4f46e5 0%, #7c3aed 40%, #6d28d9 70%, #4338ca 100%)",
           boxShadow: "4px 0 40px 0 rgba(109,40,217,0.35), 8px 0 80px 0 rgba(79,70,229,0.15)"
@@ -110,7 +110,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative z-10 overflow-hidden">
+      <main className="flex-1 flex flex-col relative z-10 overflow-hidden md:mr-72">
          <AnimatePresence mode="wait">
             <motion.div
               key={pathname}

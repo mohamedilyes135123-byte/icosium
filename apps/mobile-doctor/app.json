@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Enaya Doctor",
+    "name": "عناية للأطباء",
     "slug": "enaya-doctor",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.enayadoctor"
+      "package": "com.icosium.doctor"
     },
     "web": {
       "favicon": "./assets/favicon.png"

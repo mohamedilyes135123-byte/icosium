@@ -155,10 +155,10 @@ export default function DoctorDashboardMobile() {
         transition={{ delay: 0.3 }}
         className="grid grid-cols-2 gap-4 mb-8"
       >
-        <QuickStat icon={<Users />} title={t("todayPatients")} value={loading ? "..." : stats.todayPatients} color="from-blue-500 to-indigo-400" />
-        <QuickStat icon={<Calendar />} title={t("upcomingAppointments")} value={loading ? "..." : stats.upcomingAppts} color="from-cyan-500 to-teal-400" />
-        <QuickStat icon={<FileText />} title={t("completedPrescriptions")} value={loading ? "..." : stats.prescriptions} color="from-indigo-500 to-violet-400" />
-        <QuickStat icon={<Activity />} title={t("labResults")} value={loading ? "..." : stats.labResults} color="from-rose-500 to-orange-400" notification={stats.labResults > 0} />
+        <QuickStat href="/patients" icon={<Users />} title={t("todayPatients")} value={loading ? "..." : stats.todayPatients} color="from-[#1a6ff5] to-[#0ea5e9]" />
+        <QuickStat href="/appointments" icon={<Calendar />} title={t("upcomingAppointments")} value={loading ? "..." : stats.upcomingAppts} color="from-[#06b6d4] to-[#10b981]" />
+        <QuickStat href="/prescriptions" icon={<FileText />} title={t("completedPrescriptions")} value={loading ? "..." : stats.prescriptions} color="from-[#8b5cf6] to-[#6366f1]" />
+        <QuickStat href="/dashboard" icon={<Activity />} title={t("labResults")} value={loading ? "..." : stats.labResults} color="from-[#f43f5e] to-[#f97316]" notification={stats.labResults > 0} />
       </motion.div>
 
       {/* Action Scan */}
@@ -184,15 +184,26 @@ export default function DoctorDashboardMobile() {
   );
 }
 
-function QuickStat({ title, icon, value, color, notification }: any) {
+function QuickStat({ title, icon, value, color, notification, href }: any) {
   return (
-    <motion.div className={`rounded-3xl p-4 bg-gradient-to-br ${color} text-white shadow-lg relative overflow-hidden flex flex-col justify-between aspect-square md:aspect-auto md:min-h-[140px]`}>
-      {notification && <span className="absolute top-3 left-3 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white z-20 animate-pulse"></span>}
-      <div className="absolute -right-3 -top-3 opacity-20 w-16 h-16">{icon}</div>
-      <div className="flex flex-col relative z-10 h-full justify-center mt-2">
-         <h4 className="font-black text-4xl mb-1">{value}</h4>
-         <h5 className="font-bold text-white/90 text-xs leading-tight">{title}</h5>
-      </div>
-    </motion.div>
+    <Link href={href || "#"} className="block">
+      <motion.div 
+        whileHover={{ scale: 1.02, y: -2 }}
+        whileTap={{ scale: 0.98 }}
+        className={`cursor-pointer rounded-3xl p-6 bg-gradient-to-br ${color} text-white shadow-md hover:shadow-lg transition-all relative overflow-hidden flex items-center h-32 gap-6`}
+      >
+        {notification && <span className="absolute top-4 left-4 w-3 h-3 bg-rose-500 rounded-full border-2 border-white z-20 animate-pulse shadow-sm"></span>}
+        
+        {/* Icon closer to text in a glass box */}
+        <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm shadow-inner shrink-0 text-white [&>svg]:w-8 [&>svg]:h-8">
+           {icon}
+        </div>
+        
+        <div className="flex flex-col relative z-10 flex-1">
+           <h4 className="font-black text-4xl mb-0.5 drop-shadow-sm leading-none">{value}</h4>
+           <h5 className="font-bold text-white/95 text-[15px] drop-shadow-sm">{title}</h5>
+        </div>
+      </motion.div>
+    </Link>
   )
 }

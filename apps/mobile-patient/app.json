@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Enaya Patient",
+    "name": "عناية للمرضى",
     "slug": "enaya-patient",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.enayapatient"
+      "package": "com.icosium.patient"
     },
     "web": {
       "favicon": "./assets/favicon.png"

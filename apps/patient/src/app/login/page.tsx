@@ -1,8 +1,5 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
-
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -91,9 +88,8 @@ export default function PatientLoginPage() {
     const { data, error: err } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
     if (err) { setError("فشل تسجيل الدخول. تحقق من بياناتك."); setLoading(false); return; }
     if (data?.user?.user_metadata?.role === "patient") {
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 500);
+      router.push("/dashboard");
+      router.refresh();
     } else { 
       setError("هذه البوابة مخصصة للمرضى فقط."); 
       setLoading(false); 

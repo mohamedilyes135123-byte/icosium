@@ -79,7 +79,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--bg-page)", direction: "rtl", position: "relative" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100dvh", background: "var(--bg-page)", direction: "rtl", position: "relative", overflow: "hidden" }}>
       
       {/* Daylight Ambient Background (Fixed so glass effect persists on scroll) */}
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-daylight">
@@ -167,8 +167,8 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
         </aside>
 
         {/* Main Content Area */}
-        <div className="flex-1 min-h-screen flex justify-center md:mr-[288px] w-full relative z-10">
-          <main className="w-full pb-24 md:pb-8 pt-4 px-4 md:px-8 max-w-[768px]">
+        <div className="flex-1 flex justify-center md:mr-[288px] w-full relative z-10 overflow-hidden">
+          <main className="w-full pb-24 md:pb-8 pt-4 px-4 md:px-8 max-w-[768px] overflow-y-auto h-full">
             {children}
           </main>
         </div>

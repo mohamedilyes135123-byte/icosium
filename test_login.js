@@ -1,20 +1,38 @@
-const { createClient } = require('@supabase/supabase-js');
+const puppeteer = require('puppeteer');
 
-const supabaseUrl = 'https://bvhdeqbonkmfxdndwgge.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ2aGRlcWJvbmttZnhkbmR3Z2dlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzYwMTgsImV4cCI6MjA5MTUxMjAxOH0.okxeCTUNdWAiME2vrE93GP3tA0UKBZb2WwuoBUlbVwE';
-const supabase = createClient(supabaseUrl, supabaseKey);
+(async () => {
+  console.log("Launching browser...");
+  const browser = await puppeteer.launch({ headless: 'new' });
+  const page = await browser.newPage();
 
-async function testLogin() {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: 'pharmacy@test.com',
-    password: '123456',
-  });
+  console.log("Navigating to login page...");
+  await page.goto('https://3inaya-patient.vercel.app/login', { waitUntil: 'networkidle2' });
 
-  if (error) {
-    console.error('Login error:', error.message);
+  console.log("Typing email and password...");
+  await page.type('input[type="email"]', 'patient@test.com');
+  await page.type('input[type="password"]', '123456');
+
+  console.log("Clicking submit...");
+  await page.click('button[type="submit"]');
+
+  console.log("Waiting for 3 seconds...");
+  await new Promise(r => setTimeout(r, 3000));
+
+  console.log("Current URL:", page.url());
+  
+  // check if there is an error message
+  const text = await page.evaluate(() => document.body.innerText);
+  if (text.includes('فشل تسجيل الدخول')) {
+    console.log("Found error: فشل تسجيل الدخول");
+  } else if (text.includes('هذه البوابة مخصصة للمرضى فقط.')) {
+    console.log("Found error: هذه البوابة مخصصة للمرضى فقط.");
   } else {
-    console.log('Login success:', data.user.email);
+    console.log("No specific error message found.");
   }
-}
+  
+  const html = await page.evaluate(() => document.body.innerHTML);
+  require('fs').writeFileSync('page.html', html);
+  console.log("Saved page.html");
 
-testLogin();
+  await browser.close();
+})();

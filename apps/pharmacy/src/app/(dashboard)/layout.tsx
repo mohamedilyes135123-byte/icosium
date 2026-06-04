@@ -15,7 +15,7 @@ export default function PharmacyLayout({
   const { t, lang, setLang } = useLanguage();
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-teal-500/20 relative">
+    <div className="flex h-[100dvh] bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-teal-500/20 relative" dir="rtl">
       
       {/* Daylight Ambient Background */}
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-daylight">
@@ -24,7 +24,7 @@ export default function PharmacyLayout({
       </div>
 
       {/* Distinctive Deep Daylight Sidebar */}
-      <aside className="w-72 border-r rtl:border-l rtl:border-r-0 border-teal-600/30 flex flex-col z-20 h-screen bg-gradient-to-b from-teal-600 to-teal-700 text-white shadow-2xl relative overflow-hidden">
+      <aside className="w-72 border-l border-teal-600/30 flex flex-col z-40 h-screen bg-gradient-to-b from-teal-600 to-teal-700 text-white shadow-2xl overflow-hidden fixed top-0 right-0">
         <div className="absolute inset-0 bg-white/5 backdrop-blur-md pointer-events-none" />
         
         <div className="p-6 flex items-center gap-3 font-bold text-xl border-b border-white/10 relative z-10">
@@ -59,7 +59,7 @@ export default function PharmacyLayout({
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative z-10 overflow-hidden text-right">
+      <main className="flex-1 flex flex-col relative z-10 overflow-hidden text-right mr-72">
          <AnimatePresence mode="wait">
             <motion.div
               key={pathname}

@@ -48,7 +48,7 @@ export default function DoctorLayout({
   }, [pathname, supabase]);
 
   return (
-    <div key={lang} className="flex h-screen bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-blue-500/20 relative" dir={lang === "ar" ? "rtl" : "ltr"}>
+    <div key={lang} className="flex h-[100dvh] bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-blue-500/20 relative" dir="rtl">
       
       {/* Daylight Ambient Background */}
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-daylight">
@@ -57,7 +57,7 @@ export default function DoctorLayout({
       </div>
 
       {/* ─── Premium Blue Gradient Sidebar ─── */}
-      <aside className="hidden md:flex w-72 flex-col z-20 h-screen relative overflow-hidden"
+      <aside className="hidden md:flex fixed top-0 right-0 w-72 border-l border-blue-600/30 flex-col z-40 h-screen overflow-hidden"
         style={{ background: "linear-gradient(160deg, #1d4ed8 0%, #0369a1 45%, #06b6d4 100%)", boxShadow: "4px 0 40px 0 rgba(59,130,246,0.35), 8px 0 80px 0 rgba(6,182,212,0.15)" }}>
 
         {/* Animated Stethoscope Background */}
@@ -128,7 +128,7 @@ export default function DoctorLayout({
       </aside>
 
       {/* Main Content Area */}
-      <main className={`flex-1 flex flex-col relative z-10 overflow-hidden pb-24 md:pb-0 ${lang === "ar" ? "text-right" : "text-left"}`}>
+      <main className={`flex-1 flex flex-col relative z-10 overflow-hidden pb-24 md:pb-0 md:mr-72 ${lang === "ar" ? "text-right" : "text-left"}`}>
          <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
