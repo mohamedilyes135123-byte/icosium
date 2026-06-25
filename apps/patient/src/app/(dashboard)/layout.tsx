@@ -150,7 +150,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                   </div>
                   <span style={{ position: "relative", zIndex: 1, flex: 1 }}>{item.label}</span>
                   {showBadge && (
-                    <span style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", height: 20, minWidth: 20, padding: "0 6px", borderRadius: 999, background: "#ef4444", color: "#ffffff", fontSize: 10, fontWeight: "bold", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+                    <span style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", height: 22, minWidth: 22, padding: "0 6px", borderRadius: 999, background: "#dc2626", color: "#ffffff", fontSize: 11, fontWeight: "bold", boxShadow: "0 2px 8px rgba(220,38,38,0.6), 0 0 0 2px #fff", letterSpacing: 0 }}>
                       {notifCount > 99 ? '99+' : notifCount}
                     </span>
                   )}
@@ -184,7 +184,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                 <div className="nav-icon" style={{ color: active ? "#16a34a" : "#9ca3af", position: "relative" }}>
                   {item.icon}
                   {showBadge && (
-                    <span style={{ position: "absolute", top: -4, right: -4, display: "flex", alignItems: "center", justifyContent: "center", height: 16, width: 16, borderRadius: 999, background: "#ef4444", color: "#ffffff", fontSize: 9, fontWeight: "bold", border: "2px solid #ffffff" }}>
+                    <span style={{ position: "absolute", top: -5, right: -5, display: "flex", alignItems: "center", justifyContent: "center", height: 18, minWidth: 18, borderRadius: 999, background: "#dc2626", color: "#ffffff", fontSize: 10, fontWeight: "bold", border: "2px solid #ffffff", boxShadow: "0 2px 6px rgba(220,38,38,0.5)", padding: "0 3px" }}>
                       {notifCount > 99 ? '99+' : notifCount}
                     </span>
                   )}

@@ -90,10 +90,9 @@ export default function PatientAIChat() {
         <Button 
            onClick={sendToDoctor}
            disabled={submitting || messages.length < 3 || isLoading}
-           variant="outline"
-           className="bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-50 rounded-xl"
+           className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl px-4 py-2 shadow-md flex items-center gap-2 transition-all disabled:opacity-40"
         >
-           {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Hospital className="w-4 h-4 ml-2" />}
+           {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Hospital className="w-4 h-4" />}
            مشاركة مع الطبيب
         </Button>
       </motion.header>
@@ -157,7 +156,7 @@ export default function PatientAIChat() {
           <Button 
             type="submit" 
             disabled={!input?.trim() || isLoading}
-            className="absolute left-2 w-10 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-md flex items-center justify-center p-0"
+            className="absolute left-2 w-11 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-lg flex items-center justify-center p-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Send className="w-5 h-5 rtl:-translate-x-0.5 rtl:rotate-180" />
           </Button>
