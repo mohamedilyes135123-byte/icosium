@@ -275,48 +275,46 @@ export default function LabRequests() {
       <AnimatePresence>
         {uploadPanel?.open && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
             onClick={() => setUploadPanel(null)}>
             <motion.div
-              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 22 }}
-              className="w-full bg-white rounded-t-[2rem] p-6"
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100"
               onClick={e => e.stopPropagation()}>
 
-              <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6" />
-
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
-                  <Upload className="w-5 h-5" />
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0">
+                  <Upload className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-800">{t("uploadModalTitle")}</h3>
-                  <p className="text-xs text-slate-400">{t("uploadModalSubtitle")}</p>
+                  <h3 className="font-black text-slate-800 text-lg">{t("uploadModalTitle")}</h3>
+                  <p className="text-sm text-slate-500 mt-0.5">{t("uploadModalSubtitle")}</p>
                 </div>
               </div>
 
-              <div className="space-y-4 mb-6">
+              <div className="space-y-4 mb-8">
                 <div>
-                  <label className="text-sm font-black text-slate-700 mb-2 block">{t("resultSummaryLabel")}</label>
+                  <label className="text-sm font-bold text-slate-700 mb-2 block">{t("resultSummaryLabel")}</label>
                   <textarea value={resultNotes} onChange={e => setResultNotes(e.target.value)}
                     placeholder={t("resultSummaryPlaceholder")}
-                    className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-emerald-400 outline-none resize-none h-28 text-slate-700 font-medium" />
+                    className="w-full p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-emerald-400 focus:bg-white outline-none resize-none h-28 text-slate-700 font-medium transition-all" />
                 </div>
                 <div>
-                  <label className="text-sm font-black text-slate-700 mb-2 block">{t("resultFileLinkLabel")}</label>
+                  <label className="text-sm font-bold text-slate-700 mb-2 block">{t("resultFileLinkLabel")}</label>
                   <input value={resultFileUrl} onChange={e => setResultFileUrl(e.target.value)}
                     placeholder={t("resultFileLinkPlaceholder")}
-                    className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-emerald-400 outline-none text-slate-700 font-medium" />
+                    className="w-full p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-emerald-400 focus:bg-white outline-none text-slate-700 font-medium transition-all" />
                 </div>
               </div>
 
               <div className="flex gap-3">
                 <Button onClick={submitResults} disabled={uploading || !resultNotes.trim()}
-                  className="flex-1 h-12 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-sm">
+                  className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-50">
                   {uploading ? t("uploading") : t("uploadAndSendBtn")}
                 </Button>
                 <Button onClick={() => setUploadPanel(null)}
-                  className="h-12 px-5 rounded-2xl border border-slate-200 bg-white text-slate-500 font-bold">
+                  className="h-12 px-6 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 hover:border-slate-300 transition-all">
                   {t("cancel")}
                 </Button>
               </div>
