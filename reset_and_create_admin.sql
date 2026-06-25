@@ -22,13 +22,13 @@ DELETE FROM public.appointments      WHERE TRUE;
 -- حذف profiles لغير الـ Admin
 DELETE FROM public.profiles
 WHERE id NOT IN (
-  SELECT id FROM auth.users WHERE email = 'admin@3inaya.com'
+  SELECT id FROM auth.users WHERE email = 'admin@test.com'
 );
 
 -- STEP 2: حذف جميع auth.users ما عدا الـ Admin
 -- ================================================================
 DELETE FROM auth.users
-WHERE email != 'admin@3inaya.com';
+WHERE email != 'admin@test.com';
 
 -- STEP 3: تأكد أن الـ Admin profile موجود وصحيح
 -- ================================================================
@@ -41,7 +41,7 @@ SELECT
   true,
   'approved'
 FROM auth.users 
-WHERE email = 'admin@3inaya.com'
+WHERE email = 'admin@test.com'
 ON CONFLICT (id) DO UPDATE SET
   role            = 'admin',
   full_name       = 'مسؤول النظام',

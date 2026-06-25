@@ -10,8 +10,8 @@ $headers = @{
 $users = @(
     @{ email="patient@test.com";  password="123456"; role="patient";  full_name="Ahmed Patient";   address="Alger Centre" }
     @{ email="doctor@test.com";   password="123456"; role="doctor";   full_name="Dr. Youcef Benali"; address="Bab El Oued"; specialty="Medecine Generale" }
-    @{ email="lab@test.com";      password="123456"; role="lab";      full_name="Labo El Nour";     address="Zeralda" }
-    @{ email="pharmacy@test.com"; password="123456"; role="pharmacy"; full_name="Pharmacie Chifa";  address="Hussein Dey" }
+    @{ email="labo@test.com";      password="123456"; role="lab";      full_name="Labo El Nour";     address="Zeralda" }
+    @{ email="pharmacie@test.com"; password="123456"; role="pharmacy"; full_name="Pharmacie Chifa";  address="Hussein Dey" }
     @{ email="admin@test.com";    password="123456"; role="admin";    full_name="Admin Systeme";    address="Alger" }
 )
 
@@ -74,7 +74,7 @@ Write-Host "========================================" -ForegroundColor Magenta
 Write-Host "  TEST ACCOUNTS:"
 Write-Host "  patient@test.com  / 123456"
 Write-Host "  doctor@test.com   / 123456"
-Write-Host "  lab@test.com      / 123456"
-Write-Host "  pharmacy@test.com / 123456"
+Write-Host "  labo@test.com      / 123456"
+Write-Host "  pharmacie@test.com / 123456"
 Write-Host "  admin@test.com    / 123456"
 Write-Host "========================================" -ForegroundColor Magenta

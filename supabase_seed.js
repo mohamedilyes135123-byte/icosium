@@ -17,11 +17,11 @@ async function seed() {
 
   // We will create the 5 core accounts using normal auth.signUp
   const users = [
-    { email: 'patient@3inaya.com', pass: '123456', meta: { role: 'patient', full_name: 'أحمد بن علي', phone: '0555000001' } },
-    { email: 'doctor@3inaya.com', pass: '123456', meta: { role: 'doctor', full_name: 'د. يوسف خليل', phone: '0555000002' } },
-    { email: 'lab@3inaya.com', pass: '123456', meta: { role: 'lab', full_name: 'مختبرات الشفاء', phone: '0555000003' } },
-    { email: 'pharmacy@3inaya.com', pass: '123456', meta: { role: 'pharmacy', full_name: 'صيدلية النور', phone: '0555000004' } },
-    { email: 'admin@3inaya.com', pass: '123456', meta: { role: 'admin', full_name: 'مسؤول النظام الدائم', phone: '0555000005' } }
+    { email: 'patient@test.com', pass: '123456', meta: { role: 'patient', full_name: 'أحمد بن علي', phone: '0555000001' } },
+    { email: 'doctor@test.com', pass: '123456', meta: { role: 'doctor', full_name: 'د. يوسف خليل', phone: '0555000002' } },
+    { email: 'labo@test.com', pass: '123456', meta: { role: 'lab', full_name: 'مختبرات الشفاء', phone: '0555000003' } },
+    { email: 'pharmacie@test.com', pass: '123456', meta: { role: 'pharmacy', full_name: 'صيدلية النور', phone: '0555000004' } },
+    { email: 'admin@test.com', pass: '123456', meta: { role: 'admin', full_name: 'مسؤول النظام الدائم', phone: '0555000005' } }
   ];
 
   const createdUsers = {};
@@ -49,7 +49,7 @@ async function seed() {
 
   // To insert relationships (Requests, Lab, Prescriptions), we need to log in as the DOCTOR to satisfy RLS
   console.log("\n🔗 Inserting interrelated cases...");
-  await supabase.auth.signInWithPassword({ email: 'doctor@3inaya.com', password: '123456' });
+  await supabase.auth.signInWithPassword({ email: 'doctor@test.com', password: '123456' });
 
   const patientId = createdUsers['patient'].id;
   const doctorId = createdUsers['doctor'].id;
@@ -85,10 +85,10 @@ async function seed() {
   console.log("\n🎉 Seeding Finished Successfully!");
   console.log(`
   Real test accounts are ready:
-  - Patient: patient@3inaya.com / 123456
-  - Doctor: doctor@3inaya.com / 123456
-  - Lab: lab@3inaya.com / 123456
-  - Pharmacy: pharmacy@3inaya.com / 123456
+  - Patient: patient@test.com / 123456
+  - Doctor: doctor@test.com / 123456
+  - Lab: labo@test.com / 123456
+  - Pharmacy: pharmacie@test.com / 123456
   `);
 }
 

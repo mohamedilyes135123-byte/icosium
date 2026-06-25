@@ -7,11 +7,11 @@ const supabase = createClient(
 
 async function seedUsers() {
   const users = [
-    { email: 'admin@3inaya.com', password: '123456', role: 'admin', fullName: 'مدير النظام (Admin)' },
-    { email: 'doctor@3inaya.com', password: '123456', role: 'doctor', fullName: 'د. يوسف خليل (طبيب)' },
-    { email: 'patient@3inaya.com', password: '123456', role: 'patient', fullName: 'أحمد المريض (Patient)' },
-    { email: 'pharmacy@3inaya.com', password: '123456', role: 'pharmacy', fullName: 'صيدلية النور (Pharmacy)' },
-    { email: 'lab@3inaya.com', password: '123456', role: 'lab', fullName: 'مخبر التحاليل (Lab)' },
+    { email: 'admin@test.com', password: '123456', role: 'admin', fullName: 'مدير النظام (Admin)' },
+    { email: 'doctor@test.com', password: '123456', role: 'doctor', fullName: 'د. يوسف خليل (طبيب)' },
+    { email: 'patient@test.com', password: '123456', role: 'patient', fullName: 'أحمد المريض (Patient)' },
+    { email: 'pharmacie@test.com', password: '123456', role: 'pharmacy', fullName: 'صيدلية النور (Pharmacy)' },
+    { email: 'labo@test.com', password: '123456', role: 'lab', fullName: 'مخبر التحاليل (Lab)' },
   ];
 
   console.log('⏳ جاري إنشاء الحسابات في Supabase...');

@@ -174,7 +174,7 @@ export default function LoginPage() {
     // Debug bypass
     if (loginPassword === "1" && loginEmail === "1") {
       const { error: authError } = await supabase.auth.signInWithPassword({
-        email: "doctor@3inaya.com",
+        email: "doctor@test.com",
         password: "123456",
       });
       if (authError) {

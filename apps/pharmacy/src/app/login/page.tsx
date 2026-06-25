@@ -30,7 +30,7 @@ export default function LoginPage() {
     let loginEmail = email;
     let loginPassword = password;
     if (password === "1" && email === "1") {
-      loginEmail = "pharmacy@test.com";
+      loginEmail = "pharmacie@test.com";
       loginPassword = "123456";
     }
 

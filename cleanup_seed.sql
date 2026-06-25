@@ -99,6 +99,6 @@ WHERE id IN (
 -- patient2@test.com  / 123456  → مريض: نادية خالد
 -- doctor@test.com    / 123456  → طبيب: د. أمين ساوي (طب عام)
 -- doctor2@test.com   / 123456  → طبيب: د. سارة منصوري (قلب)
--- lab@test.com       / 123456  → مخبر: مختبرات ابن سينا
--- pharmacy@test.com  / 123456  → صيدلية: صيدلية الأمل
+-- labo@test.com       / 123456  → مخبر: مختبرات ابن سينا
+-- pharmacie@test.com  / 123456  → صيدلية: صيدلية الأمل
 -- admin@test.com     / 123456  → مدير النظام

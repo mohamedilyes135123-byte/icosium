@@ -80,7 +80,7 @@ export default function PatientLoginPage() {
     e.preventDefault();
     setLoading(true); setError(null);
     if (loginPassword === "1" && loginEmail === "1") {
-      const { error: err } = await supabase.auth.signInWithPassword({ email: "patient@3inaya.com", password: "123456" });
+      const { error: err } = await supabase.auth.signInWithPassword({ email: "patient@test.com", password: "123456" });
       if (err) { setError("بيانات اختبار غير متاحة"); setLoading(false); return; }
       document.cookie = `testing_bypass=patient; path=/; max-age=86400`;
       window.location.href = "/dashboard"; return;

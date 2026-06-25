@@ -26,12 +26,12 @@ DELETE FROM public.profiles WHERE id IN (
 DELETE FROM auth.identities WHERE provider_id IN (
   'patient@test.com','patient2@test.com',
   'doctor@test.com','doctor2@test.com',
-  'lab@test.com','pharmacy@test.com','admin@test.com'
+  'labo@test.com','pharmacie@test.com','admin@test.com'
 );
 DELETE FROM auth.users WHERE email IN (
   'patient@test.com','patient2@test.com',
   'doctor@test.com','doctor2@test.com',
-  'lab@test.com','pharmacy@test.com','admin@test.com'
+  'labo@test.com','pharmacie@test.com','admin@test.com'
 );
 -- Delete by ID (safety)
 DELETE FROM auth.identities WHERE user_id IN (
@@ -105,7 +105,7 @@ INSERT INTO auth.users (
 -- Lab: Ibn Sina
 ('00000000-0000-0000-0000-000000000000',
  '33333333-3333-3333-3333-333333333333',
- 'authenticated','authenticated','lab@test.com',
+ 'authenticated','authenticated','labo@test.com',
  crypt('123456', gen_salt('bf')),
  NOW(),
  '{"provider":"email","providers":["email"]}',
@@ -115,7 +115,7 @@ INSERT INTO auth.users (
 -- Pharmacy: Al Amal
 ('00000000-0000-0000-0000-000000000000',
  '44444444-4444-4444-4444-444444444444',
- 'authenticated','authenticated','pharmacy@test.com',
+ 'authenticated','authenticated','pharmacie@test.com',
  crypt('123456', gen_salt('bf')),
  NOW(),
  '{"provider":"email","providers":["email"]}',
@@ -151,11 +151,11 @@ VALUES
   format('{"sub":"%s","email":"doctor2@test.com"}','bbbb2222-2222-2222-2222-222222222222')::jsonb,
   'email','doctor2@test.com',NOW(),NOW(),NOW()),
  (gen_random_uuid(),'33333333-3333-3333-3333-333333333333',
-  format('{"sub":"%s","email":"lab@test.com"}','33333333-3333-3333-3333-333333333333')::jsonb,
-  'email','lab@test.com',NOW(),NOW(),NOW()),
+  format('{"sub":"%s","email":"labo@test.com"}','33333333-3333-3333-3333-333333333333')::jsonb,
+  'email','labo@test.com',NOW(),NOW(),NOW()),
  (gen_random_uuid(),'44444444-4444-4444-4444-444444444444',
-  format('{"sub":"%s","email":"pharmacy@test.com"}','44444444-4444-4444-4444-444444444444')::jsonb,
-  'email','pharmacy@test.com',NOW(),NOW(),NOW()),
+  format('{"sub":"%s","email":"pharmacie@test.com"}','44444444-4444-4444-4444-444444444444')::jsonb,
+  'email','pharmacie@test.com',NOW(),NOW(),NOW()),
  (gen_random_uuid(),'55555555-5555-5555-5555-555555555555',
   format('{"sub":"%s","email":"admin@test.com"}','55555555-5555-5555-5555-555555555555')::jsonb,
   'email','admin@test.com',NOW(),NOW(),NOW())
@@ -380,8 +380,8 @@ ON CONFLICT (id) DO NOTHING;
 --   Patient 2 : patient2@test.com
 --   Doctor    : doctor@test.com
 --   Doctor 2  : doctor2@test.com
---   Lab       : lab@test.com
---   Pharmacy  : pharmacy@test.com
+--   Lab       : labo@test.com
+--   Pharmacy  : pharmacie@test.com
 --   Admin     : admin@test.com
 -- ================================================================
 

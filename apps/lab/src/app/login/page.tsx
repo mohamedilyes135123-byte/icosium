@@ -30,7 +30,7 @@ export default function LoginPage() {
     // --- QUICK DEBUG CREDENTIALS ---
     if (password === "1" && email === '1') {
       const { error: authError } = await supabase.auth.signInWithPassword({
-        email: 'lab@3inaya.com',
+        email: 'labo@test.com',
         password: '123456',
       });
       if (authError) {

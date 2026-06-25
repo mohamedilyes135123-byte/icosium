@@ -7,7 +7,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function setPharmacyMetadata() {
   // Sign in first to get a session (requires existing credentials)
   const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-    email: 'pharmacy@test.com',
+    email: 'pharmacie@test.com',
     password: '123456',
   });
 

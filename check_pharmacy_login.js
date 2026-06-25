@@ -6,10 +6,10 @@ const supabase = createClient(
 );
 
 const candidates = [
-  { email: 'pharmacy@3inaya.com',    password: '123456' },
+  { email: 'pharmacie@test.com',    password: '123456' },
   { email: 'pharmacy11@test.com',    password: '123456' },
   { email: 'pharmacy12@test.com',    password: '123456' },
-  { email: 'pharmacy@test.com',      password: '123456' },
+  { email: 'pharmacie@test.com',      password: '123456' },
 ];
 
 async function tryLogin() {

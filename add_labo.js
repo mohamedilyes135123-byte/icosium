@@ -19,7 +19,7 @@ async function addLabo() {
   console.log("labo@test.com:", error ? error.message : "Success");
   
   const { data: d2, error: e2 } = await supabase.auth.signUp({
-    email: 'lab@test.com',
+    email: 'labo@test.com',
     password: '123456',
     options: {
       data: {
@@ -28,7 +28,7 @@ async function addLabo() {
       }
     }
   });
-  console.log("lab@test.com:", e2 ? e2.message : "Success");
+  console.log("labo@test.com:", e2 ? e2.message : "Success");
 }
 
 addLabo();
