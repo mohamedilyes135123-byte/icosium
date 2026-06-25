@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -271,8 +272,8 @@ export default function LabRequests() {
         </AnimatePresence>
       </div>
 
-      {/* Upload Results Panel */}
-      <AnimatePresence>
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
         {uploadPanel?.open && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
@@ -322,6 +323,7 @@ export default function LabRequests() {
           </motion.div>
         )}
       </AnimatePresence>
+      , document.body)}
     </div>
   );
 }

@@ -24,7 +24,7 @@ export default function LabLayout({
       </div>
 
       {/* Distinctive Deep Daylight Sidebar */}
-      <aside className="w-72 border-l border-cyan-600/30 flex flex-col z-40 h-screen bg-gradient-to-b from-cyan-600 to-sky-700 text-white shadow-2xl overflow-hidden fixed top-0 right-0">
+      <aside className="w-72 border-l border-cyan-600/30 flex flex-col z-30 h-screen bg-gradient-to-b from-cyan-600 to-sky-700 text-white shadow-2xl overflow-hidden fixed top-0 right-0">
         <div className="absolute inset-0 bg-white/5 backdrop-blur-md pointer-events-none" />
         
         <div className="p-6 flex items-center gap-3 font-bold text-xl border-b border-white/10 relative z-10">
@@ -59,7 +59,7 @@ export default function LabLayout({
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative z-10 overflow-hidden text-right mr-72">
+      <main className="flex-1 flex flex-col relative z-10 overflow-visible text-right mr-72">
          <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
