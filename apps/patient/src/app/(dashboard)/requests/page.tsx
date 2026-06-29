@@ -1,30 +1,20 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
+import { uploadLabFile } from "@/lib/supabase/actions";
 import Image from "next/image";
 
-type RequestType = "PRESCRIPTION" | "LAB" | "ROUTINE_LAB";
-
-const ROUTINE_TESTS = [
-  { name: "صورة الدم الكاملة CBC", code: "CBC" },
-  { name: "سكر الدم الصائم", code: "FBG" },
-  { name: "سكر بعد الأكل", code: "PPBG" },
-  { name: "وظائف الكبد", code: "LFT" },
-  { name: "وظائف الكلى", code: "RFT" },
-  { name: "صورة دهنيات الدم", code: "LIPID" },
-  { name: "فيتامين D", code: "VIT_D" },
-  { name: "هرمون الغدة الدرقية TSH", code: "TSH" },
-  { name: "تحليل البول", code: "UA" },
-];
+// Strictly 3 request types per spec
+type RequestType = "APPOINTMENT" | "PRESCRIPTION" | "LAB";
 
 const STATUS: Record<string, { label: string; bg: string; color: string; icon?: string }> = {
-  PENDING: { label: "قيد الانتظار", bg: "#fef9c3", color: "#92400e", icon: "/icon_pending.png" },
-  APPROVED: { label: "موافق", bg: "#dcfce7", color: "#166534", icon: "/icon_approved.png" },
-  REJECTED: { label: "❌ مرفوض", bg: "#fee2e2", color: "#991b1b" },
-  MODIFIED: { label: "معدّل", bg: "#dbeafe", color: "#1e40af", icon: "/icon_modified.png" },
+  PENDING:  { label: "قيد الانتظار", bg: "#fef9c3", color: "#92400e", icon: "/icon_pending.png" },
+  APPROVED: { label: "موافق",        bg: "#dcfce7", color: "#166534", icon: "/icon_approved.png" },
+  REJECTED: { label: "❌ مرفوض",     bg: "#fee2e2", color: "#991b1b" },
+  MODIFIED: { label: "معدّل",        bg: "#dbeafe", color: "#1e40af", icon: "/icon_modified.png" },
 };
 
 export default function PatientRequests() {
@@ -38,12 +28,21 @@ export default function PatientRequests() {
   const [submitting, setSubmitting] = useState(false);
   const [modal, setModal] = useState<{ type: "lab" | "pharmacy"; labReqId?: string; prescriptionId?: string } | null>(null);
 
-  // Form state
-  const [reqType, setReqType] = useState<RequestType>("PRESCRIPTION");
+  // Form state — strictly 3 types
+  const [reqType, setReqType] = useState<RequestType>("APPOINTMENT");
   const [doctorId, setDoctorId] = useState("");
   const [symptoms, setSymptoms] = useState("");
-  const [selectedTests, setSelectedTests] = useState<string[]>([]);
   const [priority, setPriority] = useState("normal");
+  // Lab file upload
+  const [labFile, setLabFile] = useState<File | null>(null);
+  const [labFileUrl, setLabFileUrl] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // AI Prescription Analysis
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
+  const [oldPrescriptionUrl, setOldPrescriptionUrl] = useState<string>("");
+  const aiInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -60,7 +59,7 @@ export default function PatientRequests() {
         *,
         doctor:profiles!medical_requests_doctor_id_fkey(full_name,specialty),
         doctor_responses(*),
-        prescriptions(id,qr_token,medications,is_used),
+        prescriptions(id,qr_token,medications,is_used,is_paid),
         lab_requests(id,qr_token,tests_list,status,lab_id)
       `).eq("patient_id", currentUser.id).order("created_at", { ascending: false }),
       supabase.from("profiles").select("id,full_name,specialty,address").eq("role", "doctor").eq("approval_status", "approved").neq("is_banned", true),
@@ -77,26 +76,82 @@ export default function PatientRequests() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  const handleLabFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+    setLabFile(file);
+    setUploading(true);
+    try {
+      const url = await uploadLabFile(currentUser.id, file);
+      setLabFileUrl(url);
+    } catch (err) {
+      console.error("Upload failed:", err);
+    }
+    setUploading(false);
+  };
+
+  const handleOldPrescriptionChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+    setAiAnalyzing(true);
+    try {
+      // Upload to Supabase first so doctor can see original image
+      const url = await uploadLabFile(currentUser.id, file);
+      setOldPrescriptionUrl(url);
+
+      // Send to AI for analysis
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/analyze-prescription", { method: "POST", body: formData });
+      const data = await res.json();
+      
+      if (data.success && data.analysis) {
+        setSymptoms((prev) => prev ? prev + "\n\n" + data.analysis : data.analysis);
+      } else {
+        alert(data.message || "فشل تحليل الوصفة");
+      }
+    } catch (err) {
+      console.error("AI Analysis failed:", err);
+      alert("حدث خطأ أثناء تحليل الوصفة");
+    }
+    setAiAnalyzing(false);
+  };
+
   const submitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
     setSubmitting(true);
     const supabase = createClient();
+
+    // APPOINTMENT type maps to a special note in symptoms
+    const mappedType = reqType === "APPOINTMENT" ? "PRESCRIPTION" : reqType;
     const payload: any = {
       patient_id: currentUser.id,
       doctor_id: doctorId || null,
-      type: reqType,
+      type: mappedType,
       priority,
     };
-    if (reqType === "PRESCRIPTION") {
-      payload.symptoms = symptoms;
+
+    if (reqType === "APPOINTMENT") {
+      payload.symptoms = `[موعد طبيب] ${symptoms}`;
+      if (oldPrescriptionUrl) {
+        payload.uploaded_prescription_url = oldPrescriptionUrl;
+        payload.ai_analysis = symptoms; // Symptoms holds the combined text
+      }
+    } else if (reqType === "PRESCRIPTION") {
+      payload.symptoms = `[تجديد وصفة] ${symptoms}`;
     } else {
-      payload.tests_requested = selectedTests.map(code =>
-        ROUTINE_TESTS.find(t => t.code === code) || { name: code, code }
-      );
+      // LAB — include uploaded file reference in tests_requested
+      payload.tests_requested = labFileUrl
+        ? [{ name: "تحليل مرفق", code: "UPLOADED", file_url: labFileUrl }]
+        : [{ name: "تحليل طبي", code: "LAB" }];
+      if (symptoms) payload.patient_notes = symptoms;
     }
+
     await supabase.from("medical_requests").insert([payload]);
-    setSymptoms(""); setSelectedTests([]); setDoctorId(""); setTab("list");
+    setSymptoms(""); setDoctorId(""); setTab("list");
+    setLabFile(null); setLabFileUrl("");
+    setOldPrescriptionUrl("");
     setSubmitting(false);
     fetchAll();
   };
@@ -105,7 +160,6 @@ export default function PatientRequests() {
     if (!currentUser) return;
     const supabase = createClient();
     await supabase.from("pharmacy_orders").insert([{ prescription_id: prescriptionId, patient_id: currentUser.id, pharmacy_id: pharmacyId }]);
-    // Mark prescription as used so the button disappears and results page is accurate
     await supabase.from("prescriptions").update({ is_used: true }).eq("id", prescriptionId);
     setModal(null); fetchAll();
   };
@@ -116,10 +170,35 @@ export default function PatientRequests() {
     setModal(null); fetchAll();
   };
 
-  const toggleTest = (code: string) =>
-    setSelectedTests(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]);
-
   const statusCfg = (s: string) => STATUS[s] || STATUS.PENDING;
+
+  // The 3 allowed request types
+  const REQUEST_TYPES = [
+    {
+      v: "APPOINTMENT" as RequestType,
+      label: "موعد طبيب",
+      icon: "/icon_calendar.png",
+      grad: "linear-gradient(135deg, #16a34a, #15803d)",
+      shadow: "rgba(22,163,74,0.3)",
+      desc: "احجز موعداً مع طبيبك",
+    },
+    {
+      v: "PRESCRIPTION" as RequestType,
+      label: "تجديد",
+      icon: "/icon_pharmacy.png",
+      grad: "linear-gradient(135deg, #a855f7, #7e22ce)",
+      shadow: "rgba(168,85,247,0.3)",
+      desc: "تجديد وصفة طبية",
+    },
+    {
+      v: "LAB" as RequestType,
+      label: "تحليل",
+      icon: "/icon_labs.png",
+      grad: "linear-gradient(135deg, #06b6d4, #0e7490)",
+      shadow: "rgba(6,182,212,0.3)",
+      desc: "طلب تحليل مخبري",
+    },
+  ];
 
   return (
     <div dir="rtl" style={{ paddingBottom: 120 }}>
@@ -145,25 +224,23 @@ export default function PatientRequests() {
           ))}
         </div>
 
-        {/* New Request Form */}
+        {/* ══ New Request Form ══ */}
         {tab === "new" && (
           <form onSubmit={submitRequest} style={{ background: "#fff", borderRadius: 24, padding: 20, border: "1px solid #e8f5ec", display: "flex", flexDirection: "column", gap: 16 }}>
-            {/* Type */}
+
+            {/* Type — exactly 3 buttons */}
             <div>
               <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 8 }}>نوع الطلب</label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, paddingTop: 24 }}>
-                {[
-                  { v: "PRESCRIPTION", label: "وصفة طبية", icon: "/icon_pharmacy.png", grad: "linear-gradient(135deg, #a855f7, #7e22ce)", shadow: "rgba(168,85,247,0.3)" },
-                  { v: "LAB", label: "تحاليل", icon: "/icon_labs.png", grad: "linear-gradient(135deg, #06b6d4, #0e7490)", shadow: "rgba(6,182,212,0.3)" },
-                  { v: "ROUTINE_LAB", label: "روتينية", icon: "/icon_results.png", grad: "linear-gradient(135deg, #14b8a6, #0f766e)", shadow: "rgba(20,184,166,0.3)" },
-                ].map(o => (
-                  <button key={o.v} type="button" onClick={() => setReqType(o.v as RequestType)}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, paddingTop: 56 }}>
+                {REQUEST_TYPES.map(o => (
+                  <button key={o.v} type="button" onClick={() => setReqType(o.v)}
                     className="btn"
-                    style={{ position: "relative", padding: "10px 8px 6px", borderRadius: 12, border: reqType === o.v ? "2px solid transparent" : "2px solid #e5e7eb", background: reqType === o.v ? o.grad : "#fff", color: reqType === o.v ? "#fff" : "#6b7280", boxShadow: reqType === o.v ? `0 4px 14px ${o.shadow}` : "none", fontFamily: "inherit", fontWeight: 800, fontSize: 13, cursor: "pointer", textAlign: "center", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
-                    <div style={{ position: "absolute", top: -48, left: "50%", transform: "translateX(-50%)", transition: "all 0.3s" }}>
-                      <Image src={o.icon} alt="" width={72} height={72} style={{ filter: reqType === o.v ? "drop-shadow(0 6px 12px rgba(0,0,0,0.3))" : "none", transform: reqType === o.v ? "scale(1.1)" : "scale(0.9)" }} />
+                    style={{ position: "relative", padding: "12px 8px 8px", borderRadius: 16, border: reqType === o.v ? "2px solid transparent" : "2px solid #e5e7eb", background: reqType === o.v ? o.grad : "#fff", color: reqType === o.v ? "#fff" : "#6b7280", boxShadow: reqType === o.v ? `0 4px 14px ${o.shadow}` : "none", fontFamily: "inherit", fontWeight: 800, fontSize: 13, cursor: "pointer", textAlign: "center", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
+                    <div style={{ position: "absolute", top: -52, left: "50%", transform: "translateX(-50%)" }}>
+                      <Image src={o.icon} alt="" width={72} height={72} style={{ filter: reqType === o.v ? "drop-shadow(0 6px 12px rgba(0,0,0,0.3))" : "none", transform: reqType === o.v ? "scale(1.1)" : "scale(0.9)", transition: "all 0.3s" }} />
                     </div>
-                    <div style={{ marginTop: 24 }}>{o.label}</div>
+                    <div style={{ marginTop: 8 }}>{o.label}</div>
+                    <div style={{ fontSize: 10, opacity: 0.8, marginTop: 2 }}>{o.desc}</div>
                   </button>
                 ))}
               </div>
@@ -182,53 +259,120 @@ export default function PatientRequests() {
             {/* Priority */}
             <div>
               <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6 }}>الأولوية</label>
-              <div style={{ display: "flex", gap: 8, paddingTop: 20 }}>
-                {[{ v: "normal", label: "عادي", grad: "linear-gradient(135deg, #64748b, #334155)", shadow: "rgba(100,116,139,0.3)" }, { v: "urgent", label: "عاجل", icon: "/icon_urgent.png", grad: "linear-gradient(135deg, #ef4444, #b91c1c)", shadow: "rgba(239,68,68,0.3)" }].map(p => (
+              <div style={{ display: "flex", gap: 8 }}>
+                {[
+                  { v: "normal", label: "عادي", grad: "linear-gradient(135deg, #64748b, #334155)", shadow: "rgba(100,116,139,0.3)" },
+                  { v: "urgent", label: "عاجل 🚨", grad: "linear-gradient(135deg, #ef4444, #b91c1c)", shadow: "rgba(239,68,68,0.3)" },
+                ].map(p => (
                   <button key={p.v} type="button" onClick={() => setPriority(p.v)}
-                    className="btn"
-                    style={{ position: "relative", flex: 1, padding: "10px 0", borderRadius: 12, border: priority === p.v ? "2px solid transparent" : "2px solid #e5e7eb", background: priority === p.v ? p.grad : "#fff", color: priority === p.v ? "#fff" : "#6b7280", boxShadow: priority === p.v ? `0 4px 14px ${p.shadow}` : "none", fontFamily: "inherit", fontWeight: 800, fontSize: 14, cursor: "pointer", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                    {p.icon && <Image src={p.icon} alt="" width={60} height={60} style={{ position: "absolute", top: priority === p.v ? -40 : -24, right: 16, transform: priority === p.v ? "scale(1.2)" : "scale(1)", transition: "all 0.3s", filter: priority === p.v ? "drop-shadow(0 4px 8px rgba(0,0,0,0.3))" : "none" }} />}
-                    <span style={{ marginRight: p.icon ? 32 : 0 }}>{p.label}</span>
+                    style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: priority === p.v ? "2px solid transparent" : "2px solid #e5e7eb", background: priority === p.v ? p.grad : "#fff", color: priority === p.v ? "#fff" : "#6b7280", boxShadow: priority === p.v ? `0 4px 14px ${p.shadow}` : "none", fontFamily: "inherit", fontWeight: 800, fontSize: 14, cursor: "pointer", transition: "all 0.2s" }}>
+                    {p.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Symptoms */}
-            {reqType === "PRESCRIPTION" && (
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6 }}>الأعراض والشكوى *</label>
-                <textarea value={symptoms} onChange={e => setSymptoms(e.target.value)} required
-                  placeholder="مثال: أشعر بصداع شديد منذ 3 أيام، مع ارتفاع في الحرارة..."
-                  style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid #e5e7eb", fontFamily: "inherit", fontSize: 14, resize: "none", height: 120, outline: "none", background: "#f9fafb", color: "#374151", boxSizing: "border-box" }} />
-              </div>
-            )}
-
-            {/* Tests */}
-            {reqType !== "PRESCRIPTION" && (
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 8 }}>
-                  اختر التحاليل {selectedTests.length > 0 && <span style={{ background: "#dcfce7", color: "#166534", borderRadius: 999, padding: "2px 8px", fontSize: 11 }}>{selectedTests.length} محدد</span>}
-                </label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                  {ROUTINE_TESTS.map(t => (
-                    <button key={t.code} type="button" onClick={() => toggleTest(t.code)}
-                      style={{ padding: "10px 12px", borderRadius: 12, border: `2px solid ${selectedTests.includes(t.code) ? "#2eb567" : "#e5e7eb"}`, background: selectedTests.includes(t.code) ? "#f0fdf4" : "#fff", color: selectedTests.includes(t.code) ? "#166534" : "#6b7280", fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer", textAlign: "right" }}>
-                      {t.name}
+            {/* Symptoms / Notes */}
+            {(reqType === "APPOINTMENT" || reqType === "PRESCRIPTION") && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {reqType === "APPOINTMENT" && (
+                  <div>
+                    <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6 }}>
+                      🤖 هل لديك وصفة قديمة؟ (تحليل بالذكاء الاصطناعي)
+                    </label>
+                    <input
+                      ref={aiInputRef}
+                      type="file"
+                      accept="image/*,application/pdf"
+                      onChange={handleOldPrescriptionChange}
+                      style={{ display: "none" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => aiInputRef.current?.click()}
+                      disabled={aiAnalyzing}
+                      style={{
+                        width: "100%", padding: "14px", borderRadius: 12, border: "2px dashed #a855f7",
+                        background: oldPrescriptionUrl ? "#faf5ff" : "#fff", color: "#7e22ce", fontFamily: "inherit",
+                        fontWeight: 700, fontSize: 14, cursor: aiAnalyzing ? "not-allowed" : "pointer", transition: "all 0.2s",
+                      }}
+                    >
+                      {aiAnalyzing ? "✨ جاري قراءة الوصفة بالذكاء الاصطناعي..." : oldPrescriptionUrl ? "✅ تمت القراءة بنجاح" : "📄 ارفع الوصفة القديمة لنسخ محتواها"}
                     </button>
-                  ))}
+                    {oldPrescriptionUrl && (
+                      <p style={{ fontSize: 11, color: "#7e22ce", marginTop: 4, fontWeight: 600 }}>
+                        سيتم إرسال صورة الوصفة مع التحليل للطبيب
+                      </p>
+                    )}
+                  </div>
+                )}
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6 }}>
+                    {reqType === "APPOINTMENT" ? "سبب الموعد / الأدوية *" : "الأعراض والشكوى *"}
+                  </label>
+                  <textarea value={symptoms} onChange={e => setSymptoms(e.target.value)} required
+                    placeholder={reqType === "APPOINTMENT" ? "مثال: مراجعة دورية، أو قم برفع وصفتك القديمة وسيتم كتابتها هنا..." : "مثال: أحتاج لتجديد وصفة Metformin..."}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid #e5e7eb", fontFamily: "inherit", fontSize: 14, resize: "vertical", minHeight: 120, outline: "none", background: "#f9fafb", color: "#374151", boxSizing: "border-box" }} />
                 </div>
               </div>
             )}
 
-            <button type="submit" disabled={submitting}
-              style={{ width: "100%", padding: "14px 0", borderRadius: 999, border: "none", background: "linear-gradient(135deg,#2eb567,#1e8a4c)", color: "#fff", fontFamily: "inherit", fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: "0 4px 15px rgba(46,181,103,0.35)", opacity: submitting ? 0.7 : 1 }}>
-              {submitting ? "جاري الإرسال..." : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}><Image src="/icon_new_request.png" alt="" width={24} height={24} style={{}} /> إرسال الطلب للطبيب</span>}
+            {/* Lab — file upload + notes */}
+            {reqType === "LAB" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6 }}>
+                    📎 إرفاق وصفة أو ملف قديم (اختياري)
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={handleLabFileChange}
+                    style={{ display: "none" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      width: "100%",
+                      padding: "14px",
+                      borderRadius: 12,
+                      border: "2px dashed #06b6d4",
+                      background: labFile ? "#ecfeff" : "#f0fdf4",
+                      color: "#0e7490",
+                      fontFamily: "inherit",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    {uploading ? "⏳ جاري الرفع..." : labFile ? `✅ ${labFile.name}` : "📁 اختر ملفاً أو صورة"}
+                  </button>
+                  {labFileUrl && (
+                    <p style={{ fontSize: 11, color: "#0e7490", marginTop: 4, fontWeight: 600 }}>
+                      ✓ تم رفع الملف بنجاح
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6 }}>ملاحظات للطبيب (اختياري)</label>
+                  <textarea value={symptoms} onChange={e => setSymptoms(e.target.value)}
+                    placeholder="مثال: أحتاج تحليل HBA1C ووظائف الكلى..."
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid #e5e7eb", fontFamily: "inherit", fontSize: 14, resize: "none", height: 80, outline: "none", background: "#f9fafb", color: "#374151", boxSizing: "border-box" }} />
+                </div>
+              </div>
+            )}
+
+            <button type="submit" disabled={submitting || uploading}
+              style={{ width: "100%", padding: "14px 0", borderRadius: 999, border: "none", background: "linear-gradient(135deg,#2eb567,#1e8a4c)", color: "#fff", fontFamily: "inherit", fontWeight: 700, fontSize: 16, cursor: submitting || uploading ? "not-allowed" : "pointer", boxShadow: "0 4px 15px rgba(46,181,103,0.35)", opacity: submitting || uploading ? 0.7 : 1 }}>
+              {submitting ? "جاري الإرسال..." : "📤 إرسال الطلب للطبيب"}
             </button>
           </form>
         )}
 
-        {/* Requests List */}
+        {/* ══ Requests List ══ */}
         {tab === "list" && (
           <div>
             {loading && [1, 2, 3].map(i => (
@@ -240,7 +384,7 @@ export default function PatientRequests() {
                 <div style={{ fontSize: 64, marginBottom: 16 }}>🩺</div>
                 <p style={{ fontWeight: 700, color: "#6b7280", marginBottom: 8 }}>لا توجد طلبات بعد</p>
                 <button onClick={() => setTab("new")} className="btn-pill-green" style={{ marginTop: 8, fontSize: 14 }}>
-                  ابدأ بطلب استشارة
+                  ابدأ بطلب جديد
                 </button>
               </div>
             )}
@@ -252,8 +396,7 @@ export default function PatientRequests() {
               const labReq = req.lab_requests?.[0];
               const isApproved = req.status === "APPROVED";
               const isPending = req.status === "PENDING";
-              
-              // Dynamic card styles based on status
+
               const cardBorder = isApproved ? "2px solid rgba(134, 239, 172, 0.5)" : isPending ? "2px solid rgba(254, 240, 138, 0.5)" : "2px solid rgba(147, 197, 253, 0.5)";
               const cardBg = isApproved ? "linear-gradient(to bottom, #f0fdf4, #ffffff)" : isPending ? "linear-gradient(to bottom, #fefce8, #ffffff)" : "linear-gradient(to bottom, #eff6ff, #ffffff)";
 
@@ -262,19 +405,19 @@ export default function PatientRequests() {
                   {/* Status + Type */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      <span style={{ fontSize: 13, fontWeight: 800, padding: "6px 14px", borderRadius: 999, background: cfg.bg, color: cfg.color, display: "inline-flex", alignItems: "center", gap: 6, boxShadow: `0 4px 12px ${cfg.bg}` }}>
-                        {cfg.icon && <Image src={cfg.icon} alt="" width={24} height={24} style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />}
+                      <span style={{ fontSize: 13, fontWeight: 800, padding: "6px 14px", borderRadius: 999, background: cfg.bg, color: cfg.color, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        {cfg.icon && <Image src={cfg.icon} alt="" width={20} height={20} />}
                         {cfg.label}
                       </span>
                       {req.priority === "urgent" && (
-                        <span style={{ fontSize: 12, fontWeight: 800, padding: "4px 10px", borderRadius: 999, background: "#fee2e2", color: "#991b1b", display: "inline-flex", alignItems: "center", gap: 6, animation: "pulse 1.5s infinite", boxShadow: "0 4px 12px #fee2e2" }}>
-                          <Image src="/icon_urgent.png" alt="" width={20} height={20} style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} /> عاجل
+                        <span style={{ fontSize: 12, fontWeight: 800, padding: "4px 10px", borderRadius: 999, background: "#fee2e2", color: "#991b1b", display: "inline-flex", alignItems: "center", gap: 6, animation: "pulse 1.5s infinite" }}>
+                          🚨 عاجل
                         </span>
                       )}
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 800, padding: "6px 14px", borderRadius: 999, background: req.type === "PRESCRIPTION" ? "#f3e8ff" : "#cffafe", color: req.type === "PRESCRIPTION" ? "#7c3aed" : "#0891b2", display: "inline-flex", alignItems: "center", gap: 6, boxShadow: req.type === "PRESCRIPTION" ? "0 4px 12px #f3e8ff" : "0 4px 12px #cffafe" }}>
-                      <Image src={req.type === "PRESCRIPTION" ? "/icon_pharmacy.png" : "/icon_labs.png"} alt="" width={24} height={24} style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
-                      {req.type === "PRESCRIPTION" ? "وصفة" : req.type === "LAB" ? "تحليل" : "روتيني"}
+                    <span style={{ fontSize: 13, fontWeight: 800, padding: "6px 14px", borderRadius: 999, background: req.type === "PRESCRIPTION" ? "#f3e8ff" : "#cffafe", color: req.type === "PRESCRIPTION" ? "#7c3aed" : "#0891b2", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <Image src={req.type === "PRESCRIPTION" ? "/icon_pharmacy.png" : "/icon_labs.png"} alt="" width={20} height={20} />
+                      {req.type === "PRESCRIPTION" ? "وصفة / موعد" : "تحليل"}
                     </span>
                   </div>
 
@@ -285,22 +428,21 @@ export default function PatientRequests() {
                     </p>
                     {req.doctor && (
                       <div style={{ fontSize: 13, fontWeight: 800, color: "#166534", background: "#dcfce7", padding: "4px 10px", borderRadius: 8 }}>
-                        ⚕️ {req.doctor.full_name} {req.doctor.specialty ? `(${req.doctor.specialty})` : ""}
+                        ⚕️ {req.doctor.full_name}
                       </div>
                     )}
                   </div>
 
-                  {/* Symptoms */}
+                  {/* Symptoms/Notes */}
                   {req.symptoms && (
                     <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "16px 4px 16px 16px", padding: "12px 16px", marginBottom: 12 }}>
-                      <p style={{ fontSize: 12, fontWeight: 800, color: "#94a3b8", marginBottom: 4, margin: 0 }}>الأعراض والشكوى:</p>
-                      <p style={{ fontSize: 14, fontWeight: 700, color: "#475569", margin: 0 }}>{req.symptoms}</p>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: "#475569", margin: 0 }}>{req.symptoms}</p>
                     </div>
                   )}
 
-                  {/* Doctor Response */}
+                  {/* Doctor response */}
                   {response && (
-                    <div style={{ padding: "14px 16px", borderRadius: 16, background: response.action === "APPROVE" ? "#f0fdf4" : response.action === "REJECT" ? "#fef2f2" : "#eff6ff", border: "none", borderRight: `5px solid ${response.action === "APPROVE" ? "#22c55e" : response.action === "REJECT" ? "#ef4444" : "#3b82f6"}`, marginBottom: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+                    <div style={{ padding: "14px 16px", borderRadius: 16, background: response.action === "APPROVE" ? "#f0fdf4" : response.action === "REJECT" ? "#fef2f2" : "#eff6ff", borderRight: `5px solid ${response.action === "APPROVE" ? "#22c55e" : response.action === "REJECT" ? "#ef4444" : "#3b82f6"}`, marginBottom: 16 }}>
                       <p style={{ fontSize: 12, fontWeight: 900, color: response.action === "APPROVE" ? "#166534" : response.action === "REJECT" ? "#991b1b" : "#1e40af", marginBottom: 6, margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
                         <span style={{ fontSize: 16 }}>{response.action === "APPROVE" ? "✅" : response.action === "REJECT" ? "❌" : "ℹ️"}</span>
                         رد الطبيب:
@@ -313,16 +455,16 @@ export default function PatientRequests() {
                   {isApproved && prescription && !prescription.is_used && (
                     <button onClick={() => setModal({ type: "pharmacy", prescriptionId: prescription.id })}
                       className="btn"
-                      style={{ position: "relative", width: "100%", padding: "14px 0", borderRadius: 16, border: "none", background: "linear-gradient(135deg, #a855f7, #7e22ce)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 15, cursor: "pointer", marginBottom: 8, boxShadow: "0 6px 20px rgba(168,85,247,0.35)", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
+                      style={{ position: "relative", width: "100%", padding: "14px 0", borderRadius: 16, border: "none", background: "linear-gradient(135deg, #a855f7, #7e22ce)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 15, cursor: "pointer", marginBottom: 8, boxShadow: "0 6px 20px rgba(168,85,247,0.35)" }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                        <Image src="/icon_pharmacy.png" alt="" width={32} height={32} style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.2))", transform: "scale(1.2)" }} /> 
+                        <Image src="/icon_pharmacy.png" alt="" width={28} height={28} />
                         اختر صيدلية وأرسل الوصفة
                       </div>
                     </button>
                   )}
                   {isApproved && prescription?.is_used && (
                     <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, fontWeight: 800, color: "#7c3aed", background: "#faf5ff", padding: "12px 16px", borderRadius: 12, marginBottom: 8, border: "1px dashed #e9d5ff" }}>
-                      <Image src="/icon_approved.png" alt="" width={24} height={24} style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} /> تم إرسال الوصفة للصيدلية
+                      <Image src="/icon_approved.png" alt="" width={20} height={20} /> تم إرسال الوصفة للصيدلية
                     </div>
                   )}
 
@@ -330,16 +472,16 @@ export default function PatientRequests() {
                   {isApproved && labReq && !labReq.lab_id && (
                     <button onClick={() => setModal({ type: "lab", labReqId: labReq.id })}
                       className="btn"
-                      style={{ position: "relative", width: "100%", padding: "14px 0", borderRadius: 16, border: "none", background: "linear-gradient(135deg, #06b6d4, #0e7490)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 15, cursor: "pointer", boxShadow: "0 6px 20px rgba(6,182,212,0.35)", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
+                      style={{ position: "relative", width: "100%", padding: "14px 0", borderRadius: 16, border: "none", background: "linear-gradient(135deg, #06b6d4, #0e7490)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 15, cursor: "pointer", boxShadow: "0 6px 20px rgba(6,182,212,0.35)" }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                        <Image src="/icon_labs.png" alt="" width={32} height={32} style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.2))", transform: "scale(1.2)" }} /> 
+                        <Image src="/icon_labs.png" alt="" width={28} height={28} />
                         اختر مختبراً وأرسل طلب التحليل
                       </div>
                     </button>
                   )}
                   {isApproved && labReq?.lab_id && (
                     <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, fontWeight: 800, color: "#0e7490", background: "#ecfeff", padding: "12px 16px", borderRadius: 12, border: "1px dashed #cffafe" }}>
-                      <Image src="/icon_approved.png" alt="" width={24} height={24} style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} /> تم إرسال طلب التحليل للمختبر
+                      <Image src="/icon_approved.png" alt="" width={20} height={20} /> تم إرسال طلب التحليل للمختبر
                     </div>
                   )}
                 </div>

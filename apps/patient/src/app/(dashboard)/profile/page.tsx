@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import QRCode from "react-qr-code";
+
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export default function PatientProfile() {
@@ -22,6 +24,7 @@ export default function PatientProfile() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<any>({});
+  const [showQr, setShowQr] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -93,10 +96,16 @@ export default function PatientProfile() {
           <p className="text-xs text-slate-400">بياناتك الشخصية والطبية</p>
         </div>
         {!editing ? (
-          <button onClick={() => setEditing(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-emerald-200 text-emerald-700 bg-emerald-50 text-sm font-bold hover:bg-emerald-100 transition-colors">
-            <Edit3 className="w-4 h-4" /> تعديل
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => setShowQr(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-blue-200 text-blue-700 bg-blue-50 text-sm font-bold hover:bg-blue-100 transition-colors">
+              <Activity className="w-4 h-4" /> QR الملف
+            </button>
+            <button onClick={() => setEditing(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-emerald-200 text-emerald-700 bg-emerald-50 text-sm font-bold hover:bg-emerald-100 transition-colors">
+              <Edit3 className="w-4 h-4" /> تعديل
+            </button>
+          </div>
         ) : (
           <div className="flex gap-2">
             <button onClick={save} disabled={saving}
@@ -110,6 +119,35 @@ export default function PatientProfile() {
           </div>
         )}
       </motion.div>
+
+      {/* QR Modal */}
+      <AnimatePresence>
+        {showQr && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowQr(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-black text-slate-800 mb-2">QR ملفك الطبي</h3>
+              <p className="text-sm text-slate-500 mb-6">يمكن لطبيبك مسح هذا الرمز للوصول لملفك الصحي</p>
+              
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex justify-center mb-6">
+                <QRCode value={`https://inaya-platform.com/doctor/scan?patient_id=${profile?.id}`} size={200} />
+              </div>
+              
+              <button onClick={() => setShowQr(false)}
+                className="w-full py-3.5 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors">
+                إغلاق
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Avatar + name */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}

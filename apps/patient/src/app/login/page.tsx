@@ -4,13 +4,15 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import {
-  Heart, Mail, Lock, User, Phone, Calendar, CreditCard,
+  Heart, Mail, Lock, User, Phone,
   AlertTriangle, ChevronLeft, ChevronRight, CheckCircle,
-  Pill, Activity, Globe, X, Plus, Shield
+  Pill, Activity, Globe, X, Shield
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import DatePickerField from "@/components/ui/DatePickerField";
+import QRSuccessScreen from "@/components/ui/QRSuccessScreen";
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 
 interface PatientForm {
   fullNameAr: string; fullNameFr: string;
@@ -18,7 +20,7 @@ interface PatientForm {
   dateOfBirth: string; nationalId: string; socialSecurity: string;
   address: string;
   // Medical history
-  chronicDiseases: string[]; surgeries: string;
+  chronicDiseases: string[]; otherIllness: string; surgeries: string;
   familyHistory: string; drugAllergies: string[];
   foodAllergies: string; bloodGroup: string;
   hadPhysicalExam: boolean;
@@ -32,7 +34,8 @@ const CHRONIC_OPTIONS = [
   "أمراض الرئة المزمنة BPCO", "أمراض الأعصاب", "لا يوجد",
 ];
 
-const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "غير معروف"];
+// "Unknown / غير معروف" intentionally removed
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 const COMMON_ALLERGIES = ["البنسيلين", "السلفاميد", "الأسبرين", "الإيبوبروفين", "الكودايين", "لا يوجد"];
 
@@ -42,6 +45,8 @@ export default function PatientLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  // QR success state
+  const [newUserId, setNewUserId] = useState<string | null>(null);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -49,7 +54,7 @@ export default function PatientLoginPage() {
   const [form, setForm] = useState<PatientForm>({
     fullNameAr: "", fullNameFr: "", email: "", password: "", phone: "",
     dateOfBirth: "", nationalId: "", socialSecurity: "", address: "",
-    chronicDiseases: [], surgeries: "", familyHistory: "", drugAllergies: [],
+    chronicDiseases: [], otherIllness: "", surgeries: "", familyHistory: "", drugAllergies: [],
     foodAllergies: "", bloodGroup: "", hadPhysicalExam: false,
     acceptTerms: false,
   });
@@ -90,9 +95,9 @@ export default function PatientLoginPage() {
     if (data?.user?.user_metadata?.role === "patient") {
       router.push("/dashboard");
       router.refresh();
-    } else { 
-      setError("هذه البوابة مخصصة للمرضى فقط."); 
-      setLoading(false); 
+    } else {
+      setError("هذه البوابة مخصصة للمرضى فقط.");
+      setLoading(false);
     }
   };
 
@@ -100,40 +105,59 @@ export default function PatientLoginPage() {
   const handleSignup = async () => {
     if (!form.acceptTerms) { setError("يجب الموافقة على الشروط."); return; }
     setLoading(true); setError(null);
-    const { error: err } = await supabase.auth.signUp({
+
+    // Build chronic diseases string including "other"
+    const chronicList = [...form.chronicDiseases];
+    if (form.otherIllness.trim()) chronicList.push(form.otherIllness.trim());
+
+    const { data, error: err } = await supabase.auth.signUp({
       email: form.email, password: form.password,
-      options: { data: {
-        full_name: form.fullNameAr || form.fullNameFr,
-        full_name_ar: form.fullNameAr, full_name_fr: form.fullNameFr,
-        role: "patient", phone: form.phone,
-        date_of_birth: form.dateOfBirth || null,
-        national_id: form.nationalId || null,
-        social_security: form.socialSecurity || null,
-        address: form.address || null,
-        blood_group: form.bloodGroup || null,
-        chronic_diseases: form.chronicDiseases,
-        surgeries: form.surgeries || null,
-        family_history: form.familyHistory || null,
-        drug_allergies: form.drugAllergies,
-        food_allergies: form.foodAllergies || null,
-        had_physical_exam: form.hadPhysicalExam,
-      }},
+      options: {
+        data: {
+          full_name: form.fullNameAr || form.fullNameFr,
+          full_name_ar: form.fullNameAr,
+          full_name_fr: form.fullNameFr,
+          role: "patient",
+          phone: form.phone,
+          date_of_birth: form.dateOfBirth || null,
+          national_id: form.nationalId || null,
+          social_security: form.socialSecurity || null,
+          address: form.address || null,
+          blood_group: form.bloodGroup || null,
+          chronic_diseases: chronicList,
+          other_illnesses: form.otherIllness || null,
+          surgeries: form.surgeries || null,
+          family_history: form.familyHistory || null,
+          drug_allergies: form.drugAllergies,
+          food_allergies: form.foodAllergies || null,
+          had_physical_exam: form.hadPhysicalExam,
+        }
+      },
     });
+
     if (err) { setError(err.message); setLoading(false); return; }
-    setSuccessMsg("🎉 تم إنشاء ملفك الطبي! تحقق من بريدك الإلكتروني ثم سجّل الدخول.");
-    setIsLogin(true); setStep(1); setLoading(false);
+
+    // Step 4: show QR code
+    if (data.user?.id) {
+      setNewUserId(data.user.id);
+      setStep(4);
+    } else {
+      setSuccessMsg("🎉 تم إنشاء ملفك الطبي! تحقق من بريدك الإلكتروني ثم سجّل الدخول.");
+      setIsLogin(true); setStep(1);
+    }
+    setLoading(false);
   };
 
   const nextStep = () => {
     setError(null);
     if (step === 1) {
-      if (!form.fullNameAr || !form.email || !form.password || !form.phone) {
-        setError("الرجاء ملء الحقول الإلزامية: الاسم، البريد، كلمة المرور، الهاتف");
+      if (!form.fullNameAr || !form.fullNameFr || !form.email || !form.password || !form.phone) {
+        setError("الرجاء ملء الحقول الإلزامية: الاسم العربي، الاسم الفرنسي، البريد، كلمة المرور، الهاتف");
         return;
       }
       if (form.password.length < 6) { setError("كلمة المرور 6 أحرف على الأقل."); return; }
     }
-    if (step === 2 && form.chronicDiseases.length === 0) {
+    if (step === 2 && form.chronicDiseases.length === 0 && !form.otherIllness.trim()) {
       setError("يرجى تحديد حالتك الصحية — اختر 'لا يوجد' إذا كنت بصحة جيدة.");
       return;
     }
@@ -142,22 +166,40 @@ export default function PatientLoginPage() {
 
   const cls = `w-full h-12 px-4 bg-white/70 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 outline-none text-right text-slate-800 text-sm transition-all`;
 
+  // ── Step 4: QR Success ──
+  if (!isLogin && step === 4 && newUserId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-y-auto" dir="rtl">
+        <div className="absolute inset-0 z-0 overflow-hidden bg-slate-50">
+          <div className="absolute top-[-10%] -right-[10%] w-[800px] h-[800px] bg-emerald-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-60" />
+          <div className="absolute bottom-[-10%] -left-[10%] w-[600px] h-[600px] bg-green-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-50" />
+        </div>
+        <div className="relative z-10 w-full max-w-lg bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-6">
+          <QRSuccessScreen
+            userId={newUserId}
+            fullNameAr={form.fullNameAr}
+            fullNameFr={form.fullNameFr}
+            onContinue={() => { setIsLogin(true); setStep(1); setNewUserId(null); }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-2 sm:p-4 relative overflow-y-auto" dir="rtl">
-      {/* Animated Prominent Background */}
+      {/* Animated Background */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-slate-50">
         <div className="absolute top-[-10%] -right-[10%] w-[800px] h-[800px] bg-emerald-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft" />
         <div className="absolute bottom-[-10%] -left-[10%] w-[600px] h-[600px] bg-green-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '2s' }} />
         <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px]" />
       </div>
 
-      {/* Glow keyframes */}
       <style>{`
         @keyframes logoFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes glowPulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.15); } }
-        @keyframes glowColorShift { 0% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(40deg); } 100% { filter: hue-rotate(0deg); } }
         .logo-float { animation: logoFloat 4s ease-in-out infinite; }
-        .glow-pulse { animation: glowPulse 3s ease-in-out infinite, glowColorShift 6s ease-in-out infinite; }
+        .glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
       `}</style>
 
       <div className="relative z-10 w-full max-w-lg">
@@ -170,7 +212,9 @@ export default function PatientLoginPage() {
             </div>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900">عناية</h1>
-          <h2 className="text-lg sm:text-2xl font-black mt-1 sm:mt-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-teal-500">بوابة المرضى — طبيبك في بيتك</h2>
+          <h2 className="text-lg sm:text-2xl font-black mt-1 sm:mt-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-teal-500">
+            بوابة المرضى — طبيبك في بيتك
+          </h2>
           <p className="text-slate-400 text-[10px] sm:text-xs mt-1">
             <Shield className="inline w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-500 mx-1" />
             بياناتك مشفرة ومحمية بالكامل
@@ -226,7 +270,7 @@ export default function PatientLoginPage() {
               <div>
                 {/* Step indicators */}
                 <div className="flex flex-row-reverse items-center justify-center gap-3 mb-7">
-                  {[1,2,3].map((s, i) => (
+                  {[1, 2, 3].map((s, i) => (
                     <div key={s} className="flex items-center gap-3">
                       {i > 0 && <div className={`h-0.5 w-10 rounded ${step > (3 - i) ? "bg-emerald-500" : "bg-slate-200"}`} />}
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all ${
@@ -253,8 +297,15 @@ export default function PatientLoginPage() {
                     <Field label="الاسم الكامل بالعربية *" icon={<User className="w-4 h-4" />}>
                       <input value={form.fullNameAr} onChange={e => set("fullNameAr")(e.target.value)} placeholder="أحمد بن علي" className={cls} />
                     </Field>
-                    <Field label="الاسم بالفرنسية" icon={<Globe className="w-4 h-4" />}>
-                      <input value={form.fullNameFr} onChange={e => set("fullNameFr")(e.target.value)} placeholder="Ahmed Ben Ali" className={cls} />
+                    <Field label="Nom et Prénom en Français *" icon={<Globe className="w-4 h-4" />}>
+                      <input
+                        value={form.fullNameFr}
+                        onChange={e => set("fullNameFr")(e.target.value)}
+                        placeholder="Ahmed Ben Ali"
+                        className={cls}
+                        dir="ltr"
+                        style={{ textAlign: "left" }}
+                      />
                     </Field>
                     <div className="grid grid-cols-2 gap-3">
                       <Field label="البريد الإلكتروني *" icon={<Mail className="w-4 h-4" />}>
@@ -267,14 +318,17 @@ export default function PatientLoginPage() {
                     <Field label="رقم الهاتف *" icon={<Phone className="w-4 h-4" />}>
                       <input value={form.phone} onChange={e => set("phone")(e.target.value)} type="tel" placeholder="+213 6XX XX XX XX" className={cls} />
                     </Field>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Field label="تاريخ الميلاد" icon={<Calendar className="w-4 h-4" />}>
-                        <input value={form.dateOfBirth} onChange={e => set("dateOfBirth")(e.target.value)} type="date" className={cls} />
-                      </Field>
-                      <Field label="رقم بطاقة التعريف" icon={<CreditCard className="w-4 h-4" />}>
-                        <input value={form.nationalId} onChange={e => set("nationalId")(e.target.value)} placeholder="18 رقم" className={cls} />
-                      </Field>
-                    </div>
+
+                    {/* Custom Date Picker */}
+                    <DatePickerField
+                      label="تاريخ الميلاد"
+                      value={form.dateOfBirth}
+                      onChange={v => set("dateOfBirth")(v)}
+                    />
+
+                    <Field label="رقم بطاقة التعريف" icon={<Shield className="w-4 h-4" />}>
+                      <input value={form.nationalId} onChange={e => set("nationalId")(e.target.value)} placeholder="18 رقم" className={cls} />
+                    </Field>
                     <Field label="رقم الضمان الاجتماعي" icon={<Shield className="w-4 h-4" />}>
                       <input value={form.socialSecurity} onChange={e => set("socialSecurity")(e.target.value)} placeholder="اختياري — للمؤمنين اجتماعياً" className={cls} />
                     </Field>
@@ -287,7 +341,7 @@ export default function PatientLoginPage() {
                 {/* ─── STEP 2: Medical History ─── */}
                 {step === 2 && (
                   <div className="space-y-5">
-                    {/* Blood group */}
+                    {/* Blood group — "Unknown" removed */}
                     <div>
                       <label className="text-sm font-bold text-slate-600 mb-2 block">فصيلة الدم</label>
                       <div className="flex flex-wrap gap-2">
@@ -302,7 +356,7 @@ export default function PatientLoginPage() {
 
                     {/* Chronic diseases */}
                     <div>
-                      <label className="text-sm font-bold text-slate-800 mb-2 block flex items-center gap-2">
+                      <label className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
                         <Activity className="w-4 h-4 text-emerald-600" />
                         الأمراض المزمنة <span className="text-rose-500">*</span>
                       </label>
@@ -317,6 +371,19 @@ export default function PatientLoginPage() {
                           </button>
                         ))}
                       </div>
+
+                      {/* أمراض أخرى — custom entry */}
+                      <div className="mt-3">
+                        <label className="text-xs font-bold text-slate-500 mb-1.5 flex items-center gap-1.5">
+                          <Pill className="w-3.5 h-3.5 text-purple-500" /> أمراض أخرى
+                        </label>
+                        <input
+                          value={form.otherIllness}
+                          onChange={e => set("otherIllness")(e.target.value)}
+                          placeholder="اكتب أي مرض مزمن آخر غير مذكور..."
+                          className={cls}
+                        />
+                      </div>
                     </div>
 
                     {/* Surgeries */}
@@ -329,7 +396,7 @@ export default function PatientLoginPage() {
 
                     {/* Family history */}
                     <div>
-                      <label className="text-sm font-bold text-slate-600 mb-1.5 block flex items-center gap-2">
+                      <label className="text-sm font-bold text-slate-600 mb-1.5 flex items-center gap-2">
                         <Shield className="w-4 h-4" /> الأمراض الوراثية / العائلية
                       </label>
                       <textarea value={form.familyHistory} onChange={e => set("familyHistory")(e.target.value)}
@@ -339,9 +406,8 @@ export default function PatientLoginPage() {
 
                     {/* Drug allergies */}
                     <div>
-                      <label className="text-sm font-bold text-slate-800 mb-2 block flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-amber-500" />
-                        حساسية الأدوية
+                      <label className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-500" /> حساسية الأدوية
                       </label>
                       <div className="flex flex-wrap gap-2 mb-2">
                         {COMMON_ALLERGIES.map(al => (
@@ -365,15 +431,16 @@ export default function PatientLoginPage() {
                 {/* ─── STEP 3: Confirmation ─── */}
                 {step === 3 && (
                   <div className="space-y-5">
-                    {/* Summary */}
                     <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-sm">
                       <p className="font-black text-emerald-800 mb-3">📋 ملخص ملفك الطبي</p>
                       <div className="space-y-1.5 text-slate-700">
-                        <p><span className="font-bold">الاسم:</span> {form.fullNameAr}</p>
+                        <p><span className="font-bold">الاسم (عربي):</span> {form.fullNameAr}</p>
+                        <p><span className="font-bold">Nom (Français):</span> {form.fullNameFr}</p>
                         <p><span className="font-bold">الهاتف:</span> {form.phone}</p>
+                        {form.dateOfBirth && <p><span className="font-bold">تاريخ الميلاد:</span> {new Date(form.dateOfBirth + "T00:00:00").toLocaleDateString("ar-DZ")}</p>}
                         {form.bloodGroup && <p><span className="font-bold">فصيلة الدم:</span> {form.bloodGroup}</p>}
                         {form.chronicDiseases.length > 0 && (
-                          <p><span className="font-bold">الأمراض المزمنة:</span> {form.chronicDiseases.join("، ")}</p>
+                          <p><span className="font-bold">الأمراض المزمنة:</span> {form.chronicDiseases.join("، ")}{form.otherIllness ? `، ${form.otherIllness}` : ""}</p>
                         )}
                         {form.drugAllergies.length > 0 && (
                           <p><span className="font-bold text-amber-700">حساسية الأدوية:</span> {form.drugAllergies.join("، ")}</p>

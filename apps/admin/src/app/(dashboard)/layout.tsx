@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ShieldAlert, LogOut, Users, FileLock2, ShieldCheck, BarChart3, Globe } from "lucide-react";
+import { ShieldAlert, LogOut, Users, FileLock2, ShieldCheck, BarChart3, Globe, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
@@ -97,6 +97,7 @@ export default function AdminLayout({
 
           <NavItem href="/users" icon={<Users className="w-5 h-5"/>} label="المستخدمين" current={pathname} gradient="from-violet-500 to-purple-400" />
           <NavItem href="/audit" icon={<FileLock2 className="w-5 h-5"/>} label="سجل التدقيق" current={pathname} gradient="from-rose-500 to-pink-400" />
+          <NavItem href="/payment-plans" icon={<CreditCard className="w-5 h-5"/>} label="خطط الدفع" current={pathname} gradient="from-amber-500 to-orange-400" />
         </nav>
 
         {/* Footer */}
