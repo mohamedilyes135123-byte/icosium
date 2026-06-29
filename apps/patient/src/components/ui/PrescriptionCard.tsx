@@ -290,7 +290,7 @@ export default function PrescriptionCard({
             onMouseOut={(e) => e.currentTarget.style.transform = "translateY(0)"}
           >
             {/* Fallback emoji if image is not placed yet */}
-            <img src="/download.png" alt="تحميل" style={{ width: 36, height: 36, objectFit: "contain" }} onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextElementSibling!.style.display='block'; }} />
+            <img src="/download.png" alt="تحميل" style={{ width: 36, height: 36, objectFit: "contain" }} onError={(e) => { e.currentTarget.style.display='none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display='block'; }} />
             <span style={{ fontSize: "1.5rem", display: "none" }}>📥</span>
             تحميل الملف
           </button>
@@ -317,7 +317,7 @@ export default function PrescriptionCard({
             onMouseOver={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
             onMouseOut={(e) => e.currentTarget.style.transform = "translateY(0)"}
           >
-            <img src="/send.png" alt="إرسال" style={{ width: 36, height: 36, objectFit: "contain", transform: "translateX(-2px)" }} onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextElementSibling!.style.display='block'; }} />
+            <img src="/send.png" alt="إرسال" style={{ width: 36, height: 36, objectFit: "contain", transform: "translateX(-2px)" }} onError={(e) => { e.currentTarget.style.display='none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display='block'; }} />
             <span style={{ fontSize: "1.5rem", display: "none" }}>📤</span>
             إرسال
           </button>
@@ -344,7 +344,7 @@ export default function PrescriptionCard({
             onMouseOver={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
             onMouseOut={(e) => e.currentTarget.style.transform = "translateY(0)"}
           >
-            <img src="/printer.png" alt="طبع" style={{ width: 36, height: 36, objectFit: "contain" }} onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextElementSibling!.style.display='block'; }} />
+            <img src="/printer.png" alt="طبع" style={{ width: 36, height: 36, objectFit: "contain" }} onError={(e) => { e.currentTarget.style.display='none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display='block'; }} />
             <span style={{ fontSize: "1.5rem", display: "none" }}>🖨️</span>
             طبع
           </button>
