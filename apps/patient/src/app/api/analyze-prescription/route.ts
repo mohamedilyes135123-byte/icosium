@@ -77,7 +77,7 @@ export async function POST(req: Request) {
                     role: 'user',
                     content: [
                       { type: 'text', text: prompt },
-                      { type: 'image', image: buffer, mimeType: mimeType },
+                      { type: 'image', image: buffer },
                     ],
                   },
                 ],
