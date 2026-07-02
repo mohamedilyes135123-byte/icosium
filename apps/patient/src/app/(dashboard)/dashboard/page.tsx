@@ -6,8 +6,9 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import MedicationReminders from "@/components/ui/MedicationReminders";
+import { useTranslation } from "@/hooks/useTranslation";
 
-type MetricType = "blood_sugar" | "blood_pressure";
+type MetricType = "blood_pressure" | "blood_sugar";
 
 interface Vital {
   id: string;
@@ -17,55 +18,57 @@ interface Vital {
   created_at: string;
 }
 
-// Only Blood Pressure and Blood Sugar are shown on dashboard (per spec)
-const HERO_METRICS = [
-  {
-    id: "blood_pressure" as MetricType,
-    img: "/icon_blood_pressure.png",
-    label: "ضغط الدم",
-    unit: "mmHg",
-    color: "#e11d48",
-    bg: "linear-gradient(135deg,#fff1f2,#fce7f3)",
-    border: "#fda4af",
-    hasSecond: true,
-  },
-  {
-    id: "blood_sugar" as MetricType,
-    img: "/icon_blood_sugar.png",
-    label: "مستوى السكر",
-    unit: "mg/dL",
-    color: "#d97706",
-    bg: "linear-gradient(135deg,#fffbeb,#fef3c7)",
-    border: "#fcd34d",
-    hasSecond: false,
-  },
-];
-
-function getStatus(type: MetricType, v1: number): "normal" | "high" | "low" {
-  if (type === "blood_sugar")    return v1 < 70 ? "low" : v1 > 126 ? "high" : "normal";
-  if (type === "blood_pressure") return v1 < 90 ? "low" : v1 > 140 ? "high" : "normal";
-  return "normal";
-}
-
-const STATUS_LABEL: Record<string, string> = { normal: "طبيعي", high: "مرتفع", low: "منخفض" };
-const STATUS_BG:    Record<string, string> = { normal: "#dcfce7", high: "#fee2e2", low: "#fef9c3" };
-const STATUS_CLR:   Record<string, string> = { normal: "#15803d", high: "#dc2626", low: "#92400e" };
-
-function getFeedbackMessage(type: MetricType, v1: number): string {
-  const status = getStatus(type, v1);
-  if (status === "normal") return "النتيجة طبيعية وممتازة! استمر في الحفاظ على صحتك.";
-  if (status === "high") return "النتيجة أعلى من المعدل الطبيعي. يُنصح بمراقبتها واستشارة الطبيب إذا استمرت.";
-  if (status === "low") return "النتيجة أقل من المعدل الطبيعي. يرجى الانتباه واستشارة طبيبك.";
-  return "تم التسجيل بنجاح.";
-}
-
-function getReferenceText(type: MetricType): string {
-  if (type === "blood_pressure") return "المعدل الطبيعي: حوالي 120/80";
-  if (type === "blood_sugar") return "المعدل الطبيعي: 70 - 126 mg/dL";
-  return "";
-}
-
 export default function PatientDashboard() {
+  const { t, language } = useTranslation();
+  const isRtl = language === 'ar';
+
+  const HERO_METRICS = [
+    {
+      id: "blood_pressure" as MetricType,
+      img: "/icon_blood_pressure.png",
+      label: t.dashboard.bloodPressure,
+      unit: "mmHg",
+      color: "#e11d48",
+      bg: "linear-gradient(135deg,#fff1f2,#fce7f3)",
+      border: "#fda4af",
+      hasSecond: true,
+    },
+    {
+      id: "blood_sugar" as MetricType,
+      img: "/icon_blood_sugar.png",
+      label: t.dashboard.bloodSugar,
+      unit: "mg/dL",
+      color: "#d97706",
+      bg: "linear-gradient(135deg,#fffbeb,#fef3c7)",
+      border: "#fcd34d",
+      hasSecond: false,
+    },
+  ];
+
+  const STATUS_LABEL: Record<string, string> = { normal: t.dashboard.statusNormal, high: t.dashboard.statusHigh, low: t.dashboard.statusLow };
+  const STATUS_BG:    Record<string, string> = { normal: "#dcfce7", high: "#fee2e2", low: "#fef9c3" };
+  const STATUS_CLR:   Record<string, string> = { normal: "#15803d", high: "#dc2626", low: "#92400e" };
+
+  function getStatus(type: MetricType, v1: number): "normal" | "high" | "low" {
+    if (type === "blood_sugar")    return v1 < 70 ? "low" : v1 > 126 ? "high" : "normal";
+    if (type === "blood_pressure") return v1 < 90 ? "low" : v1 > 140 ? "high" : "normal";
+    return "normal";
+  }
+
+  function getFeedbackMessage(type: MetricType, v1: number): string {
+    const status = getStatus(type, v1);
+    if (status === "normal") return t.dashboard.feedbackNormal;
+    if (status === "high") return t.dashboard.feedbackHigh;
+    if (status === "low") return t.dashboard.feedbackLow;
+    return t.dashboard.saveSuccess;
+  }
+
+  function getReferenceText(type: MetricType): string {
+    if (type === "blood_pressure") return t.dashboard.refBloodPressure;
+    if (type === "blood_sugar") return t.dashboard.refBloodSugar;
+    return "";
+  }
+
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState({ requests: 0, prescriptions: 0, labs: 0 });
   const [loading, setLoading] = useState(true);
@@ -116,7 +119,7 @@ export default function PatientDashboard() {
     load();
   }, []);
 
-  const firstName = loading ? "..." : profile?.full_name?.split(" ")[0] || "مريض";
+  const firstName = loading ? "..." : profile?.full_name?.split(" ")[0] || t.dashboard.patient;
 
   const refreshVitals = async () => {
     const supabase = createClient();
@@ -153,10 +156,10 @@ export default function PatientDashboard() {
 
     const { error } = await supabase.from("vitals").insert(payload);
     if (error) {
-      setMessage({ text: "حدث خطأ أثناء الحفظ", ok: false });
+      setMessage({ text: t.dashboard.saveError, ok: false });
     } else {
       const feedback = getFeedbackMessage(selected, parseFloat(val1));
-      setMessage({ text: `تم التسجيل بنجاح! ${feedback}`, ok: true });
+      setMessage({ text: `${t.dashboard.saveSuccess} ${feedback}`, ok: true });
       setVal1(""); setVal2(""); setNote(""); setSelected(null);
       await refreshVitals();
     }
@@ -164,7 +167,7 @@ export default function PatientDashboard() {
   };
 
   return (
-    <div dir="rtl" style={{ paddingBottom: 100 }}>
+    <div style={{ paddingBottom: 100 }}>
 
       {/* ═══════ GREEN WAVE HEADER ═══════ */}
       <div style={{
@@ -179,6 +182,7 @@ export default function PatientDashboard() {
           justifyContent: "space-between",
           alignItems: "center",
           padding: "0 1.5rem 3rem 1.5rem",
+          flexDirection: isRtl ? "row" : "row-reverse",
         }}>
           {/* Bell */}
           <div style={{
@@ -199,12 +203,12 @@ export default function PatientDashboard() {
           </div>
 
           {/* Greeting */}
-          <div style={{ textAlign: "right" }}>
+          <div style={{ textAlign: isRtl ? "right" : "left" }}>
             <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.85)", fontWeight: 600, margin: 0 }}>
-              مرحباً بك 👋
+              {t.dashboard.welcome}
             </p>
             <h1 style={{ fontSize: "1.45rem", fontWeight: 900, margin: 0 }}>
-              {firstName} — عناية
+              {firstName} — {t.dashboard.appTitle}
             </h1>
           </div>
         </div>
@@ -233,25 +237,25 @@ export default function PatientDashboard() {
           display: "flex", alignItems: "center", gap: "0.75rem",
           marginBottom: "1.25rem",
           boxShadow: "0 2px 12px rgba(202,138,4,0.08)",
+          flexDirection: isRtl ? "row" : "row-reverse"
         }}>
           <span style={{ fontSize: "1.3rem", flexShrink: 0 }}>⚠️</span>
-          <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#92400e", flex: 1 }}>
+          <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#92400e", flex: 1, textAlign: isRtl ? 'right' : 'left' }}>
             {loading
-              ? "جاري التحميل..."
+              ? t.dashboard.loading
               : stats.requests > 0
-                ? `لديك ${stats.requests} طلب طبي نشط`
-                : "لا توجد طلبات طبية معلقة حالياً"}
+                ? t.dashboard.activeRequests.replace('{count}', stats.requests.toString())
+                : t.dashboard.noRequests}
           </span>
         </div>
 
         {/* ════════════════════════════════════════
             HERO VITALS — Blood Pressure & Blood Sugar
-            (Prominent at the top, per spec)
         ════════════════════════════════════════ */}
         <div style={{ marginBottom: "1.5rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-            <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b7280" }}>اضغط على الكارت لتسجيل قياس جديد</p>
-            <h2 style={{ fontSize: "0.9rem", fontWeight: 900, color: "#166534", margin: 0 }}>📊 قياساتي الحيوية</h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", flexDirection: isRtl ? 'row' : 'row-reverse' }}>
+            <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b7280" }}>{t.dashboard.clickToRecord}</p>
+            <h2 style={{ fontSize: "0.9rem", fontWeight: 900, color: "#166534", margin: 0 }}>{t.dashboard.myVitals}</h2>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.875rem" }}>
@@ -292,13 +296,13 @@ export default function PatientDashboard() {
                       </p>
                       <span style={{ fontSize: "0.62rem", color: "#9ca3af", fontWeight: 600 }}>{m.unit}</span>
                       <span style={{ fontSize: "0.6rem", fontWeight: 700, color: "#9ca3af", marginTop: 2 }}>
-                        {new Date(vital.created_at).toDateString() === new Date().toDateString() ? "اليوم" : "آخر قياس"}
+                        {new Date(vital.created_at).toDateString() === new Date().toDateString() ? t.dashboard.today : t.dashboard.lastRecord}
                       </span>
                     </div>
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <p style={{ margin: 0, fontSize: "1.3rem", fontWeight: 900, color: "#e5e7eb" }}>—</p>
-                      <span style={{ fontSize: "0.6rem", fontWeight: 700, color: "#9ca3af", marginTop: 2 }}>غير مسجل</span>
+                      <span style={{ fontSize: "0.6rem", fontWeight: 700, color: "#9ca3af", marginTop: 2 }}>{t.dashboard.notRecorded}</span>
                     </div>
                   )}
 
@@ -319,7 +323,7 @@ export default function PatientDashboard() {
                       background: "rgba(255,255,255,0.7)", borderRadius: 999,
                       padding: "3px 10px", width: "100%", textAlign: "center",
                     }}>
-                      اضغط للتسجيل
+                      {t.dashboard.clickToAdd}
                     </span>
                   )}
                 </button>
@@ -352,16 +356,16 @@ export default function PatientDashboard() {
               border: `2px solid ${m.color}30`,
             }}>
               <h3 style={{ fontWeight: 900, color: m.color, fontSize: "1rem", marginBottom: "0.25rem", textAlign: "center" }}>
-                تسجيل قياس {m.label}
+                {t.dashboard.recordVital.replace('{label}', m.label)}
               </h3>
               <p style={{ textAlign: "center", fontSize: "0.75rem", color: "#6b7280", fontWeight: 600, marginBottom: "1rem" }}>
                 {getReferenceText(m.id)}
               </p>
 
-              <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap", flexDirection: isRtl ? "row" : "row-reverse" }}>
                 <input
                   type="number" inputMode="decimal"
-                  placeholder={m.hasSecond ? "الانقباضي (مثال: 120)" : `القيمة (${m.unit})`}
+                  placeholder={m.hasSecond ? t.dashboard.systolicPlace : t.dashboard.valuePlace.replace('{unit}', m.unit)}
                   value={val1} onChange={e => setVal1(e.target.value)}
                   style={{
                     flex: "1 1 120px", height: 52, borderRadius: "0.875rem",
@@ -373,7 +377,7 @@ export default function PatientDashboard() {
                 {m.hasSecond && (
                   <input
                     type="number" inputMode="decimal"
-                    placeholder="الانبساطي (مثال: 80)"
+                    placeholder={t.dashboard.diastolicPlace}
                     value={val2} onChange={e => setVal2(e.target.value)}
                     style={{
                       flex: "1 1 120px", height: 52, borderRadius: "0.875rem",
@@ -387,7 +391,7 @@ export default function PatientDashboard() {
 
               {/* Quick context tags */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1rem", justifyContent: "center" }}>
-                {["صائم", "بعد الأكل", "بعد مجهود رياضي", "وقت الراحة"].map(n => (
+                {[t.dashboard.fasting, t.dashboard.afterMeal, t.dashboard.afterWorkout, t.dashboard.resting].map(n => (
                   <button key={n} onClick={() => setNote(n === note ? "" : n)} style={{
                     padding: "0.5rem 1rem", borderRadius: "999px",
                     fontSize: "0.8rem", fontWeight: 800,
@@ -399,7 +403,7 @@ export default function PatientDashboard() {
                 ))}
               </div>
 
-              <div style={{ display: "flex", gap: "0.75rem" }}>
+              <div style={{ display: "flex", gap: "0.75rem", flexDirection: isRtl ? "row" : "row-reverse" }}>
                 <button onClick={save} disabled={saving || !val1} style={{
                   flex: "1 1 150px", height: 52, borderRadius: "0.875rem",
                   background: saving || !val1 ? "#d1d5db" : `linear-gradient(135deg, #22c55e, #16a34a)`,
@@ -408,7 +412,7 @@ export default function PatientDashboard() {
                   boxShadow: val1 ? "0 4px 14px rgba(22,163,74,0.3)" : "none",
                   transition: "all 0.2s",
                 }}>
-                  {saving ? "جاري الحفظ..." : "تأكيد"}
+                  {saving ? t.dashboard.saving : t.dashboard.confirm}
                 </button>
                 <button onClick={() => { setSelected(null); setVal1(""); setVal2(""); setNote(""); }} style={{
                   flex: "1 1 100px", height: 52, borderRadius: "0.875rem",
@@ -418,7 +422,7 @@ export default function PatientDashboard() {
                   boxShadow: "0 4px 14px rgba(239, 68, 68, 0.3)",
                   transition: "all 0.2s",
                 }}>
-                  إلغاء
+                  {t.dashboard.cancel}
                 </button>
               </div>
             </div>
@@ -426,7 +430,7 @@ export default function PatientDashboard() {
         })()}
 
         {/* ════════════════════════════════════════
-            MEDICATION REMINDERS (replaces مواعيدي)
+            MEDICATION REMINDERS
         ════════════════════════════════════════ */}
         <MedicationReminders />
 
@@ -440,8 +444,8 @@ export default function PatientDashboard() {
           gap: "0.5rem",
         }}>
           {[
-            { href: "/requests", img: "/icon_clipboard.png", label: "طلباتي" },
-            { href: "/results",  img: "/icon_results.png",   label: "نتائجي" },
+            { href: "/requests", img: "/icon_clipboard.png", label: t.dashboard.myRequests },
+            { href: "/results",  img: "/icon_results.png",   label: t.dashboard.myResults },
           ].map(s => (
             <Link key={s.label} href={s.href} prefetch style={{
               display: "flex", flexDirection: "column", alignItems: "center",
@@ -467,7 +471,7 @@ export default function PatientDashboard() {
           marginBottom: "0.875rem",
         }}>
           <span style={{ color: "#fff", fontSize: "1rem", fontWeight: 900 }}>
-            🚀 دخول البوابة الطبية
+            {t.dashboard.enterPortal}
           </span>
         </Link>
 

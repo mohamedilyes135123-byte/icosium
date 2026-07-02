@@ -23,10 +23,10 @@ export default function PharmacyPrescriptions() {
 
   // Status map using translation keys
   const STATUS_MAP: Record<string, { label: string; color: string }> = {
-    PENDING:    { label: t("statusPending"),    color: "bg-amber-100 text-amber-700 border-amber-200" },
+    PENDING: { label: t("statusPending"), color: "bg-amber-100 text-amber-700 border-amber-200" },
     PROCESSING: { label: t("statusProcessing"), color: "bg-blue-100 text-blue-700 border-blue-200" },
-    COMPLETED:  { label: t("statusCompleted"),  color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-    CANCELLED:  { label: t("statusCancelled"),  color: "bg-slate-100 text-slate-500 border-slate-200" },
+    COMPLETED: { label: t("statusCompleted"), color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+    CANCELLED: { label: t("statusCancelled"), color: "bg-slate-100 text-slate-500 border-slate-200" },
   };
 
   useEffect(() => {
@@ -95,7 +95,6 @@ export default function PharmacyPrescriptions() {
         </div>
       </div>
 
-      {/* ── Orders Grid ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
           {orders.map((order) => {
@@ -112,11 +111,10 @@ export default function PharmacyPrescriptions() {
                 <Card className="shadow-xl shadow-purple-500/5 flex flex-col bg-white/70 backdrop-blur-2xl rounded-3xl border-white relative overflow-hidden">
 
                   {/* Status bar */}
-                  <div className={`absolute top-0 left-0 right-0 h-1.5 ${
-                    order.status === "COMPLETED" ? "bg-emerald-500" :
-                    order.status === "PROCESSING" ? "bg-blue-400" :
-                    order.status === "CANCELLED" ? "bg-slate-300" : "bg-amber-400"
-                  }`} />
+                  <div className={`absolute top-0 left-0 right-0 h-1.5 ${order.status === "COMPLETED" ? "bg-emerald-500" :
+                      order.status === "PROCESSING" ? "bg-blue-400" :
+                        order.status === "CANCELLED" ? "bg-slate-300" : "bg-amber-400"
+                    }`} />
 
                   <CardHeader className="bg-white/50 border-b border-slate-100 pt-5 pb-4">
                     <div className="flex justify-between items-start">

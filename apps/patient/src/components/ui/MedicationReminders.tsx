@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchMedicationReminders, toggleMedicationReminder, type MedicationReminder } from "@/lib/supabase/actions";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function MedicationReminders() {
+  const { t, language } = useTranslation();
+  const isRtl = language === 'ar';
   const [reminders, setReminders] = useState<MedicationReminder[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +30,6 @@ export default function MedicationReminders() {
 
   return (
     <div
-      dir="rtl"
       style={{
         background: "linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)",
         borderRadius: "1.5rem",
@@ -35,15 +37,16 @@ export default function MedicationReminders() {
         padding: "1.25rem",
         marginBottom: "1.25rem",
         boxShadow: "0 4px 20px rgba(22,163,74,0.07)",
+        textAlign: isRtl ? "right" : "left",
       }}
     >
       {/* Header */}
       <div style={{ marginBottom: "1rem" }}>
         <h3 style={{ fontSize: "1rem", fontWeight: 900, color: "#166534", margin: "0 0 2px" }}>
-          💊 جدول الأدوية (تلقائي)
+          {t.meds.title}
         </h3>
         <p style={{ fontSize: "0.72rem", color: "#15803d", fontWeight: 600, margin: 0, opacity: 0.8 }}>
-          يتم إضافة الأدوية تلقائياً من الوصفات الطبية الخاصة بك.
+          {t.meds.subtitle}
         </p>
       </div>
 
@@ -60,14 +63,13 @@ export default function MedicationReminders() {
         <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
           <p style={{ fontSize: "1.5rem", marginBottom: 6 }}>📜</p>
           <p style={{ fontSize: "0.82rem", color: "#15803d", fontWeight: 600 }}>
-            لا يوجد أدوية مسجلة. ستظهر أدويتك هنا فور إصدار الوصفة الطبية.
+            {t.meds.noMeds}
           </p>
         </div>
       )}
 
       {!loading && reminders.map(r => {
-        // Calculate next dose for demo
-        let text = "بعد ساعتين و 30 دقيقة";
+        let text = t.meds.fallbackTime;
         let color = "#f59e0b";
         let isClose = false;
 
@@ -87,7 +89,7 @@ export default function MedicationReminders() {
           }
 
           if (nextDoseMinutes === -1) {
-            const earliest = Math.min(...r.times.map(t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; }));
+            const earliest = Math.min(...r.times.map(timeStr => { const [h, m] = timeStr.split(':').map(Number); return h * 60 + m; }));
             nextDoseMinutes = earliest + 24 * 60;
           }
 
@@ -95,23 +97,22 @@ export default function MedicationReminders() {
           const hours = Math.floor(diffMinutes / 60);
           const mins = diffMinutes % 60;
 
-          text = "بعد ";
-          if (hours > 0) text += `${hours} ساعة `;
-          if (hours > 0 && mins > 0) text += "و ";
-          if (mins > 0 || hours === 0) text += `${mins} دقيقة`;
+          text = t.meds.after;
+          if (hours > 0) text += `${hours}${t.meds.hour}`;
+          if (hours > 0 && mins > 0) text += t.meds.and;
+          if (mins > 0 || hours === 0) text += `${mins}${t.meds.minute}`;
 
           if (diffMinutes <= 60) { color = "#ef4444"; isClose = true; } // Red
           else if (diffMinutes <= 180) { color = "#f59e0b"; } // Orange
           else { color = "#16a34a"; } // Green
         } else {
-          // Pseudo-random demo values based on id
-          const mockMinutes = (r.id.charCodeAt(0) * 17) % 300; // 0 to 300 mins
+          const mockMinutes = (r.id.charCodeAt(0) * 17) % 300;
           const hours = Math.floor(mockMinutes / 60);
           const mins = mockMinutes % 60;
-          text = "بعد ";
-          if (hours > 0) text += `${hours} ساعة `;
-          if (hours > 0 && mins > 0) text += "و ";
-          if (mins > 0 || hours === 0) text += `${mins} دقيقة`;
+          text = t.meds.after;
+          if (hours > 0) text += `${hours}${t.meds.hour}`;
+          if (hours > 0 && mins > 0) text += t.meds.and;
+          if (mins > 0 || hours === 0) text += `${mins}${t.meds.minute}`;
 
           if (mockMinutes <= 60) { color = "#ef4444"; isClose = true; }
           else if (mockMinutes <= 180) { color = "#f59e0b"; }
@@ -132,6 +133,7 @@ export default function MedicationReminders() {
               border: r.is_active ? "1.5px solid #86efac" : "1.5px solid #e5e7eb",
               transition: "all 0.2s",
               opacity: r.is_active ? 1 : 0.6,
+              flexDirection: isRtl ? "row" : "row-reverse",
             }}
           >
             {/* Active toggle */}
@@ -161,7 +163,7 @@ export default function MedicationReminders() {
             </button>
 
             {/* Info */}
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0, textAlign: isRtl ? "right" : "left" }}>
               <p style={{ margin: 0, fontSize: "0.88rem", fontWeight: 900, color: "#1e293b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 💊 {r.name}
               </p>
@@ -169,16 +171,17 @@ export default function MedicationReminders() {
                 {[r.dose, r.frequency, r.duration].filter(Boolean).join(" — ")}
               </p>
               
-              <div style={{ display: "flex", alignItems: "center", marginTop: 6, flexWrap: "wrap", gap: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", marginTop: 6, flexWrap: "wrap", gap: 6, flexDirection: isRtl ? "row" : "row-reverse" }}>
                 {r.auto_created && r.doctor_name && (
                   <p style={{ margin: 0, fontSize: "0.65rem", color: "#16a34a", fontWeight: 700 }}>
-                    ⚕️ من وصفة: {r.doctor_name}
+                    {t.meds.fromPrescription}{r.doctor_name}
                   </p>
                 )}
                 
                 {r.is_active && (
                   <div style={{
-                    marginRight: "auto",
+                    marginRight: isRtl ? "auto" : undefined,
+                    marginLeft: !isRtl ? "auto" : undefined,
                     display: "flex",
                     alignItems: "center",
                     gap: 8,
@@ -186,17 +189,18 @@ export default function MedicationReminders() {
                     border: `1.5px solid ${color}40`,
                     padding: "6px 12px",
                     borderRadius: "12px",
-                    boxShadow: `0 4px 12px ${color}20`
+                    boxShadow: `0 4px 12px ${color}20`,
+                    flexDirection: isRtl ? "row" : "row-reverse",
                   }}>
                     <span style={{ fontSize: "1.5rem", animation: isClose ? "pulse 1s infinite" : "none", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }}>
                       ⏰
                     </span>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: isRtl ? "flex-start" : "flex-end" }}>
                       <span style={{ fontSize: "0.55rem", fontWeight: 900, color: color, letterSpacing: 1, textTransform: "uppercase", marginBottom: "-2px" }}>
-                        TIMER
+                        {t.meds.timer}
                       </span>
                       <span style={{ fontSize: "0.75rem", fontWeight: 900, color: color }}>
-                        الجرعة {text}
+                        {t.meds.dose} {text}
                       </span>
                     </div>
                   </div>

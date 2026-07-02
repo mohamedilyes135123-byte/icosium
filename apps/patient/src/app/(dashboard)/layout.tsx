@@ -7,10 +7,14 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Home, HeartPulse, User, LogOut, Search, Activity, Sparkles, Thermometer, ClipboardList, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
+import LanguageToggle from "@/components/ui/LanguageToggle";
 
 export default function PatientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [checking, setChecking] = useState(true);
+  const { t, language } = useTranslation();
+  const isRtl = language === 'ar';
 
   useEffect(() => {
     const supabase = createClient();
@@ -30,21 +34,21 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
   };
 
   const sideNav = [
-    { href: "/dashboard", icon: <Home className="w-5 h-5" />,         label: "الرئيسية" },
-    { href: "/ai-chat",   icon: <Sparkles className="w-5 h-5" />,     label: "المساعد الذكي" },
-    { href: "/doctors",   icon: <Search className="w-5 h-5" />,        label: "البحث عن طبيب" },
-    { href: "/requests",  icon: <Activity className="w-5 h-5" />,      label: "طلباتي الطبية" },
-    { href: "/appointments", icon: <Calendar className="w-5 h-5" />,   label: "مواعيدي" },
-    { href: "/results",   icon: <ClipboardList className="w-5 h-5" />, label: "نتائجي ووصفاتي" },
-    { href: "/vitals",    icon: <Thermometer className="w-5 h-5" />,   label: "قياساتي اليومية" },
-    { href: "/profile",   icon: <User className="w-5 h-5" />,          label: "الملف الصحي" },
+    { href: "/dashboard", icon: <Home className="w-5 h-5" />,         label: t.sidebar.dashboard },
+    { href: "/ai-chat",   icon: <Sparkles className="w-5 h-5" />,     label: t.sidebar.aiChat },
+    { href: "/doctors",   icon: <Search className="w-5 h-5" />,        label: t.sidebar.doctors },
+    { href: "/requests",  icon: <Activity className="w-5 h-5" />,      label: t.sidebar.requests },
+    { href: "/appointments", icon: <Calendar className="w-5 h-5" />,   label: t.sidebar.appointments },
+    { href: "/results",   icon: <ClipboardList className="w-5 h-5" />, label: t.sidebar.results },
+    { href: "/vitals",    icon: <Thermometer className="w-5 h-5" />,   label: t.sidebar.vitals },
+    { href: "/profile",   icon: <User className="w-5 h-5" />,          label: t.sidebar.profile },
   ];
 
   const mobileNav = [
-    { href: "/dashboard", icon: <Home className="w-6 h-6" />,         label: "الرئيسية" },
-    { href: "/requests",  icon: <Activity className="w-6 h-6" />,      label: "طلباتي" },
-    { href: "/results",   icon: <ClipboardList className="w-6 h-6" />, label: "نتائجي" },
-    { href: "/profile",   icon: <User className="w-6 h-6" />,          label: "ملفي" },
+    { href: "/dashboard", icon: <Home className="w-6 h-6" />,         label: t.sidebar.dashboard },
+    { href: "/requests",  icon: <Activity className="w-6 h-6" />,      label: t.sidebar.requests },
+    { href: "/results",   icon: <ClipboardList className="w-6 h-6" />, label: t.sidebar.results },
+    { href: "/profile",   icon: <User className="w-6 h-6" />,          label: t.sidebar.profile },
   ];
 
   const isActive = (href: string) =>
@@ -78,7 +82,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100dvh", background: "var(--bg-page)", direction: "rtl", position: "relative" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100dvh", background: "var(--bg-page)", direction: isRtl ? "rtl" : "ltr", position: "relative" }}>
       
       {/* Daylight Ambient Background (Fixed so glass effect persists on scroll) */}
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-daylight">
@@ -91,11 +95,12 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
         
         {/* Desktop Sidebar (Green Glass) */}
         <aside className="hidden md:flex" style={{ 
-          position: "fixed", top: 0, right: 0, height: "100vh", width: 288, 
+          position: "fixed", top: 0, ...(isRtl ? { right: 0 } : { left: 0 }), height: "100vh", width: 288, 
           flexDirection: "column", zIndex: 40,
           background: "linear-gradient(160deg, rgba(22, 163, 74, 0.90) 0%, rgba(21, 128, 61, 0.95) 45%, rgba(20, 83, 45, 0.98) 100%)",
           backdropFilter: "blur(24px) saturate(150%)",
-          borderLeft: "1px solid rgba(255,255,255,0.15)",
+          borderLeft: isRtl ? "1px solid rgba(255,255,255,0.15)" : "none",
+          borderRight: !isRtl ? "1px solid rgba(255,255,255,0.15)" : "none",
           overflow: "hidden"
         }}>
           {/* Floating Stethoscope Background */}
@@ -106,16 +111,15 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
 
           <div style={{ padding: "24px", display: "flex", alignItems: "center", gap: 12, borderBottom: "1px solid rgba(255,255,255,0.15)", position: "relative", zIndex: 1 }}>
             <div style={{ width: 44, height: 44, borderRadius: 14, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.8)", boxShadow: "0 4px 10px rgba(0,0,0,0.15)" }}>
-              <img src="/logo.png" alt="عناية" style={{ width: 32, height: 32, objectFit: "contain", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
+              <img src="/logo.png" alt="Logo" style={{ width: 32, height: 32, objectFit: "contain", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
             </div>
-            <span style={{ fontWeight: 900, fontSize: 22, color: "#ffffff", textShadow: "0 2px 6px rgba(0,0,0,0.4)" }}>عناية للمرضى</span>
+            <span style={{ fontWeight: 900, fontSize: 22, color: "#ffffff", textShadow: "0 2px 6px rgba(0,0,0,0.4)" }}>{t.sidebar.appTitle}</span>
           </div>
 
           <nav style={{ flex: 1, padding: "24px 16px", display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
             {sideNav.map(item => {
               const active = isActive(item.href);
               const isApptsOrReqs = item.href === "/requests" || item.href === "/appointments";
-              // We show the badge on the requests and appointments tab just to alert them
               const showBadge = isApptsOrReqs && notifCount > 0;
               return (
                 <Link key={item.href} href={item.href} prefetch={true} style={{
@@ -160,14 +164,18 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
 
           <div style={{ padding: 16, borderTop: "1px solid rgba(255,255,255,0.15)", position: "relative", zIndex: 1 }}>
             <button onClick={handleLogout} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 16px", borderRadius: 999, color: "#fca5a5", fontWeight: 700, fontSize: 14, border: "1px solid rgba(248,113,113,0.3)", background: "rgba(254,226,226,0.1)", cursor: "pointer", transition: "all 0.2s" }}>
-              <LogOut className="w-4 h-4" /> تسجيل الخروج
+              <LogOut className="w-4 h-4" /> {t.sidebar.logout}
             </button>
           </div>
         </aside>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex justify-center md:mr-[288px] w-full relative z-10">
-          <main className="w-full pb-28 md:pb-8 pt-4 px-4 md:px-8 max-w-[768px]">
+        <div className={`flex-1 flex justify-center w-full relative z-10 ${isRtl ? 'md:mr-[288px]' : 'md:ml-[288px]'}`}>
+          {/* Universal Language Toggle */}
+          <div className={`fixed top-6 md:top-8 z-50 ${isRtl ? 'left-6 md:left-8' : 'right-6 md:right-8'}`}>
+            <LanguageToggle />
+          </div>
+          <main className="w-full pb-28 md:pb-8 pt-20 px-4 md:px-8 max-w-[768px]">
             {children}
           </main>
         </div>

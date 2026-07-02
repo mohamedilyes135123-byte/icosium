@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic';
 
-
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
@@ -10,10 +9,14 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Search, MapPin, Award, ChevronRight, Stethoscope, Phone, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function DoctorDirectory() {
   const supabase = createClient();
   const router = useRouter();
+  const { t, language } = useTranslation();
+  const isRtl = language === 'ar';
+  
   const [doctors, setDoctors] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -35,37 +38,35 @@ export default function DoctorDirectory() {
 
   const filtered = doctors.filter(d =>
     !search ||
-    d.full_name?.includes(search) ||
-    d.specialty?.includes(search) ||
-    d.address?.includes(search)
+    d.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+    d.specialty?.toLowerCase().includes(search.toLowerCase()) ||
+    d.address?.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Navigate to new request with pre-selected doctor
   const startRequest = (doctorId: string) => {
     router.push(`/requests?doctor=${doctorId}`);
   };
 
-  // ─────────────────────────────────────────────────────────────
   return (
-    <div className="w-full pb-32" dir="rtl">
+    <div className="w-full pb-32" style={{ direction: isRtl ? "rtl" : "ltr" }}>
 
       {/* ── Header ── */}
       <motion.header initial={{ opacity: 0, y: -15 }} animate={{ opacity: 1, y: 0 }}
         className="mb-6 bg-white/60 backdrop-blur-md p-5 rounded-3xl shadow-sm border border-white">
-        <h1 className="text-2xl font-black text-slate-800 mb-1">ابحث عن طبيبك</h1>
-        <p className="text-slate-500 text-sm mb-4">
-          اختر طبيبك وأرسل طلبك مباشرة — أنت من يتحكم في رحلتك الطبية
+        <h1 className={`text-2xl font-black text-slate-800 mb-1 ${isRtl ? "text-right" : "text-left"}`}>{t.doctors.title}</h1>
+        <p className={`text-slate-500 text-sm mb-4 ${isRtl ? "text-right" : "text-left"}`}>
+          {t.doctors.subtitle}
         </p>
 
         <div className="relative">
           <input
             type="text"
-            placeholder="ابحث باسم الطبيب، التخصص، المنطقة..."
+            placeholder={t.doctors.searchPlaceholder}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full h-12 pr-4 pl-12 rounded-2xl border border-slate-200 bg-white/80 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all text-sm font-medium text-slate-700"
+            className={`w-full h-12 rounded-2xl border border-slate-200 bg-white/80 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all text-sm font-medium text-slate-700 ${isRtl ? "pr-4 pl-12" : "pl-4 pr-12"}`}
           />
-          <Search className="absolute top-3.5 left-4 text-slate-400 w-5 h-5 pointer-events-none" />
+          <Search className={`absolute top-3.5 text-slate-400 w-5 h-5 pointer-events-none ${isRtl ? "left-4" : "right-4"}`} />
         </div>
       </motion.header>
 
@@ -87,7 +88,7 @@ export default function DoctorDirectory() {
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.04 } }}>
                   <Card className="hover:border-emerald-300 transition-all group bg-white/70 backdrop-blur-lg shadow-sm border-white/60 rounded-3xl overflow-hidden">
                     <CardContent className="p-5">
-                      <div className="flex gap-4">
+                      <div className={`flex gap-4 ${isRtl ? "flex-row" : "flex-row-reverse"}`}>
 
                         {/* Avatar */}
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-100 to-cyan-50 border border-blue-100 flex-shrink-0 flex items-center justify-center shadow-inner">
@@ -95,37 +96,37 @@ export default function DoctorDirectory() {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start mb-1">
+                          <div className={`flex justify-between items-start mb-1 ${isRtl ? "flex-row text-right" : "flex-row-reverse text-left"}`}>
                             <div className="min-w-0">
                               <h3 className="text-lg font-black text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight truncate">
-                                {doc.full_name}
+                                {language === 'ar' ? `د. ${doc.full_name}` : `Dr. ${doc.full_name}`}
                               </h3>
                               {doc.specialty && (
-                                <div className="flex items-center gap-1 text-emerald-600 text-xs font-bold mt-0.5 bg-emerald-50 w-fit px-2 py-0.5 rounded-md">
+                                <div className={`flex items-center gap-1 text-emerald-600 text-xs font-bold mt-0.5 bg-emerald-50 w-fit px-2 py-0.5 rounded-md ${isRtl ? "flex-row" : "flex-row-reverse"}`}>
                                   <Award className="w-3.5 h-3.5" />
                                   {doc.specialty}
                                 </div>
                               )}
                             </div>
                             {isApproved ? (
-                              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 shrink-0 mr-2">
-                                ✅ معتمد
+                              <span className={`text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 shrink-0 ${isRtl ? "mr-2" : "ml-2"}`}>
+                                {t.doctors.verified}
                               </span>
                             ) : (
-                              <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200 shrink-0 mr-2">
-                                ⏳ قيد المراجعة
+                              <span className={`text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200 shrink-0 ${isRtl ? "mr-2" : "ml-2"}`}>
+                                {t.doctors.pending}
                               </span>
                             )}
                           </div>
 
                           {doc.address && (
-                            <div className="text-slate-400 text-xs flex items-center gap-1.5 mt-1.5">
+                            <div className={`text-slate-400 text-xs flex items-center gap-1.5 mt-1.5 ${isRtl ? "flex-row" : "flex-row-reverse"}`}>
                               <MapPin className="w-3.5 h-3.5 shrink-0" />
                               <span className="truncate">{doc.address}</span>
                             </div>
                           )}
                           {doc.phone && (
-                            <div className="text-slate-400 text-xs flex items-center gap-1.5 mt-1">
+                            <div className={`text-slate-400 text-xs flex items-center gap-1.5 mt-1 ${isRtl ? "flex-row" : "flex-row-reverse"}`}>
                               <Phone className="w-3.5 h-3.5 shrink-0" />
                               <span>{doc.phone}</span>
                             </div>
@@ -136,13 +137,13 @@ export default function DoctorDirectory() {
                             <Button
                               onClick={() => startRequest(doc.id)}
                               disabled={!isApproved}
-                              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${isRtl ? "flex-row" : "flex-row-reverse"} ${
                                 isApproved
                                   ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20"
                                   : "bg-slate-100 text-slate-400 cursor-not-allowed"
                               }`}>
-                              <Send className="w-4 h-4 rtl:-scale-x-100" />
-                              إرسال طلب لهذا الطبيب
+                              <Send className={`w-4 h-4 ${isRtl ? "-scale-x-100" : ""}`} />
+                              {t.doctors.sendRequest}
                             </Button>
                           </div>
                         </div>
@@ -158,7 +159,7 @@ export default function DoctorDirectory() {
                 className="text-center py-20 bg-white/40 rounded-3xl border border-slate-200 border-dashed">
                 <Stethoscope className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                 <p className="text-slate-500 font-medium">
-                  {search ? "لا يوجد أطباء يطابقون بحثك" : "لا يوجد أطباء مسجلون حالياً"}
+                  {search ? t.doctors.noResults : t.doctors.noDoctors}
                 </p>
               </motion.div>
             )}

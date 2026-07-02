@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type MetricType = "blood_sugar" | "blood_pressure" | "weight" | "oximetry" | "heart_rate";
 
@@ -15,14 +16,6 @@ interface Vital {
   created_at: string;
 }
 
-const METRICS = [
-  { id: "blood_pressure" as MetricType, img: "/icon_blood_pressure.png", label: "ضغط الدم",      unit: "mmHg",  bg: "#fff1f2", color: "#e11d48", hasSecond: true  },
-  { id: "blood_sugar"    as MetricType, img: "/icon_blood_sugar.png",    label: "سكر الدم",      unit: "mg/dL", bg: "#fffbeb", color: "#d97706", hasSecond: false },
-  { id: "heart_rate"     as MetricType, img: "/icon_weight.png",         label: "نبضات القلب",   unit: "bpm",   bg: "#fef2f2", color: "#dc2626", hasSecond: false },
-  { id: "oximetry"       as MetricType, img: "/icon_oximetry.png",       label: "تشبع الأكسجين", unit: "%",     bg: "#ecfeff", color: "#0891b2", hasSecond: false },
-  { id: "weight"         as MetricType, img: "/icon_heart_rate.png",     label: "الوزن",          unit: "kg",    bg: "#eff6ff", color: "#2563eb", hasSecond: false },
-];
-
 function getStatus(type: MetricType, v1: number): "normal" | "high" | "low" {
   if (type === "blood_sugar")    return v1 < 70 ? "low" : v1 > 126 ? "high" : "normal";
   if (type === "blood_pressure") return v1 < 90 ? "low" : v1 > 140 ? "high" : "normal";
@@ -31,11 +24,26 @@ function getStatus(type: MetricType, v1: number): "normal" | "high" | "low" {
   return "normal";
 }
 
-const STATUS_LABEL: Record<string, string> = { normal: "طبيعي", high: "مرتفع", low: "منخفض" };
-const STATUS_BG:    Record<string, string> = { normal: "#dcfce7", high: "#fee2e2", low: "#fef9c3" };
-const STATUS_CLR:   Record<string, string> = { normal: "#15803d", high: "#dc2626", low: "#92400e" };
-
 export default function VitalsPage() {
+  const { t, language } = useTranslation();
+  const isRtl = language === 'ar';
+
+  const METRICS = [
+    { id: "blood_pressure" as MetricType, img: "/icon_blood_pressure.png", label: t.vitals.bloodPressure, unit: "mmHg",  bg: "#fff1f2", color: "#e11d48", hasSecond: true  },
+    { id: "blood_sugar"    as MetricType, img: "/icon_blood_sugar.png",    label: t.vitals.bloodSugar,    unit: "mg/dL", bg: "#fffbeb", color: "#d97706", hasSecond: false },
+    { id: "heart_rate"     as MetricType, img: "/icon_weight.png",         label: t.vitals.heartRate,     unit: "bpm",   bg: "#fef2f2", color: "#dc2626", hasSecond: false },
+    { id: "oximetry"       as MetricType, img: "/icon_oximetry.png",       label: t.vitals.oximetry,      unit: "%",     bg: "#ecfeff", color: "#0891b2", hasSecond: false },
+    { id: "weight"         as MetricType, img: "/icon_heart_rate.png",     label: t.vitals.weight,        unit: "kg",    bg: "#eff6ff", color: "#2563eb", hasSecond: false },
+  ];
+
+  const STATUS_LABEL: Record<string, string> = { 
+    normal: t.vitals.statusNormal, 
+    high: t.vitals.statusHigh, 
+    low: t.vitals.statusLow 
+  };
+  const STATUS_BG:    Record<string, string> = { normal: "#dcfce7", high: "#fee2e2", low: "#fef9c3" };
+  const STATUS_CLR:   Record<string, string> = { normal: "#15803d", high: "#dc2626", low: "#92400e" };
+
   const [todayVitals, setTodayVitals] = useState<Record<MetricType, Vital | null>>({
     blood_pressure: null, blood_sugar: null, heart_rate: null, oximetry: null, weight: null,
   });
@@ -92,9 +100,9 @@ export default function VitalsPage() {
 
     const { error } = await supabase.from("vitals").insert(payload);
     if (error) {
-      setMessage({ text: "حدث خطأ أثناء الحفظ", ok: false });
+      setMessage({ text: t.vitals.errorSaving, ok: false });
     } else {
-      setMessage({ text: "تم تسجيل القياس بنجاح!", ok: true });
+      setMessage({ text: t.vitals.successSaving, ok: true });
       setVal1("");
       setVal2("");
       setSelected(null);
@@ -106,20 +114,21 @@ export default function VitalsPage() {
   const logged = METRICS.filter(m => todayVitals[m.id] !== null).length;
 
   return (
-    <div dir="rtl" style={{ background: "#f4faf6", paddingBottom: 100 }}>
+    <div style={{ background: "#f4faf6", paddingBottom: 100, direction: isRtl ? "rtl" : "ltr" }}>
 
       {/* Header */}
       <div style={{
         background: "linear-gradient(180deg, #16a34a 0%, #22c55e 100%)",
         padding: "2.5rem 1.5rem 3.5rem",
         position: "relative", color: "white",
+        textAlign: isRtl ? "right" : "left",
       }}>
-        <h1 style={{ fontSize: "1.4rem", fontWeight: 900, margin: 0 }}>قياساتي اليومية</h1>
+        <h1 style={{ fontSize: "1.4rem", fontWeight: 900, margin: 0 }}>{t.vitals.title}</h1>
         <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.8)", margin: "4px 0 0" }}>
-          {loading ? "..." : `${logged} / ${METRICS.length} قياسات مسجّلة اليوم`}
+          {loading ? "..." : t.vitals.registeredToday.replace('{logged}', logged.toString()).replace('{total}', METRICS.length.toString())}
         </p>
         <div style={{ position: "absolute", bottom: -1, left: 0, width: "100%", overflow: "hidden" }}>
-          <svg viewBox="0 0 1440 40" fill="none" style={{ display: "block", width: "calc(100% + 1px)", height: 30 }}>
+          <svg viewBox="0 0 1440 40" fill="none" style={{ display: "block", width: "calc(100% + 1px)", height: 30, transform: isRtl ? "none" : "scaleX(-1)" }}>
             <path d="M0,20L360,30L720,15L1080,25L1440,20L1440,40L0,40Z" fill="#f4faf6"/>
           </svg>
         </div>
@@ -128,10 +137,10 @@ export default function VitalsPage() {
       <div style={{ padding: "0.5rem 1.25rem 0" }}>
 
         {/* Progress bar */}
-        <div style={{ background: "#fff", borderRadius: "1.25rem", padding: "1rem 1.25rem", marginBottom: "1.25rem", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-            <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#16a34a" }}>{logged}/{METRICS.length} مسجّلة</span>
-            <span style={{ fontSize: "0.8rem", fontWeight: 900, color: "#374151" }}>قياسات اليوم</span>
+        <div style={{ background: "#fff", borderRadius: "1.25rem", padding: "1rem 1.25rem", marginBottom: "1.25rem", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", textAlign: isRtl ? "right" : "left" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, flexDirection: isRtl ? "row" : "row-reverse" }}>
+            <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#16a34a" }}>{logged}/{METRICS.length} {t.vitals.registered}</span>
+            <span style={{ fontSize: "0.8rem", fontWeight: 900, color: "#374151" }}>{t.vitals.todayProgress}</span>
           </div>
           <div style={{ height: 8, background: "#f0fdf4", borderRadius: 999, overflow: "hidden" }}>
             <div style={{
@@ -182,7 +191,7 @@ export default function VitalsPage() {
                 {vital ? (
                   <p style={{ margin: 0, fontSize: "1.3rem", fontWeight: 900, color: m.color, lineHeight: 1 }}>
                     {vital.value1}{vital.value2 != null ? `/${vital.value2}` : ""}
-                    <span style={{ fontSize: "0.6rem", color: "#9ca3af", marginRight: 3, fontWeight: 600 }}>{m.unit}</span>
+                    <span style={{ fontSize: "0.6rem", color: "#9ca3af", marginRight: isRtl ? 3 : 0, marginLeft: isRtl ? 0 : 3, fontWeight: 600 }}>{m.unit}</span>
                   </p>
                 ) : (
                   <p style={{ margin: 0, fontSize: "1.1rem", fontWeight: 900, color: "#e5e7eb" }}>—</p>
@@ -204,7 +213,7 @@ export default function VitalsPage() {
                     fontSize: "0.65rem", fontWeight: 700, color: "#16a34a",
                     background: "#f0fdf4", borderRadius: 999, padding: "3px 0", width: "100%", textAlign: "center",
                   }}>
-                    اضغط للتسجيل
+                    {t.vitals.clickToRegister}
                   </span>
                 )}
               </button>
@@ -223,14 +232,14 @@ export default function VitalsPage() {
               border: `2px solid ${m.color}20`,
             }}>
               <h3 style={{ fontWeight: 900, color: m.color, fontSize: "1rem", marginBottom: "1rem", textAlign: "center" }}>
-                تسجيل قياس {m.label}
+                {t.vitals.registerMetric.replace('{label}', m.label)}
               </h3>
 
-              <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem" }}>
+              <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", flexDirection: isRtl ? "row" : "row-reverse" }}>
                 <input
                   type="number"
                   inputMode="decimal"
-                  placeholder={m.hasSecond ? "الانقباضي (مثال: 120)" : `القيمة (${m.unit})`}
+                  placeholder={m.hasSecond ? t.vitals.systolicPlaceholder : t.vitals.valuePlaceholder.replace('{unit}', m.unit)}
                   value={val1}
                   onChange={e => setVal1(e.target.value)}
                   style={{
@@ -244,7 +253,7 @@ export default function VitalsPage() {
                   <input
                     type="number"
                     inputMode="decimal"
-                    placeholder="الانبساطي (مثال: 80)"
+                    placeholder={t.vitals.diastolicPlaceholder}
                     value={val2}
                     onChange={e => setVal2(e.target.value)}
                     style={{
@@ -257,7 +266,7 @@ export default function VitalsPage() {
                 )}
               </div>
 
-              <div style={{ display: "flex", gap: "0.75rem" }}>
+              <div style={{ display: "flex", gap: "0.75rem", flexDirection: isRtl ? "row" : "row-reverse" }}>
                 <button
                   onClick={save}
                   disabled={saving || !val1}
@@ -270,7 +279,7 @@ export default function VitalsPage() {
                     transition: "all 0.2s",
                   }}
                 >
-                  {saving ? "جاري الحفظ..." : "✅ تسجيل"}
+                  {saving ? t.vitals.saving : t.vitals.registerBtn}
                 </button>
                 <button
                   onClick={() => { setSelected(null); setVal1(""); setVal2(""); }}
@@ -280,7 +289,7 @@ export default function VitalsPage() {
                     color: "#6b7280", fontWeight: 700, cursor: "pointer",
                   }}
                 >
-                  إلغاء
+                  {t.vitals.cancel}
                 </button>
               </div>
             </div>

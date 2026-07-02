@@ -232,11 +232,8 @@ export default function PrescriptionCard({
               border: "2px solid #fde047",
             }}>
               <p style={{ fontSize: "1.5rem", margin: "0 0 6px" }}>🔒</p>
-              <p style={{ fontSize: "0.88rem", fontWeight: 900, color: "#1e293b", margin: "0 0 4px" }}>
-                تظهر بعد الدفع
-              </p>
-              <p style={{ fontSize: "0.72rem", color: "#6b7280", margin: "0 0 12px" }}>
-                ادفع لتتمكن من رؤية وتحميل وصفتك الطبية
+              <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "#1e293b", margin: "0 0 14px" }}>
+                ادفع لتتمكن من رؤية وصفتك الطبية
               </p>
               <button
                 onClick={() => setShowPaymentModal(true)}

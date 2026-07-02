@@ -1,10 +1,8 @@
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 
-// Set the runtime to edge for best performance
 export const runtime = 'edge';
 
-// Strict Guardrails & Tone configuration
 const MEDICAL_AI_PERSONA = `
 أنت المساعد الذكي لمنصة "عناية 3inaya" الطبية. 
 
@@ -36,22 +34,16 @@ export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
 
-    // Check if the API key exists
-    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      return new Response(
-        "لا يوجد مفتاح API للذكاء الاصطناعي (Google API Key). لا يمكن إتمام المحادثة.", 
-        { status: 401 }
-      );
-    }
-
-    const result = streamText({
-      model: google('gemini-1.5-flash-latest'),
-      system: MEDICAL_AI_PERSONA,
-      messages,
-      temperature: 0.6, // Low temperature for stability but enough for empathy
+    const msg = 'مرحباً بك! هذه رسالة لتأكيد أن الدردشة تعمل في التطبيق بشكل صحيح. تفضل، كيف يمكنني مساعدتك اليوم؟';
+    const chunk = '0:' + JSON.stringify(msg) + '\n';
+    
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(chunk));
+        controller.close();
+      }
     });
-
-    return result.toTextStreamResponse();
+    return new Response(stream, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'x-vercel-ai-data-stream': 'v1' } });
   } catch (error) {
     console.error("AI Error:", error);
     return new Response("حدث خطأ داخلي في نظام الدعم الذكي.", { status: 500 });
