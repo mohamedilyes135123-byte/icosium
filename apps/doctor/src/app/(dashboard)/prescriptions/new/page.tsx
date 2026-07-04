@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   Pill, Plus, Trash2, QrCode, Printer, Send, CheckCircle,
@@ -77,6 +77,14 @@ function newMed(): Med {
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function NewPrescriptionPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500 font-bold">جاري التحميل...</div>}>
+      <NewPrescriptionContent />
+    </Suspense>
+  );
+}
+
+function NewPrescriptionContent() {
   const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
