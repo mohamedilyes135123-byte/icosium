@@ -274,7 +274,7 @@ export default function PrescriptionCard({
             <div style={{
               background: "#ffffff",
               borderRadius: "1rem",
-              padding: "2.5rem 1.5rem",
+              padding: "1.5rem 1rem",
               textAlign: "center",
               boxShadow: "0 15px 40px rgba(0,0,0,0.15)",
               border: "2px solid #eab308",
@@ -283,12 +283,12 @@ export default function PrescriptionCard({
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: "1.25rem",
+              gap: "0.85rem",
             }}>
-              <div style={{ background: "#fef9c3", width: 56, height: 56, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(253,224,71,0.4)" }}>
-                <span style={{ fontSize: "1.75rem" }}>🔒</span>
+              <div style={{ background: "#fef9c3", width: 44, height: 44, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(253,224,71,0.4)" }}>
+                <span style={{ fontSize: "1.4rem" }}>🔒</span>
               </div>
-              <p style={{ fontSize: "1.1rem", fontWeight: 800, color: "#1e293b", margin: 0 }}>
+              <p style={{ fontSize: "1rem", fontWeight: 800, color: "#1e293b", margin: 0 }}>
                 {pcKeys.payToView}
               </p>
               <button
@@ -297,9 +297,9 @@ export default function PrescriptionCard({
                   background: "#eab308",
                   color: "white",
                   border: "none",
-                  padding: "0.85rem 1.5rem",
+                  padding: "0.6rem 1rem",
                   borderRadius: "0.5rem",
-                  fontSize: "0.95rem",
+                  fontSize: "0.9rem",
                   fontWeight: 800,
                   cursor: "pointer",
                   width: "100%",

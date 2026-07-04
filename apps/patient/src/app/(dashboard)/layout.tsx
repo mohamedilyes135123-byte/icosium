@@ -36,7 +36,6 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
   const sideNav = [
     { href: "/dashboard", icon: <Home className="w-5 h-5" />,         label: t.sidebar.dashboard },
     { href: "/ai-chat",   icon: <Sparkles className="w-5 h-5" />,     label: t.sidebar.aiChat },
-    { href: "/doctors",   icon: <Search className="w-5 h-5" />,        label: t.sidebar.doctors },
     { href: "/requests",  icon: <Activity className="w-5 h-5" />,      label: t.sidebar.requests },
     { href: "/appointments", icon: <Calendar className="w-5 h-5" />,   label: t.sidebar.appointments },
     { href: "/results",   icon: <ClipboardList className="w-5 h-5" />, label: t.sidebar.results },
