@@ -145,7 +145,7 @@ export default function PatientRequests() {
         
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 second timeout
+          const timeoutId = setTimeout(() => controller.abort(), 50000); // 50 second timeout
           
           const res = await fetch("/api/analyze-prescription", { 
             method: "POST", 

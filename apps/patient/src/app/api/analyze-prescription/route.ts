@@ -1,6 +1,8 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 
+export const maxDuration = 60; // Allow max duration for AI analysis
+
 // 🚀🚀 Prompts per document type (French & Highly Concise) 🚀🚀🚀
 const UNIVERSAL_PROMPT = `
 أنت مساعد طبي ذكي ومرن متخصص في قراءة وتحليل جميع أنواع الوثائق الطبية (وصفات طبية، تحاليل مخبرية، أشعة، بطاقة زمرة الدم، تقارير، تخطيط قلب، إلخ).
