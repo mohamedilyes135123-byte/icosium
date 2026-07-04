@@ -151,7 +151,9 @@ export default function PrescriptionCard({
             {labTests && labTests.length > 0 ? "🧪" : "📝"}
           </p>
           <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 900, color: "#064e3b" }}>
-            {labTests && labTests.length > 0 ? "Demande d'analyses médicales" : "Ordonnance médicale"}
+            {labTests && labTests.length > 0 
+              ? (language === "ar" ? "طلب تحاليل طبية" : "Demande d'analyses médicales") 
+              : (language === "ar" ? "وصفة طبية" : "Ordonnance médicale")}
           </h3>
           {doctorName && (
             <p style={{ margin: 0, fontSize: "0.72rem", color: "#4ade80", fontWeight: 600 }}>
@@ -200,7 +202,7 @@ export default function PrescriptionCard({
       </div>
 
       {/* Content — blurred if not paid */}
-      <div style={{ padding: "1rem 1.25rem", position: "relative" }}>
+      <div style={{ padding: "1rem 1.25rem", position: "relative", minHeight: "180px" }}>
         <div style={{
           filter: isPaid ? "none" : "blur(6px)",
           userSelect: isPaid ? "auto" : "none",
@@ -210,7 +212,9 @@ export default function PrescriptionCard({
           {/* Medications or Lab Tests */}
           <div style={{ marginBottom: "0.75rem" }}>
             <p style={{ fontSize: "0.75rem", fontWeight: 900, color: "#6b7280", marginBottom: 6 }}>
-              {labTests && labTests.length > 0 ? "Analyses prescrites :" : "Médicaments prescrits :"}
+              {labTests && labTests.length > 0 
+                ? (language === "ar" ? "التحاليل المطلوبة:" : "Analyses prescrites :") 
+                : (language === "ar" ? "الأدوية الموصوفة:" : "Médicaments prescrits :")}
             </p>
             {labTests && labTests.length > 0 ? (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -253,7 +257,7 @@ export default function PrescriptionCard({
               border: "1px solid #bbf7d0",
             }}>
               <p style={{ margin: 0, fontSize: "0.72rem", fontWeight: 900, color: "#166534", marginBottom: 4 }}>
-                Notes du médecin :
+                {language === "ar" ? "ملاحظات الطبيب:" : "Notes du médecin :"}
               </p>
               <p style={{ margin: 0, fontSize: "0.82rem", color: "#374151", lineHeight: 1.6 }}>{doctorNotes}</p>
             </div>
