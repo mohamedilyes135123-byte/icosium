@@ -163,6 +163,7 @@ export default function PatientRequests() {
           }
         } catch (fetchErr: any) {
           console.warn("AI Analysis aborted or failed due to timeout:", fetchErr.message);
+          alert((isRtl ? "فشل تحليل الذكاء الاصطناعي. يرجى المحاولة مرة أخرى." : "L'analyse IA a échoué. Veuillez réessayer."));
         }
       }
     } catch (err: any) {
@@ -527,7 +528,8 @@ export default function PatientRequests() {
 
             <button type="submit" disabled={submitting || uploading || aiAnalyzing}
               style={{ width: "100%", padding: "14px 0", borderRadius: 999, border: "none", background: "linear-gradient(135deg,#2eb567,#1e8a4c)", color: "#fff", fontFamily: "inherit", fontWeight: 700, fontSize: 16, cursor: (submitting || uploading || aiAnalyzing) ? "not-allowed" : "pointer", boxShadow: "0 4px 15px rgba(46,181,103,0.35)", opacity: (submitting || uploading || aiAnalyzing) ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexDirection: isRtl ? "row" : "row-reverse" }}>
-              {submitting ? t.requests.submitting : (
+              {aiAnalyzing ? (isRtl ? "يتم الآن تحليل وصفتك بالذكاء الاصطناعي وإرسالها للطبيب..." : "Analyse IA de votre ordonnance en cours...") : 
+               submitting ? t.requests.submitting : (
                 <>
                   <Image src="/right-arrow.png" alt="" width={24} height={24} />
                   {t.requests.sendRequest.replace('📤 ', '').replace('📤', '')}
