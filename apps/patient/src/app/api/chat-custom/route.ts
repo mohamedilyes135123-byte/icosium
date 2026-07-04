@@ -1,9 +1,11 @@
+// Direct fetch to avoid SDK version incompatibilities
+
 export const runtime = 'edge';
 
 const MEDICAL_AI_PERSONA = `
 أنت المساعد الذكي لمنصة "عناية 3inaya" الطبية. 
 
-دورك الأساسي:
+دورة الأساسي:
 مساعدة المريض في شرح أعراضه بلغة بسيطة جداً، وتلخيص حالته لمشاركتها لاحقاً مع الطبيب.
 
 كيف يجب أن يكون أسلوب لغتك (التوجيهات الصارمة):
@@ -31,43 +33,50 @@ export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
 
-    const groqApiKey = process.env.GROQ_API_KEY || "";
-
-    if (!groqApiKey) {
-      return Response.json({ message: "مفتاح API للذكاء الاصطناعي (Groq) مفقود." }, { status: 401 });
+    const groqKey = process.env.GROQ_API_KEY || "";
+    if (!groqKey) {
+      return Response.json({ message: "مفتاح API للذكاء الاصطناعي مفقود." }, { status: 401 });
     }
 
-    const payload = {
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: MEDICAL_AI_PERSONA },
-        ...messages.map((m: any) => ({
-          role: m.role === "assistant" ? "assistant" : "user",
-          content: m.content
-        }))
-      ],
-      temperature: 0.6,
-    };
+    const aiMessages = [
+      { role: "system" as const, content: MEDICAL_AI_PERSONA },
+      ...messages.map((m: any) => ({
+        role: (m.role === "assistant" ? "assistant" : "user") as "assistant" | "user",
+        content: m.content
+      }))
+    ];
 
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${groqApiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
+    let result = "";
+    try {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${groqKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: aiMessages,
+          temperature: 0.6
+        })
+      });
 
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("Groq API Error Status:", res.status, errText);
+      if (!response.ok) {
+        throw new Error(`Groq API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      result = data.choices?.[0]?.message?.content || "";
+      
+    } catch (err) {
+      console.error("Groq API Error:", err);
       return Response.json({ message: "فشل الاتصال بخادم الذكاء الاصطناعي الجديد." }, { status: 500 });
     }
 
-    const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || "عذراً، لم أتمكن من معالجة الرسالة.";
+    // Clean up <think> tags if any
+    result = result.replace(/<think>[\s\S]*?(?:<\/think>|$)/g, '').trim();
 
-    return Response.json({ message: reply });
+    return Response.json({ message: result });
   } catch (error) {
     console.error("AI Error:", error);
     return Response.json({ message: "حدث خطأ داخلي في الخادم بسبب الذكاء الاصطناعي." }, { status: 500 });

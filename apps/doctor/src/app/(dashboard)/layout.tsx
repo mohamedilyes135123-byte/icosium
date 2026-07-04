@@ -96,7 +96,6 @@ export default function DoctorLayout({
           <NavItem href="/dashboard" icon={<Home className="w-5 h-5"/>} label={t("dashboard")} current={pathname} />
           <NavItem href="/requests" icon={<Activity className="w-5 h-5"/>} label={t("requests")} current={pathname} badge={reqCount > 0 ? reqCount : undefined} />
           <NavItem href="/appointments" icon={<Calendar className="w-5 h-5"/>} label={t("appointments")} current={pathname} badge={apptCount > 0 ? apptCount : undefined} />
-          <NavItem href="/prescriptions" icon={<ClipboardList className="w-5 h-5"/>} label={t("prescriptions")} current={pathname} />
           <NavItem href="/patients" icon={<Users className="w-5 h-5"/>} label={t("patients")} current={pathname} />
           <NavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label={t("settings")} current={pathname} />
 
@@ -116,7 +115,11 @@ export default function DoctorLayout({
             onClick={() => setLang(lang === "ar" ? "fr" : "ar")}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white/90 hover:bg-white/15 transition-colors text-sm font-bold border border-white/20"
           >
-            <Globe className="w-4 h-4"/>
+            {lang === "ar" ? (
+              <img src="/france.png" alt="Français" className="w-5 h-5 rounded-sm object-cover" />
+            ) : (
+              <img src="/algeria.png" alt="العربية" className="w-5 h-5 rounded-sm object-cover" />
+            )}
             {lang === "ar" ? "Français" : "العربية"}
           </button>
 

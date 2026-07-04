@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f4f8; padding: 20px; }
+        .page { background: white; width: 210mm; min-height: 297mm; margin: auto; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 15px; box-sizing: border-box; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0056b3; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo-section img { width: 120px; }
+        .doctor-info { text-align: right; color: #333; }
+        .doctor-info h2 { margin: 0; color: #0056b3; }
+        
+        .title { text-align: center; font-size: 28px; font-weight: 800; color: #0056b3; margin: 20px 0; border-bottom: 2px solid #0056b3; display: inline-block; width: 100%; }
+        
+        .patient-box { background: #e7f1ff; padding: 20px; border-radius: 10px; margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        .exams-section { margin-top: 20px; min-height: 400px; }
+        .checkbox-list { list-style: none; padding: 0; font-size: 18px; }
+        .checkbox-list li { margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+        
+        .footer { margin-top: 50px; border-top: 1px solid #0056b3; padding-top: 20px; display: flex; justify-content: space-between; }
+        .signature { text-align: center; color: #0056b3; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="logo-section">
+                <img src="Asset 3.png" alt="شعار عناية">
+            </div>
+            <div class="doctor-info">
+                <h2>Dr. [Nom du Médecin]</h2>
+                <p>Tél: 05XXXXXXXX | Cabinet Médical</p>
+            </div>
+        </div>
+
+        <div class="title">Demande d'examens médicaux</div>
+
+        <div class="patient-box">
+            <span>Patient: ...........................</span>
+            <span>Âge: ........... ans</span>
+            <span>Date: 02/07/2026</span>
+        </div>
+
+        <div class="exams-section">
+            <h3>Veuillez effectuer les examens suivants:</h3>
+            <ul class="checkbox-list">
+                <li>☐ NFS (Numération Formule Sanguine)</li>
+                <li>☐ Glycémie à jeun</li>
+                <li>☐ Bilan lipidique</li>
+                <li>☐ Créatinine / Urée</li>
+                <li>☐ Bilan hépatique</li>
+                <li>☐ CRP / Vitesse de sédimentation</li>
+                <li>....................................................................</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <div class="note">
+                <p><strong>Note:</strong> .....................................................</p>
+            </div>
+            <div class="signature">
+                <p>Signature & Cachet</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

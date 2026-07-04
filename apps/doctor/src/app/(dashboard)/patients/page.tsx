@@ -243,32 +243,35 @@ export default function DoctorPatients() {
                             {patient.prescriptions.length === 0 ? (
                               <p className="text-center text-slate-400 text-sm py-4">{lang === "ar" ? "لا توجد وصفات" : "Aucune ordonnance"}</p>
                             ) : patient.prescriptions.map((rx: any) => (
-                              <div key={rx.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-                                <div className="flex justify-between items-center mb-2">
-                                  <span className="text-xs text-slate-500 flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
-                                    {new Date(rx.created_at).toLocaleDateString(localeStr)}
-                                  </span>
-                                  {rx.is_used ? (
-                                    <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                                      <BadgeCheck className="w-3.5 h-3.5" />{lang === "ar" ? "صُرفت" : "Délivrée"}</span>
-                                  ) : (
-                                    <span className="text-xs font-bold text-amber-700">{lang === "ar" ? "بانتظار المريض" : "En attente du patient"}</span>
-                                  )}
-                                </div>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {rx.medications?.map((m: any, idx: number) => (
-                                    <span key={idx} className="text-xs bg-white border border-slate-200 text-slate-700 px-2 py-1 rounded-lg font-medium flex items-center gap-1">
-                                      <Pill className="w-3 h-3 text-blue-400" />{m.name} {m.dose}
-                                    </span>
-                                  ))}
-                                </div>
-                                {rx.qr_token && (
-                                  <div className="mt-2 flex items-center gap-2">
-                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=40x40&data=${rx.qr_token}`} alt="QR" className="w-8 h-8 rounded" />
-                                    <p className="text-xs text-slate-400 font-mono">{rx.qr_token?.substring(0, 16)}...</p>
+                              <div key={rx.id} className="bg-white border border-slate-200 hover:border-blue-300 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div className="flex flex-col gap-2 w-full md:w-auto">
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-xl">💊</span>
+                                    <h4 className="font-black text-slate-800 text-sm">{lang === "ar" ? "وصفة طبية" : "Ordonnance"}</h4>
                                   </div>
-                                )}
+                                  <div className="flex flex-wrap items-center gap-3 text-xs">
+                                    <span className="text-slate-500 flex items-center gap-1">
+                                      <Calendar className="w-3.5 h-3.5" /> {new Date(rx.created_at).toLocaleDateString(localeStr)}
+                                    </span>
+                                    <span className="text-slate-400">•</span>
+                                    <span className="text-slate-600 font-bold bg-slate-100 px-2 py-0.5 rounded-md">
+                                      {rx.medications?.length || 0} {lang === "ar" ? "أدوية" : "médicaments"}
+                                    </span>
+                                    <span className="text-slate-400">•</span>
+                                    {rx.is_used ? (
+                                      <span className="text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                        <BadgeCheck className="w-3 h-3" />{lang === "ar" ? "صُرفت" : "Délivrée"}
+                                      </span>
+                                    ) : (
+                                      <span className="text-amber-700 font-bold bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                        <Clock className="w-3 h-3" />{lang === "ar" ? "بانتظار المريض" : "En attente"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <a href={`http://localhost:3000/print/prescription/${rx.id}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center bg-gradient-to-l from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition-all whitespace-nowrap">
+                                  {lang === "ar" ? "عرض الوثيقة" : "Voir le document"}
+                                </a>
                               </div>
                             ))}
                           </div>
@@ -280,35 +283,35 @@ export default function DoctorPatients() {
                             {patient.labRequests.length === 0 ? (
                               <p className="text-center text-slate-400 text-sm py-4">{lang === "ar" ? "لا توجد طلبات تحاليل" : "Aucune demande d'analyse"}</p>
                             ) : patient.labRequests.map((lr: any) => (
-                              <div key={lr.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-                                <div className="flex justify-between items-center mb-2">
-                                  <span className="text-xs text-slate-500 flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
-                                    {new Date(lr.created_at).toLocaleDateString(localeStr)}
-                                  </span>
-                                  <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${
-                                    lr.status === "COMPLETED" ? "bg-emerald-100 text-emerald-700" :
-                                    lr.status === "PROCESSING" ? "bg-blue-100 text-blue-700" :
-                                    "bg-amber-100 text-amber-700"
-                                  }`}>
-                                    {lr.status === "COMPLETED" ? `✅ ${lang === "ar" ? "مكتمل" : "Terminé"}` :
-                                     lr.status === "PROCESSING" ? `🔬 ${lang === "ar" ? "جاري" : "En cours"}` :
-                                     `⏳ ${lang === "ar" ? "انتظار" : "En attente"}`}
-                                  </span>
-                                </div>
-                                <div className="flex flex-wrap gap-1.5 mb-2">
-                                  {lr.tests_list?.map((test: any, idx: number) => (
-                                    <span key={idx} className="text-xs bg-cyan-50 border border-cyan-100 text-cyan-700 px-2 py-1 rounded-lg font-bold">
-                                      {test.name}
-                                    </span>
-                                  ))}
-                                </div>
-                                {lr.lab_results?.length > 0 && (
-                                  <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-2.5">
-                                    <p className="text-xs text-emerald-700 font-bold">📋 {lang === "ar" ? "النتائج:" : "Résultats :"}</p>
-                                    <p className="text-xs text-slate-600">{lr.lab_results[0].result_notes || (lang === "ar" ? "تم رفع الملف" : "Fichier envoyé")}</p>
+                              <div key={lr.id} className="bg-white border border-slate-200 hover:border-cyan-300 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div className="flex flex-col gap-2 w-full md:w-auto">
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-xl">🔬</span>
+                                    <h4 className="font-black text-slate-800 text-sm">{lang === "ar" ? "طلب تحاليل طبية" : "Demande d'analyses"}</h4>
                                   </div>
-                                )}
+                                  <div className="flex flex-wrap items-center gap-3 text-xs">
+                                    <span className="text-slate-500 flex items-center gap-1">
+                                      <Calendar className="w-3.5 h-3.5" /> {new Date(lr.created_at).toLocaleDateString(localeStr)}
+                                    </span>
+                                    <span className="text-slate-400">•</span>
+                                    <span className="text-slate-600 font-bold bg-slate-100 px-2 py-0.5 rounded-md">
+                                      {lr.tests_list?.length || 0} {lang === "ar" ? "تحليل" : "analyse(s)"}
+                                    </span>
+                                    <span className="text-slate-400">•</span>
+                                    <span className={`font-bold px-2 py-0.5 rounded-md flex items-center gap-1 ${
+                                      lr.status === "COMPLETED" ? "bg-emerald-50 border border-emerald-100 text-emerald-700" :
+                                      lr.status === "PROCESSING" ? "bg-blue-50 border border-blue-100 text-blue-700" :
+                                      "bg-amber-50 border border-amber-100 text-amber-700"
+                                    }`}>
+                                      {lr.status === "COMPLETED" ? `✅ ${lang === "ar" ? "مكتمل" : "Terminé"}` :
+                                       lr.status === "PROCESSING" ? `🔬 ${lang === "ar" ? "جاري" : "En cours"}` :
+                                       `⏳ ${lang === "ar" ? "انتظار" : "En attente"}`}
+                                    </span>
+                                  </div>
+                                </div>
+                                <a href={`http://localhost:3000/print/lab/${lr.id}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center bg-gradient-to-l from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition-all whitespace-nowrap">
+                                  {lang === "ar" ? "عرض الوثيقة" : "Voir le document"}
+                                </a>
                               </div>
                             ))}
                           </div>

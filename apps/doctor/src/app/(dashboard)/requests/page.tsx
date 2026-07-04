@@ -2,16 +2,80 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import {
   CheckCircle, XCircle, Edit3, AlertCircle,
-  Clock, Pill, TestTube, User
+  Clock, Pill, TestTube, User, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+
+// ─── Lab Test Categories ─────────────────────────────────────────
+const LAB_TEST_CATEGORIES = [
+  {
+    id: "routine",
+    categoryAr: "تحاليل روتينية",
+    categoryFr: "Analyses de routine",
+    icon: "🔁",
+    color: "from-blue-500 to-cyan-500",
+    bgClass: "bg-blue-50",
+    textClass: "text-blue-700",
+    tests: [
+      "GLYCEMIE A JEUN", "GROUPAGE SANGUIN", "FNS + VS", "TAUX DE FER SERIQUE", "CRP",
+      "UREE + CREATINEMIE", "TAUX DE CHOLESTEROL TOTAL", "TAUX DE TRIGLECRIDES", "TAUX HDL-LDL",
+      "BILAN HEPATIQUE", "CALCEMIE", "MAGNESEMIE", "ECBU + ATB", "ASLO", "IONOGRAMME",
+      "EXAMEN PARASITOLOGIQUE DES SELLES", "COPROCULTURE", "BILIRUBINE DIRECT", "BILIRUBNE INDIRECTE",
+      "BILIRUBINE TOTALE", "TROPONINE", "HBA1 C", "TSH", "T3+ T4", "BHCG SANGUIN", "SEROLOGIE (HIV, HBS, Syphilis)"
+    ]
+  },
+  {
+    id: "pre_marital",
+    categoryAr: "تحاليل ما قبل الزواج",
+    categoryFr: "Bilan prénuptial",
+    icon: "💍",
+    color: "from-purple-500 to-fuchsia-500",
+    bgClass: "bg-purple-50",
+    textClass: "text-purple-700",
+    tests: [
+      "Serologie syphilis (BW)", "Antigène HBs (HBS)", "Anticorps anti-hépatite C (HCV)", "Anticorps anti-HIV (HIV)"
+    ]
+  },
+  {
+    id: "pre_natal",
+    categoryAr: "تحاليل ما قبل الولادة",
+    categoryFr: "Bilan prénatal",
+    icon: "🤰",
+    color: "from-pink-500 to-rose-500",
+    bgClass: "bg-pink-50",
+    textClass: "text-pink-700",
+    subcategories: [
+      {
+        nameAr: "أمراض الدم (Hémogramme)",
+        nameFr: "Hémogramme",
+        tests: ["Groupage, Rhésus", "Glycémie à jeun et post prandiale", "Créatinémie + Urée", "Formule et numération sanguine", "Vitesse de sédimentation", "C-Réactive protéine", "Acide urique", "Sérologie toxoplasmose IgG+IgM", "Sérologie rubéole : IgG + IgM", "TPHA", "VDRL", "Sérologie hépatite B + hépatite C", "Sérologie HIV", "Sérologie chlamydia"]
+      },
+      {
+        nameAr: "البول (Urine)",
+        nameFr: "Urine",
+        tests: ["Micro Albumunurie", "Chimie des urines", "Examen cytobactériologique des urines"]
+      },
+      {
+        nameAr: "الهرمونات (Bilan hormonal)",
+        nameFr: "Bilan hormonal",
+        tests: ["BHCG", "FSH", "LH", "Oestradiol", "PRL", "Progestérone", "Testostérone", "Autres ..."]
+      },
+      {
+        nameAr: "الإفرازات / السائل المنوي",
+        nameFr: "Pertes vaginales / sperme",
+        tests: ["Examen cytobactériologique + recherche germe banals", "Recherche chlamydia + mycoplasme"]
+      }
+    ]
+  }
+];
 
 // ─── Types ───────────────────────────────────────────────────────
 type DoctorAction = "APPROVE" | "REJECT" | "MODIFY";
@@ -30,6 +94,7 @@ interface ActionPanelState {
 export default function DoctorRequests() {
   const { lang, t } = useLanguage();
   const supabase = createClient();
+  const router = useRouter();
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -43,6 +108,23 @@ export default function DoctorRequests() {
   const [modifiedSymptoms, setModifiedSymptoms] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [aiAnalysisPreview, setAiAnalysisPreview] = useState<string | null>(null);
+  const [selectedTests, setSelectedTests] = useState<string[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: lang === "ar" ? 320 : -320, behavior: 'smooth' });
+  };
+  const scrollRight = () => {
+    if (scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: lang === "ar" ? -320 : 320, behavior: 'smooth' });
+  };
+
+  const toggleTest = (testName: string) => {
+    setSelectedTests(prev => 
+      prev.includes(testName) 
+        ? prev.filter(t => t !== testName) 
+        : [...prev, testName]
+    );
+  };
 
   // ── Get current user ─────────ث─────────────────────────────────
   useEffect(() => {
@@ -56,7 +138,7 @@ export default function DoctorRequests() {
       .from("medical_requests")
       .select(`
         *,
-        patient:profiles!medical_requests_patient_id_fkey(full_name, phone, address),
+        patient:profiles!medical_requests_patient_id_fkey(id, full_name, phone, address),
         doctor_responses(id, action, created_at)
       `)
       .or(`doctor_id.eq.${currentUser.id},doctor_id.is.null`)
@@ -88,6 +170,7 @@ export default function DoctorRequests() {
     setMedications([{ name: "", dose: "", frequency: "", duration: "", notes: "" }]);
     setDoctorNotes("");
     setModifiedSymptoms(req.symptoms || "");
+    setSelectedTests([]); // Do not pre-fill patient's requested tests
   };
 
   // ── Confirm Doctor Action ─────────────────────────────────────
@@ -125,20 +208,37 @@ export default function DoctorRequests() {
       }
     }
 
-    // 3. If APPROVE + LAB → create lab_request
-    if (panel.action === "APPROVE" && (panel.requestType === "LAB" || panel.requestType === "ROUTINE_LAB")) {
-      const tests = panel.testsRequested.length > 0
-        ? panel.testsRequested
-        : [{ name: lang === "ar" ? "تحليل روتيني عام" : "Analyse de routine générale", code: "GENERAL" }];
+      // 3. If APPROVE or MODIFY + LAB → create lab_request
+      if ((panel.action === "APPROVE" || panel.action === "MODIFY") && (panel.requestType === "LAB" || panel.requestType === "ROUTINE_LAB")) {
+        let tests = [];
+        if (panel.action === "APPROVE") {
+          tests = panel.testsRequested.length > 0
+            ? panel.testsRequested
+            : [{ name: lang === "ar" ? "تحليل روتيني عام" : "Analyse de routine générale", code: "GENERAL" }];
+        } else {
+          tests = selectedTests.length > 0
+            ? selectedTests.map(name => ({ name }))
+            : [{ name: lang === "ar" ? "تحليل روتيني عام" : "Analyse de routine générale", code: "GENERAL" }];
+        }
 
-      await supabase.from("lab_requests").insert([{
-        request_id: panel.requestId,
-        patient_id: panel.patientId,
-        doctor_id: currentUser.id,
-        tests_list: tests,
-        doctor_notes: doctorNotes || null,
-      }]);
-    }
+        // First create a prescription record so it appears in the doctor's and patient's lists and can be paid for
+        const { data: rxData } = await supabase.from("prescriptions").insert([{
+          request_id: panel.requestId,
+          response_id: response.id,
+          patient_id: panel.patientId,
+          doctor_id: currentUser.id,
+          medications: [], // Empty since it's a lab test
+          doctor_notes: doctorNotes || null,
+        }]).select().single();
+
+        await supabase.from("lab_requests").insert([{
+          request_id: panel.requestId,
+          patient_id: panel.patientId,
+          doctor_id: currentUser.id,
+          tests_list: tests,
+          doctor_notes: doctorNotes || null,
+        }]);
+      }
 
     setPanel(null);
     fetchRequests();
@@ -271,16 +371,20 @@ export default function DoctorRequests() {
               </div>
 
               {/* ── Action Buttons ── */}
-              <div className="mt-auto grid grid-cols-3 gap-3 pt-3">
+              <div className="mt-auto grid grid-cols-2 gap-3 pt-3">
                 <Button onClick={() => openPanel(req, "REJECT")}
-                  className="flex flex-col items-center justify-center gap-1.5 py-4 h-auto bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-xl font-bold text-sm border border-slate-200 hover:border-rose-200 transition-colors shadow-none">
+                  className="flex flex-col items-center justify-center gap-1.5 py-4 h-auto bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white rounded-xl font-black text-sm shadow-md shadow-rose-500/20 transition-all border-none">
                   <XCircle className="w-5 h-5" />{t("rejectBtn")}</Button>
-                <Button onClick={() => openPanel(req, "MODIFY")}
-                  className="flex flex-col items-center justify-center gap-1.5 py-4 h-auto bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-xl font-bold text-sm border border-slate-200 hover:border-blue-200 transition-colors shadow-none">
-                  <Edit3 className="w-5 h-5" />{t("modifyBtn")}</Button>
-                <Button onClick={() => openPanel(req, "APPROVE")}
-                  className="flex flex-col items-center justify-center gap-1.5 py-4 h-auto bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-black text-sm shadow-md shadow-blue-500/20 transition-all border-none">
-                  <CheckCircle className="w-5 h-5" />{t("approveBtn")}</Button>
+                
+                {req.type === "PRESCRIPTION" ? (
+                  <Button onClick={() => router.push(`/prescriptions/new?patientId=${req.patient?.id || ''}&patientName=${encodeURIComponent(req.patient?.full_name || '')}&requestId=${req.id}`)}
+                    className="flex flex-col items-center justify-center gap-1.5 py-4 h-auto bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-black text-sm shadow-md shadow-blue-500/20 transition-all border-none">
+                    <Edit3 className="w-5 h-5" />{lang === "ar" ? "موافقة وتعديل" : "Approuver et Modifier"}</Button>
+                ) : (
+                  <Button onClick={() => openPanel(req, "MODIFY")}
+                    className="flex flex-col items-center justify-center gap-1.5 py-4 h-auto bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-black text-sm shadow-md shadow-blue-500/20 transition-all border-none">
+                    <Edit3 className="w-5 h-5" />{lang === "ar" ? "موافقة وتعديل" : "Approuver et Modifier"}</Button>
+                )}
               </div>
             </motion.div>
           ))}
@@ -384,8 +488,89 @@ export default function DoctorRequests() {
                     </div>
                   )}
 
-                  {/* Modify: edit symptoms */}
-                  {panel.action === "MODIFY" && (
+                  {/* Lab tests modification (MODIFY + LAB) */}
+                  {panel.action === "MODIFY" && panel.requestType !== "PRESCRIPTION" && (
+                    <div className="mb-6">
+                      <div className="flex justify-between items-center mb-3">
+                        <label className="text-sm font-black text-white flex items-center gap-2">
+                          <img src="/icon_lab_test.png" className="w-6 h-6 object-contain filter drop-shadow-md" /> {t("labTestsRequestedWarning") || (lang === "ar" ? "تحديد التحاليل المطلوبة" : "Sélectionner les analyses")}
+                        </label>
+                        <div className="flex gap-2">
+                          <button onClick={(e) => { e.preventDefault(); scrollRight(); }} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+                            {lang === "ar" ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+                          </button>
+                          <button onClick={(e) => { e.preventDefault(); scrollLeft(); }} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+                            {lang === "ar" ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="relative group">
+                        <div ref={scrollContainerRef} className="flex overflow-x-auto gap-4 pb-4 custom-scrollbar snap-x" style={{ scrollBehavior: 'smooth' }}>
+                          {LAB_TEST_CATEGORIES.map(cat => (
+                            <div key={cat.id} className="min-w-[320px] max-w-[320px] bg-white rounded-3xl p-5 shadow-xl shadow-black/10 border-2 border-transparent hover:border-cyan-200 transition-all snap-start flex-shrink-0 flex flex-col h-[350px]">
+                              <div className={`w-full py-2 px-4 rounded-xl bg-gradient-to-r ${cat.color} text-white font-black text-lg flex items-center gap-3 mb-4 shadow-md shrink-0`}>
+                                 <span>{cat.icon}</span> {lang === "ar" ? cat.categoryAr : cat.categoryFr}
+                              </div>
+                              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                                {cat.tests ? (
+                                  <div className="flex flex-wrap gap-2">
+                                    {cat.tests.map(test => {
+                                      const isSelected = selectedTests.includes(test);
+                                      return (
+                                        <button
+                                          key={test}
+                                          onClick={(e) => { e.preventDefault(); toggleTest(test); }}
+                                          className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all border ${
+                                            isSelected 
+                                              ? 'bg-cyan-500 text-white shadow-md shadow-cyan-500/30 border-transparent' 
+                                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-cyan-300 hover:bg-cyan-50'
+                                          }`}
+                                        >
+                                          {isSelected && <CheckCircle className="w-3 h-3 inline-block mr-1 ml-1" />}
+                                          {test}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                ) : cat.subcategories ? (
+                                  <div className="space-y-4">
+                                    {cat.subcategories.map(sub => (
+                                      <div key={sub.nameFr}>
+                                        <h4 className="text-xs font-black text-slate-400 mb-2 uppercase">{lang === "ar" ? sub.nameAr : sub.nameFr}</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                          {sub.tests.map(test => {
+                                            const isSelected = selectedTests.includes(test);
+                                            return (
+                                              <button
+                                                key={test}
+                                                onClick={(e) => { e.preventDefault(); toggleTest(test); }}
+                                                className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all border ${
+                                                  isSelected 
+                                                    ? 'bg-cyan-500 text-white shadow-md shadow-cyan-500/30 border-transparent' 
+                                                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-cyan-300 hover:bg-cyan-50'
+                                                }`}
+                                              >
+                                                {isSelected && <CheckCircle className="w-3 h-3 inline-block mr-1 ml-1" />}
+                                                {test}
+                                              </button>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : null}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Modify: edit symptoms (only for non-lab requests or optionally alongside lab) */}
+                  {panel.action === "MODIFY" && panel.requestType === "PRESCRIPTION" && (
                     <div className="mb-6">
                       <label className="text-sm font-black text-white mb-2 block">{t("modifyCaseDescription")}</label>
                       <textarea value={modifiedSymptoms} onChange={e => setModifiedSymptoms(e.target.value)}
@@ -396,7 +581,7 @@ export default function DoctorRequests() {
                   {/* Doctor notes */}
                   <div className="mb-8">
                     <label className="text-sm font-black text-white mb-2 block">
-                      {panel.action === "REJECT" ? t("rejectionReasonLabelRequired") : t("patientNotesOptional")}
+                      {panel.action === "REJECT" ? (lang === "ar" ? "سبب الرفض (اختياري)" : "Motif du refus (optionnel)") : t("patientNotesOptional")}
                     </label>
                     <textarea value={doctorNotes} onChange={e => setDoctorNotes(e.target.value)}
                       placeholder={panel.action === "REJECT" ? t("rejectionReasonPlaceholder") : t("patientNotesPlaceholderEx")}
@@ -404,7 +589,7 @@ export default function DoctorRequests() {
                   </div>
 
                   <div className="flex gap-4">
-                    <Button onClick={confirmAction} disabled={loading || (panel.action === "REJECT" && !doctorNotes.trim())}
+                    <Button onClick={confirmAction} disabled={loading}
                       className="flex-1 h-14 rounded-2xl bg-white text-blue-600 hover:bg-cyan-50 font-black text-base shadow-lg shadow-black/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
                       {loading ? t("saving") : (
                         panel.action === "APPROVE" ? <><img src="/icon_confirm_action.png" className="w-5 h-5 object-contain" /> {t("confirmApprove")}</> :

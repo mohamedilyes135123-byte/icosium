@@ -78,6 +78,7 @@ export default function PatientRequests() {
   const [doctorId, setDoctorId] = useState("");
   const [symptoms, setSymptoms] = useState("");
   const [priority, setPriority] = useState("normal");
+  const [selectedLabTests, setSelectedLabTests] = useState<string[]>([]);
 
   const [docFiles, setDocFiles] = useState<File[]>([]);
   const [docFileUrls, setDocFileUrls] = useState<string[]>([]);
@@ -142,17 +143,31 @@ export default function PatientRequests() {
         const docType = reqType === "LAB" ? "lab" : "prescription";
         formData.append("docType", docType);
         
-        const res = await fetch("/api/analyze-prescription", { method: "POST", body: formData });
-        const data = await res.json();
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 second timeout
+          
+          const res = await fetch("/api/analyze-prescription", { 
+            method: "POST", 
+            body: formData,
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          const data = await res.json();
 
-        if (data.success && data.analysis) {
-          setAiAnalyses(prev => [...prev, data.analysis]);
-        } else {
-          alert(`${t.requests.aiError} ${data.message || t.requests.tryAgain}`);
+          if (data.success && data.analysis) {
+            setAiAnalyses(prev => [...prev, data.analysis]);
+          } else {
+            console.warn("AI Analysis skipped:", data.message);
+          }
+        } catch (fetchErr: any) {
+          console.warn("AI Analysis aborted or failed due to timeout:", fetchErr.message);
         }
       }
-    } catch (err) {
-      console.error("Analysis failed:", err);
+    } catch (err: any) {
+      console.error("Upload failed:", err.message);
+      alert((isRtl ? "حدث خطأ أثناء رفع الملف: " : "Erreur lors du téléchargement : ") + err.message);
     }
 
     setUploading(false);
@@ -188,7 +203,9 @@ export default function PatientRequests() {
         payload.ai_analysis = aiAnalyses.join('\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
       }
     } else {
-      payload.tests_requested = [{ name: t.requests.labTest, code: "LAB" }];
+      payload.tests_requested = selectedLabTests.length > 0 
+        ? selectedLabTests.map(id => ({ name: (t.requests as any).labTestTypes?.[id] || id, code: id.toUpperCase() }))
+        : [{ name: t.requests.labTest, code: "LAB" }];
       if (symptoms) payload.patient_notes = symptoms;
       if (docFileUrls.length > 0) {
         payload.uploaded_prescription_url = docFileUrls.join(',');
@@ -200,6 +217,7 @@ export default function PatientRequests() {
     setSymptoms(""); setDoctorId(""); setTab("list");
     setDocFiles([]); setDocFileUrls([]);
     setAiAnalyses([]); setSubmitting(false);
+    setSelectedLabTests([]);
     fetchAll();
   };
 
@@ -215,6 +233,17 @@ export default function PatientRequests() {
     const supabase = createClient();
     await supabase.from("lab_requests").update({ lab_id: labId }).eq("id", labReqId);
     setModal(null); fetchAll();
+  };
+
+  const deleteRequest = async (id: string) => {
+    if (!confirm(isRtl ? "هل أنت متأكد من حذف هذا الطلب نهائياً؟" : "Êtes-vous sûr de vouloir supprimer cette demande ?")) return;
+    const supabase = createClient();
+    const { error } = await supabase.from("medical_requests").delete().eq("id", id);
+    if (error) {
+      alert((isRtl ? "حدث خطأ أثناء الحذف: " : "Erreur de suppression: ") + error.message);
+    } else {
+      fetchAll();
+    }
   };
 
   const statusCfg = (s: string) => STATUS[s] || STATUS.PENDING;
@@ -308,10 +337,11 @@ export default function PatientRequests() {
               <div style={{ display: "flex", gap: 8, flexDirection: isRtl ? "row" : "row-reverse" }}>
                 {[
                   { v: "normal", label: t.requests.normal, grad: "linear-gradient(135deg, #64748b, #334155)", shadow: "rgba(100,116,139,0.3)" },
-                  { v: "urgent", label: t.requests.urgent, grad: "linear-gradient(135deg, #ef4444, #b91c1c)", shadow: "rgba(239,68,68,0.3)" },
+                  { v: "urgent", label: t.requests.urgent.replace(' 🚨', '').replace('🚨', ''), grad: "linear-gradient(135deg, #ef4444, #b91c1c)", shadow: "rgba(239,68,68,0.3)", icon: "/urgent.png" },
                 ].map(p => (
                   <button key={p.v} type="button" onClick={() => setPriority(p.v)}
-                    style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: priority === p.v ? "2px solid transparent" : "2px solid #e5e7eb", background: priority === p.v ? p.grad : "#fff", color: priority === p.v ? "#fff" : "#6b7280", boxShadow: priority === p.v ? `0 4px 14px ${p.shadow}` : "none", fontFamily: "inherit", fontWeight: 800, fontSize: 14, cursor: "pointer", transition: "all 0.2s" }}>
+                    style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: priority === p.v ? "2px solid transparent" : "2px solid #e5e7eb", background: priority === p.v ? p.grad : "#fff", color: priority === p.v ? "#fff" : "#6b7280", boxShadow: priority === p.v ? `0 4px 14px ${p.shadow}` : "none", fontFamily: "inherit", fontWeight: 800, fontSize: 14, cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                    {p.icon && <Image src={p.icon} alt="" width={26} height={26} />}
                     {p.label}
                   </button>
                 ))}
@@ -434,17 +464,75 @@ export default function PatientRequests() {
             )}
 
             {reqType === "LAB" && (
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6, textAlign: isRtl ? "right" : "left" }}>{t.requests.notesLab}</label>
-                <textarea value={symptoms} onChange={e => setSymptoms(e.target.value)}
-                  placeholder={t.requests.notesLabPlace}
-                  style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid #e5e7eb", fontFamily: "inherit", fontSize: 14, resize: "none", height: 80, outline: "none", background: "#f9fafb", color: "#374151", boxSizing: "border-box", direction: isRtl ? "rtl" : "ltr" }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <div>
+                  <label style={{ fontSize: 14, fontWeight: 900, color: "#1e293b", display: "block", marginBottom: 12, textAlign: isRtl ? "right" : "left" }}>
+                    {isRtl ? "📌 اختر نوع التحليل (يمكن تحديد أكثر من خيار)" : "📌 Choisissez le type d'analyse (plusieurs choix possibles)"}
+                  </label>
+                  <style dangerouslySetInnerHTML={{__html: `
+                    @keyframes checkmarkDash {
+                      0% { stroke-dasharray: 0, 100; opacity: 0; transform: scale(0.5) rotate(-15deg); }
+                      100% { stroke-dasharray: 100, 100; opacity: 1; transform: scale(1) rotate(0deg); }
+                    }
+                    .lab-option-card {
+                      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+                    }
+                    .lab-option-card:hover {
+                      transform: translateY(-3px) scale(1.01) !important;
+                      box-shadow: 0 12px 30px rgba(0,0,0,0.06) !important;
+                    }
+                  `}} />
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12, direction: isRtl ? "rtl" : "ltr" }}>
+                    {["routine", "pregnancy", "premarital", "restaurant", "other"].map((testId) => {
+                      const label = (t.requests as any).labTestTypes?.[testId] || testId;
+                      const isSelected = selectedLabTests.includes(testId);
+                      return (
+                        <label key={testId} className="lab-option-card" style={{ display: "flex", alignItems: "center", gap: 16, cursor: "pointer", background: isSelected ? "linear-gradient(135deg, #ecfeff 0%, #ffffff 100%)" : "#ffffff", border: isSelected ? "2px solid #06b6d4" : "2px solid #e2e8f0", padding: "16px 20px", borderRadius: 16, transform: isSelected ? "scale(1.01)" : "scale(1)", boxShadow: isSelected ? "0 8px 24px rgba(6,182,212,0.15)" : "0 2px 8px rgba(0,0,0,0.02)" }}>
+                          <div style={{ position: "relative", width: 28, height: 28, flexShrink: 0, borderRadius: 8, border: isSelected ? "none" : "2px solid #cbd5e1", background: isSelected ? "linear-gradient(135deg, #06b6d4, #0891b2)" : "#f8fafc", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isSelected ? "0 4px 10px rgba(6,182,212,0.3)" : "none" }}>
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) setSelectedLabTests(prev => [...prev, testId]);
+                                else setSelectedLabTests(prev => prev.filter(id => id !== testId));
+                              }}
+                              style={{ position: "absolute", opacity: 0, cursor: "pointer", width: "100%", height: "100%", margin: 0, zIndex: 2 }}
+                            />
+                            {isSelected && (
+                              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16, animation: "checkmarkDash 0.4s ease-out forwards" }}>
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            )}
+                          </div>
+                          <span style={{ fontSize: 15, fontWeight: isSelected ? 800 : 700, color: isSelected ? "#0e7490" : "#1e293b", transition: "color 0.3s" }}>
+                            {label}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 6, textAlign: isRtl ? "right" : "left" }}>
+                    {selectedLabTests.includes("other") ? (isRtl ? "يرجى تحديد التحاليل الأخرى أو إضافة ملاحظات" : "Veuillez préciser les autres analyses ou ajouter des notes") : t.requests.notesLab}
+                  </label>
+                  <textarea value={symptoms} onChange={e => setSymptoms(e.target.value)}
+                    placeholder={t.requests.notesLabPlace}
+                    required={selectedLabTests.includes("other") && docFiles.length === 0}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid #e5e7eb", fontFamily: "inherit", fontSize: 14, resize: "none", minHeight: 80, outline: "none", background: "#f9fafb", color: "#374151", boxSizing: "border-box", direction: isRtl ? "rtl" : "ltr" }} />
+                </div>
               </div>
             )}
 
             <button type="submit" disabled={submitting || uploading || aiAnalyzing}
-              style={{ width: "100%", padding: "14px 0", borderRadius: 999, border: "none", background: "linear-gradient(135deg,#2eb567,#1e8a4c)", color: "#fff", fontFamily: "inherit", fontWeight: 700, fontSize: 16, cursor: (submitting || uploading || aiAnalyzing) ? "not-allowed" : "pointer", boxShadow: "0 4px 15px rgba(46,181,103,0.35)", opacity: (submitting || uploading || aiAnalyzing) ? 0.7 : 1 }}>
-              {submitting ? t.requests.submitting : t.requests.sendRequest}
+              style={{ width: "100%", padding: "14px 0", borderRadius: 999, border: "none", background: "linear-gradient(135deg,#2eb567,#1e8a4c)", color: "#fff", fontFamily: "inherit", fontWeight: 700, fontSize: 16, cursor: (submitting || uploading || aiAnalyzing) ? "not-allowed" : "pointer", boxShadow: "0 4px 15px rgba(46,181,103,0.35)", opacity: (submitting || uploading || aiAnalyzing) ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexDirection: isRtl ? "row" : "row-reverse" }}>
+              {submitting ? t.requests.submitting : (
+                <>
+                  <Image src="/right-arrow.png" alt="" width={24} height={24} />
+                  {t.requests.sendRequest.replace('📤 ', '').replace('📤', '')}
+                </>
+              )}
             </button>
           </form>
         )}
@@ -487,14 +575,28 @@ export default function PatientRequests() {
                       </span>
                       {req.priority === "urgent" && (
                         <span style={{ fontSize: 12, fontWeight: 800, padding: "4px 10px", borderRadius: 999, background: "#fee2e2", color: "#991b1b", display: "inline-flex", alignItems: "center", gap: 6, animation: "pulse 1.5s infinite", flexDirection: isRtl ? "row" : "row-reverse" }}>
-                          {t.requests.urgent}
+                          <Image src="/urgent.png" alt="" width={22} height={22} />
+                          {t.requests.urgent.replace(' 🚨', '').replace('🚨', '')}
                         </span>
                       )}
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 800, padding: "6px 14px", borderRadius: 999, background: req.type === "PRESCRIPTION" ? "#f3e8ff" : "#cffafe", color: req.type === "PRESCRIPTION" ? "#7c3aed" : "#0891b2", display: "inline-flex", alignItems: "center", gap: 6, flexDirection: isRtl ? "row" : "row-reverse" }}>
-                      <Image src={req.type === "PRESCRIPTION" ? "/icon_pharmacy.png" : "/icon_labs.png"} alt="" width={20} height={20} />
-                      {req.type === "PRESCRIPTION" ? t.requests.prescriptionOrAppt : t.requests.labType}
-                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, padding: "6px 14px", borderRadius: 999, background: req.type === "PRESCRIPTION" ? "#f3e8ff" : "#cffafe", color: req.type === "PRESCRIPTION" ? "#7c3aed" : "#0891b2", display: "inline-flex", alignItems: "center", gap: 6, flexDirection: isRtl ? "row" : "row-reverse" }}>
+                        <Image src={req.type === "PRESCRIPTION" ? "/icon_pharmacy.png" : "/icon_labs.png"} alt="" width={20} height={20} />
+                        {req.type === "PRESCRIPTION" ? t.requests.prescriptionOrAppt : t.requests.labType}
+                      </span>
+                      {isPending && (
+                        <button
+                          onClick={() => deleteRequest(req.id)}
+                          style={{ background: "#fee2e2", color: "#991b1b", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.2s" }}
+                          title={isRtl ? "حذف الطلب" : "Supprimer la demande"}
+                          onMouseOver={(e) => e.currentTarget.style.transform = "scale(1.1)"}
+                          onMouseOut={(e) => e.currentTarget.style.transform = "scale(1)"}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexDirection: isRtl ? "row" : "row-reverse" }}>
@@ -508,15 +610,17 @@ export default function PatientRequests() {
                     )}
                   </div>
 
-                  {req.ai_analysis && (
-                    <div style={{ background: "linear-gradient(135deg, #f0f4ff, #f5f0ff)", border: "1px solid #c4b5fd", borderRadius: 12, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "flex-start", gap: 8, flexDirection: isRtl ? "row" : "row-reverse" }}>
-                      <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
-                      <div style={{ textAlign: isRtl ? "right" : "left" }}>
-                        <p style={{ margin: 0, fontSize: 12, fontWeight: 900, color: "#5b21b6" }}>{t.requests.aiAnalyzed}</p>
-                        <p style={{ margin: "2px 0 0", fontSize: 11, color: "#7c3aed" }}>{t.requests.aiAnalyzedDesc}</p>
-                      </div>
+                  {req.uploaded_prescription_url && (
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12, flexDirection: isRtl ? "row" : "row-reverse" }}>
+                      {req.uploaded_prescription_url.split(',').map((url: string, idx: number) => (
+                        <a key={idx} href={url} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "#f8fafc", borderRadius: 12, fontSize: 13, fontWeight: 700, color: "#0f172a", textDecoration: "none", border: "1px solid #cbd5e1", transition: "all 0.2s" }}>
+                          🖼️ {t.requests.attachedFiles} {idx + 1}
+                        </a>
+                      ))}
                     </div>
                   )}
+
+
 
                   {req.symptoms && (
                     <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: isRtl ? "16px 4px 16px 16px" : "4px 16px 16px 16px", padding: "12px 16px", marginBottom: 12 }}>
@@ -534,36 +638,13 @@ export default function PatientRequests() {
                     </div>
                   )}
 
-                  {isApproved && prescription && !prescription.is_used && (
-                    <button onClick={() => setModal({ type: "pharmacy", prescriptionId: prescription.id })}
+                  {isApproved && (prescription || labReq) && (
+                    <a href="/results?tab=pharmacy"
                       className="btn"
-                      style={{ position: "relative", width: "100%", padding: "14px 0", borderRadius: 16, border: "none", background: "linear-gradient(135deg, #a855f7, #7e22ce)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 15, cursor: "pointer", marginBottom: 8, boxShadow: "0 6px 20px rgba(168,85,247,0.35)" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexDirection: isRtl ? "row" : "row-reverse" }}>
-                        <Image src="/icon_pharmacy.png" alt="" width={28} height={28} />
-                        {t.requests.choosePharmacy}
-                      </div>
-                    </button>
-                  )}
-                  {isApproved && prescription?.is_used && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, fontWeight: 800, color: "#7c3aed", background: "#faf5ff", padding: "12px 16px", borderRadius: 12, marginBottom: 8, border: "1px dashed #e9d5ff", flexDirection: isRtl ? "row" : "row-reverse" }}>
-                      <Image src="/icon_approved.png" alt="" width={20} height={20} /> {t.requests.sentToPharmacy}
-                    </div>
-                  )}
-
-                  {isApproved && labReq && !labReq.lab_id && (
-                    <button onClick={() => setModal({ type: "lab", labReqId: labReq.id })}
-                      className="btn"
-                      style={{ position: "relative", width: "100%", padding: "14px 0", borderRadius: 16, border: "none", background: "linear-gradient(135deg, #06b6d4, #0e7490)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 15, cursor: "pointer", boxShadow: "0 6px 20px rgba(6,182,212,0.35)" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexDirection: isRtl ? "row" : "row-reverse" }}>
-                        <Image src="/icon_labs.png" alt="" width={28} height={28} />
-                        {t.requests.chooseLab}
-                      </div>
-                    </button>
-                  )}
-                  {isApproved && labReq?.lab_id && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, fontWeight: 800, color: "#0e7490", background: "#ecfeff", padding: "12px 16px", borderRadius: 12, border: "1px dashed #cffafe", flexDirection: isRtl ? "row" : "row-reverse" }}>
-                      <Image src="/icon_approved.png" alt="" width={20} height={20} /> {t.requests.sentToLab}
-                    </div>
+                      style={{ textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", padding: "14px 0", borderRadius: 16, border: "none", background: "linear-gradient(135deg, #10b981, #059669)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 15, cursor: "pointer", marginBottom: 8, boxShadow: "0 6px 20px rgba(16,185,129,0.35)", flexDirection: isRtl ? "row" : "row-reverse" }}>
+                      <Image src="/icon_results.png" alt="" width={28} height={28} />
+                      {isRtl ? "عرض في نتائج تحاليلي ووصفاتي" : "Voir dans mes résultats"}
+                    </a>
                   )}
                 </div>
               );

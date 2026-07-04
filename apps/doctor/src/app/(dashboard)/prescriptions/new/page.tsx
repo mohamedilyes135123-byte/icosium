@@ -11,7 +11,7 @@ import {
   Search, ArrowRight, Save, FileText, X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserPlus } from "lucide-react";
 
 // ─── Common durations / frequencies ──────────────────────────────────────────
@@ -38,7 +38,6 @@ const DRUG_DB = [
   "Ventoline 100mcg (spray)", "Becotide 250mcg (spray)",
   "Insuline Rapide", "Insuline Lente",
 ];
-
 // ─── Known interactions (simplified AI-like check) ────────────────────────────
 const INTERACTIONS: Record<string, string[]> = {
   "Metformine": ["Furosémide", "Alcohol"],
@@ -49,6 +48,18 @@ const INTERACTIONS: Record<string, string[]> = {
   "Enalapril 10mg": ["Spironolactone 25mg"],
   "Bromazépam 3mg": ["Alprazolam 0.5mg"],
 };
+
+const DRUG_CATEGORIES = [
+  { id: "anti-infectieux", categoryFr: "01. ANTI-INFECTIEUX", color: "from-blue-500 to-cyan-400", icon: "🦠", drugs: ["Amoxicilline", "Céfotaxime", "Azithromycine", "Fluconazole"] },
+  { id: "cardio", categoryFr: "02. SYSTÈME CARDIOVASCULAIRE", color: "from-rose-500 to-red-400", icon: "❤️", drugs: ["Irbevel", "Co-Irbevel", "Amlodipine", "Farinox", "Ramipril", "Bisoprolol"] },
+  { id: "snc", categoryFr: "03. SYSTÈME NERVEUX CENTRAL", color: "from-purple-500 to-indigo-400", icon: "🧠", drugs: ["Paracétamol", "Diazépam", "Sertraline", "Lévodopa + Bensérazide"] },
+  { id: "respi", categoryFr: "04. SYSTÈME RESPIRATOIRE", color: "from-sky-500 to-blue-400", icon: "🫁", drugs: ["Salbutamol", "Béclométasone", "Ambroxol"] },
+  { id: "gastro", categoryFr: "05. SYSTÈME GASTRO-INTESTINAL", color: "from-emerald-500 to-green-400", icon: "🍽️", drugs: ["Oméprazole", "Antapam", "Dompéridone", "Corect", "Lactulose"] },
+  { id: "endo", categoryFr: "06. SYSTÈME ENDOCRINIEN", color: "from-amber-500 to-orange-400", icon: "🩸", drugs: ["Insuline humaine", "Metformine", "Lévothyroxine"] },
+  { id: "musculo", categoryFr: "07. SYSTÈME MUSCULO-SQUELETTIQUE", color: "from-orange-500 to-rose-400", icon: "🦴", drugs: ["Diclofénac", "Ibuprofène", "Alendronate"] },
+  { id: "hemato", categoryFr: "09. SYSTÈME HÉMATOLOGIQUE", color: "from-red-600 to-rose-500", icon: "💉", drugs: ["Fumarate ferreux", "Héparine sodique"] },
+  { id: "urinaire", categoryFr: "10. APPAREIL URINAIRE ET SYSTÈME RÉNAL", color: "from-cyan-500 to-teal-400", icon: "💧", drugs: ["Furosémide"] }
+];
 
 interface Med {
   id: string;
@@ -68,6 +79,7 @@ function newMed(): Med {
 export default function NewPrescriptionPage() {
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const printRef = useRef<HTMLDivElement>(null);
 
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -79,6 +91,20 @@ export default function NewPrescriptionPage() {
   const [myPatients, setMyPatients] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const [requestId, setRequestId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const defaultPatientId = searchParams.get('patientId');
+    const defaultPatientName = searchParams.get('patientName');
+    const defaultRequestId = searchParams.get('requestId');
+    
+    if (defaultPatientId && defaultPatientName) {
+      setSelectedPatient({ id: defaultPatientId, full_name: defaultPatientName });
+    }
+    if (defaultRequestId) {
+      setRequestId(defaultRequestId);
+    }
+  }, [searchParams]);
 
   const [showNewPatientModal, setShowNewPatientModal] = useState(false);
   const [newPatient, setNewPatient] = useState({ full_name: "", phone: "" });
@@ -93,6 +119,40 @@ export default function NewPrescriptionPage() {
   const [aiWarnings, setAiWarnings] = useState<string[]>([]);
   const [diagnose, setDiagnose] = useState("");
   const [doctorNotes, setDoctorNotes] = useState("");
+
+  // Modal state for drug selector
+  const [showDrugModal, setShowDrugModal] = useState(false);
+  const [drugModalTargetId, setDrugModalTargetId] = useState<string | null>(null);
+  const [customDrugs, setCustomDrugs] = useState<string[]>([]);
+  const [customDrugInput, setCustomDrugInput] = useState("");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load custom drugs
+  useEffect(() => {
+    const saved = localStorage.getItem("customDrugs");
+    if (saved) {
+      try { setCustomDrugs(JSON.parse(saved)); } catch (e) {}
+    }
+  }, []);
+
+  const handleAddCustomDrug = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customDrugInput.trim() || !drugModalTargetId) return;
+    const newDrug = customDrugInput.trim();
+    const updatedCustom = [...new Set([...customDrugs, newDrug])];
+    setCustomDrugs(updatedCustom);
+    localStorage.setItem("customDrugs", JSON.stringify(updatedCustom));
+    selectDrug(drugModalTargetId, newDrug);
+    setCustomDrugInput("");
+    setShowDrugModal(false);
+  };
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+  };
+  const scrollRight = () => {
+    if (scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+  };
 
   // State
   const [saving, setSaving] = useState(false);
@@ -189,6 +249,7 @@ export default function NewPrescriptionPage() {
     setMeds(prev => prev.map(m => m.id === medId ? { ...m, name: drugName } : m));
     setDrugSearch(prev => ({ ...prev, [medId]: "" }));
     setSuggestions(prev => ({ ...prev, [medId]: [] }));
+    setShowDrugModal(false);
     runAiCheck();
   };
 
@@ -220,24 +281,39 @@ export default function NewPrescriptionPage() {
     if (!validMeds.length) return;
     setSaving(true);
 
-    // Create a standalone prescription (not linked to a request)
+    // Create a standalone prescription (or linked to a request)
     const { data: rx, error } = await supabase.from("prescriptions").insert([{
       patient_id: selectedPatient.id,
       doctor_id: currentUser.id,
       medications: validMeds,
       doctor_notes: doctorNotes || null,
-      // request_id will be null for walk-in prescriptions
-      request_id: null,
+      request_id: requestId || null,
     }]).select().single();
 
     if (error || !rx) { setSaving(false); alert("خطأ في الحفظ: " + error?.message); return; }
+
+    // If it was linked to a request, auto-approve the request
+    if (requestId) {
+      await supabase.from("medical_requests").update({ status: "APPROVED" }).eq("id", requestId);
+      await supabase.from("doctor_responses").insert([{
+        request_id: requestId,
+        doctor_id: currentUser.id,
+        action: "APPROVE",
+        notes: "تم الموافقة وإصدار وصفة جديدة.",
+      }]);
+    }
+
     setSaved({ rx, qr: rx.qr_token });
     setStep("preview");
     setSaving(false);
   };
 
   const handlePrint = () => {
-    window.print();
+    if (saved?.rx) {
+      window.open(`/print/prescription/${saved.rx.id}`, "_blank");
+    } else {
+      window.print();
+    }
   };
 
   const handleSendToPatient = async () => {
@@ -295,7 +371,7 @@ export default function NewPrescriptionPage() {
 
       <div className="space-y-5">
         {/* Patient selection */}
-        <Section title="المريض" icon={<User className="w-5 h-5 text-blue-600" />}>
+        <Section title="المريض" icon={<User className="w-5 h-5 text-blue-600" />} className="relative z-50">
           {!selectedPatient ? (
               <div className="relative">
               <Search className="absolute right-3 top-3 w-4 h-4 text-slate-400" />
@@ -416,33 +492,30 @@ export default function NewPrescriptionPage() {
                   )}
                 </div>
 
-                {/* Drug search */}
-                <div className="relative mb-3">
-                  <input
-                    value={med.name || drugSearch[med.id] || ""}
-                    onChange={e => {
-                      if (med.name) {
-                        updateMed(med.id, "name", "");
-                      }
-                      handleDrugSearch(med.id, e.target.value);
+                {/* Drug select button */}
+                <div className="mb-4">
+                  <label className="text-xs text-slate-500 font-bold mb-1 block">اختر الدواء</label>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setDrugModalTargetId(med.id);
+                      setShowDrugModal(true);
                     }}
-                    onFocus={() => med.name && handleDrugSearch(med.id, med.name)}
-                    placeholder="اسم الدواء — ابدأ بالكتابة..."
-                    className="w-full h-10 px-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-sm font-medium"
-                  />
-                  {(suggestions[med.id] || []).length > 0 && (
-                    <div className="absolute top-11 right-0 left-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-20 overflow-hidden">
-                      {suggestions[med.id].map(drug => (
-                        <button key={drug} onClick={() => selectDrug(med.id, drug)}
-                          className="w-full px-4 py-2.5 text-right text-sm font-medium text-slate-700 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0">
-                          💊 {drug}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                    className={`w-full h-12 px-4 text-right flex items-center justify-between border rounded-xl font-medium transition-colors ${
+                      med.name ? 'bg-blue-50 border-blue-200 text-blue-800' : 'bg-white border-slate-200 text-slate-400 hover:border-blue-400'
+                    }`}
+                  >
+                    <span>{med.name || "اضغط لاختيار الدواء من القائمة..."}</span>
+                    <Pill className={`w-5 h-5 ${med.name ? 'text-blue-500' : 'text-slate-300'}`} />
+                  </button>
                 </div>
-
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs text-slate-500 font-bold mb-1 block">الجرعة (ملغ/غرام)</label>
+                    <input value={med.dose} onChange={e => updateMed(med.id, "dose", e.target.value)}
+                      placeholder="مثال: 500mg, 1g..."
+                      className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-400" />
+                  </div>
                   <div>
                     <label className="text-xs text-slate-500 font-bold mb-1 block">تواتر الجرعة</label>
                     <select value={med.frequency} onChange={e => updateMed(med.id, "frequency", e.target.value)}
@@ -465,7 +538,7 @@ export default function NewPrescriptionPage() {
                       placeholder="مثال: 2 علبة"
                       className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-400" />
                   </div>
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="text-xs text-slate-500 font-bold mb-1 block">ملاحظات خاصة</label>
                     <input value={med.notes} onChange={e => updateMed(med.id, "notes", e.target.value)}
                       placeholder="مع الأكل، مع الماء..."
@@ -548,6 +621,115 @@ export default function NewPrescriptionPage() {
         )}
       </AnimatePresence>
 
+      {/* Drug Selection Modal */}
+      <AnimatePresence>
+        {showDrugModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
+              className="bg-slate-50 w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl border border-white flex flex-col max-h-[90vh]"
+            >
+              {/* Modal Header */}
+              <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-slate-100 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
+                    <Pill className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-black text-slate-800">قائمة الأدوية</h2>
+                    <p className="text-xs text-slate-500 font-medium">اختر الدواء المناسب أو أضف دواءً جديداً</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowDrugModal(false)}
+                  className="w-10 h-10 rounded-full bg-slate-100 hover:bg-rose-100 hover:text-rose-600 flex items-center justify-center text-slate-500 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="mb-6 flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                  <form onSubmit={handleAddCustomDrug} className="flex gap-2 w-full max-w-md">
+                    <input
+                      type="text"
+                      placeholder="اسم الدواء غير موجود؟ أضفه هنا..."
+                      value={customDrugInput}
+                      onChange={(e) => setCustomDrugInput(e.target.value)}
+                      className="flex-1 h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+                    />
+                    <button type="submit" className="h-11 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-colors text-sm">
+                      إضافة واستعمال
+                    </button>
+                  </form>
+                  <div className="flex gap-2 hidden md:flex">
+                    <button onClick={scrollRight} className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors">
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                    <button onClick={scrollLeft} className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors rotate-180">
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <div ref={scrollContainerRef} className="flex overflow-x-auto gap-6 pb-4 custom-scrollbar snap-x" style={{ scrollBehavior: 'smooth' }}>
+                    
+                    {/* Custom Drugs Category */}
+                    {customDrugs.length > 0 && (
+                      <div className="min-w-[320px] max-w-[320px] bg-white rounded-3xl p-5 shadow-xl shadow-black/5 border-2 border-transparent hover:border-blue-200 transition-all snap-start flex-shrink-0 flex flex-col h-[350px]">
+                        <div className="w-full py-2 px-4 rounded-xl bg-gradient-to-r from-slate-600 to-slate-500 text-white font-black text-lg flex items-center gap-3 mb-4 shadow-md shrink-0">
+                          <span>✨</span> أدوية مخصصة
+                        </div>
+                        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                          <div className="flex flex-col gap-2">
+                            {customDrugs.map(drug => (
+                              <button
+                                key={drug}
+                                onClick={(e) => { e.preventDefault(); if (drugModalTargetId) selectDrug(drugModalTargetId, drug); }}
+                                className="text-left px-4 py-3 rounded-xl font-bold transition-all border bg-slate-50 text-slate-700 border-slate-200 hover:border-blue-300 hover:bg-blue-50"
+                              >
+                                💊 {drug}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Predefined Categories */}
+                    {DRUG_CATEGORIES.map(cat => (
+                      <div key={cat.id} className="min-w-[320px] max-w-[320px] bg-white rounded-3xl p-5 shadow-xl shadow-black/5 border-2 border-transparent hover:border-blue-200 transition-all snap-start flex-shrink-0 flex flex-col h-[350px]">
+                        <div className={`w-full py-2 px-4 rounded-xl bg-gradient-to-r ${cat.color} text-white font-black flex items-center gap-3 mb-4 shadow-md shrink-0 text-sm`}>
+                          <span className="text-xl">{cat.icon}</span> {cat.categoryFr}
+                        </div>
+                        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                          <div className="flex flex-col gap-2">
+                            {cat.drugs.map(drug => (
+                              <button
+                                key={drug}
+                                onClick={(e) => { e.preventDefault(); if (drugModalTargetId) selectDrug(drugModalTargetId, drug); }}
+                                className="text-left px-4 py-3 rounded-xl font-bold transition-all border bg-slate-50 text-slate-700 border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-sm"
+                              >
+                                💊 {drug}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 
@@ -555,21 +737,42 @@ export default function NewPrescriptionPage() {
   return (
     <div className="w-full" dir="rtl">
       {/* Action bar */}
-      <div className="flex gap-3 mb-6 print:hidden">
+      <div className="flex flex-wrap gap-3 mb-6 print:hidden">
         <button onClick={() => setStep("form")}
           className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-slate-200 bg-white text-slate-600 font-bold text-sm hover:bg-slate-50 transition-colors">
           <ArrowRight className="w-4 h-4" /> تعديل
         </button>
-        <button onClick={handlePrint}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all">
-          <Printer className="w-4 h-4" /> طباعة
-        </button>
-        <button onClick={handleSendToPatient} disabled={isSent}
-          className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-bold text-sm shadow-lg transition-all ${isSent ? 'bg-slate-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600'}`}>
+        {saved?.rx ? (
+          <a
+            href={`/print/prescription/${saved.rx.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all">
+            <Printer className="w-4 h-4" /> طباعة الوصفة الرسمية
+          </a>
+        ) : (
+          <button onClick={handleSave} disabled={saving || !selectedPatient}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-l from-blue-600 to-cyan-500 text-white font-bold text-sm shadow-lg transition-all disabled:opacity-50">
+            <Save className="w-4 h-4" /> {saving ? "جاري الحفظ..." : "حفظ وإصدار الوصفة"}
+          </button>
+        )}
+        <button onClick={handleSendToPatient} disabled={isSent || !saved?.rx}
+          className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-bold text-sm shadow-lg transition-all ${isSent ? 'bg-slate-400 cursor-not-allowed' : !saved?.rx ? 'bg-slate-300 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600'}`}>
           {isSent ? <CheckCircle className="w-4 h-4" /> : <Send className="w-4 h-4" />}
-          {isSent ? "تم الإرسال" : "إرسال للمريض"}
+          {isSent ? "✅ تم الإرسال للمريض" : "إرسال للمريض"}
         </button>
       </div>
+
+      {/* Success notification */}
+      {saved?.rx && (
+        <div className="mb-5 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 print:hidden flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div>
+            <p className="font-bold text-emerald-800 text-sm">تم إصدار الوصفة بنجاح!</p>
+            <p className="text-xs text-emerald-600 mt-0.5">اضغط على "طباعة الوصفة الرسمية" للحصول على النسخة الكاملة مع الـ QR والتوقيع الإلكتروني</p>
+          </div>
+        </div>
+      )}
 
       <style>{`
         @media print {
@@ -666,6 +869,7 @@ export default function NewPrescriptionPage() {
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
                     <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">الدواء</th>
+                    <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">الجرعة</th>
                     <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">التكرار</th>
                     <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">المدة</th>
                     <th className="text-right px-4 py-3 font-black text-slate-600 text-xs">الكمية</th>
@@ -676,6 +880,7 @@ export default function NewPrescriptionPage() {
                   {meds.filter(m => m.name).map((med, i) => (
                     <tr key={med.id} className={`border-b border-slate-100 ${i % 2 === 0 ? "bg-white" : "bg-slate-50/50"}`}>
                       <td className="px-4 py-3 font-bold text-slate-800">💊 {med.name}</td>
+                      <td className="px-4 py-3 text-slate-600 font-medium">{med.dose || "—"}</td>
                       <td className="px-4 py-3 text-slate-600">{med.frequency}</td>
                       <td className="px-4 py-3 text-slate-600">{med.duration}</td>
                       <td className="px-4 py-3 text-slate-600">{med.quantity}</td>
@@ -751,11 +956,11 @@ export default function NewPrescriptionPage() {
 }
 
 // ── Helper Section wrapper ─────────────────────────────────────────────────────
-function Section({ title, icon, children, action }: {
-  title: string; icon: React.ReactNode; children: React.ReactNode; action?: React.ReactNode
+function Section({ title, icon, children, action, className }: {
+  title: string; icon: React.ReactNode; children: React.ReactNode; action?: React.ReactNode; className?: string;
 }) {
   return (
-    <div className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl p-5 shadow-lg shadow-slate-200/40">
+    <div className={`bg-white/80 backdrop-blur-xl border border-white rounded-3xl p-5 shadow-lg shadow-slate-200/40 ${className || ""}`}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           {icon}

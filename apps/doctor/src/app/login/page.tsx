@@ -140,7 +140,7 @@ function StepIndicator({ step, current }: { step: number; current: Step }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function LoginPage() {
-  const { lang, t } = useLanguage();
+  const { lang, setLang, t } = useLanguage();
   const [isLogin, setIsLogin] = useState(true);
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
@@ -276,11 +276,31 @@ export default function LoginPage() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" dir={lang === "ar" ? "rtl" : "ltr"}>
-      {/* Animated Prominent Background */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-slate-50">
         <div className="absolute top-[-10%] -right-[10%] w-[800px] h-[800px] bg-blue-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-60 animate-pulse-soft" />
         <div className="absolute bottom-[-10%] -left-[10%] w-[600px] h-[600px] bg-indigo-300 rounded-full mix-blend-multiply filter blur-[150px] opacity-50 animate-pulse-soft" style={{ animationDelay: '2s' }} />
         <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px]" />
+      </div>
+
+      {/* Language Toggle */}
+      <div className={`absolute top-6 ${lang === 'ar' ? 'left-6' : 'right-6'} z-50`}>
+        <button
+          onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
+          className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow border border-slate-200 hover:bg-white transition-all text-sm font-semibold text-slate-700"
+          type="button"
+        >
+          {lang === 'ar' ? (
+            <>
+              <img src="/france.png" alt="Français" className="w-5 h-5 rounded-full object-cover" />
+              <span>Français</span>
+            </>
+          ) : (
+            <>
+              <span className="text-lg leading-none">🇩🇿</span>
+              <span>العربية</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Glow keyframes */}

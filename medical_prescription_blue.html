@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f4f8; padding: 20px; }
+        .page { background: white; width: 210mm; min-height: 297mm; margin: auto; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 15px; box-sizing: border-box; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0056b3; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo-section img { width: 120px; }
+        .doctor-info { text-align: right; color: #333; }
+        .doctor-info h2 { margin: 0; color: #0056b3; }
+        
+        .title { text-align: center; font-size: 32px; font-weight: 800; color: #0056b3; margin: 20px 0; letter-spacing: 2px; text-transform: uppercase; }
+        
+        .patient-box { background: #e7f1ff; padding: 20px; border-radius: 10px; border-right: 5px solid #0056b3; margin-bottom: 30px; display: flex; justify-content: space-between; }
+        .patient-box span { font-weight: 600; color: #003366; }
+
+        .medicines { margin-top: 20px; min-height: 400px; }
+        .medicines ol { font-size: 20px; line-height: 2.5; color: #222; }
+        
+        .footer { margin-top: 50px; font-size: 16px; border-top: 1px solid #0056b3; padding-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .signature { text-align: center; color: #0056b3; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="logo-section">
+                <img src="Asset 3.png" alt="شعار عناية">
+            </div>
+            <div class="doctor-info">
+                <h2>Dr. [Nom du Médecin]</h2>
+                <p>Spécialiste en [Spécialité]</p>
+                <p>Tél: 05XXXXXXXX | E-mail: doc@enaya.com</p>
+            </div>
+        </div>
+
+        <div class="title">Ordonnance</div>
+
+        <div class="patient-box">
+            <span>Patient: ...........................</span>
+            <span>Âge: ........... ans</span>
+            <span>Date: 02/07/2026</span>
+        </div>
+
+        <div class="medicines">
+            <ol>
+                <li>[Médicament] - [Posologie]</li>
+                <li>[Médicament] - [Posologie]</li>
+                <li>[Médicament] - [Posologie]</li>
+            </ol>
+        </div>
+
+        <div class="footer">
+            <div class="note">
+                <p><strong>Remarque:</strong> .....................................................</p>
+            </div>
+            <div class="signature">
+                <p>Signature & Cachet</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

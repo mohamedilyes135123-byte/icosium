@@ -259,10 +259,10 @@ export async function uploadLabFile(userId: string, file: File): Promise<string>
   const ext = file.name.split(".").pop();
   const path = `${userId}/${Date.now()}.${ext}`;
   const { error } = await supabase.storage
-    .from("lab-uploads")
+    .from("medical-docs")
     .upload(path, file, { upsert: true });
   if (error) throw new Error(error.message);
 
-  const { data } = supabase.storage.from("lab-uploads").getPublicUrl(path);
+  const { data } = supabase.storage.from("medical-docs").getPublicUrl(path);
   return data.publicUrl;
 }

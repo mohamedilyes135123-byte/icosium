@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import PrescriptionCard from "@/components/ui/PrescriptionCard";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -23,7 +23,9 @@ export default function PatientResults() {
     CANCELLED:  { label: t.results.statusCancelled,  bg: "#f1f5f9", color: "#64748b", dot: "#94a3b8" },
   };
 
-  const [tab, setTab] = useState<Tab>("lab");
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as Tab) || "lab";
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [labResults, setLabResults] = useState<any[]>([]);
   const [pharmacyOrders, setPharmacyOrders] = useState<any[]>([]);
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
@@ -49,7 +51,7 @@ export default function PatientResults() {
     setLoading(true);
     setError(null);
 
-    const [{ data: results, error: labErr }, { data: orders, error: ordErr }, { data: rxData, error: rxErr }] = await Promise.all([
+    const dataRes = await Promise.all([
       supabase
         .from("lab_results")
         .select(`
@@ -79,20 +81,34 @@ export default function PatientResults() {
       supabase
         .from("prescriptions")
         .select(`
-          id, is_paid, status, medications, doctor_notes, qr_token, created_at,
+          id, is_paid, status, medications, doctor_notes, qr_token, created_at, request_id,
           doctor:profiles!prescriptions_doctor_id_fkey(full_name)
         `)
         .eq("patient_id", currentUser.id)
         .neq("status", "archived")
         .order("created_at", { ascending: false }),
+      supabase
+        .from("lab_requests")
+        .select("id, request_id, tests_list")
+        .eq("patient_id", currentUser.id),
     ]);
 
+    const [{ data: results, error: labErr }, { data: orders, error: ordErr }, { data: rxData }, { data: lrData }] = dataRes;
     if (labErr) { console.error(labErr); setError(labErr.message); }
     if (ordErr) { console.error(ordErr); setError(ordErr.message); }
 
+    // Map lab_requests to prescriptions by request_id
+    const rxMapped = (rxData || []).map((rx: any) => {
+      const matchingLab = (lrData || []).find((lr: any) => lr.request_id === rx.request_id);
+      return {
+        ...rx,
+        lab_requests: matchingLab ? [matchingLab] : [],
+      };
+    });
+
     setLabResults(results || []);
     setPharmacyOrders(orders || []);
-    setPrescriptions(rxData || []);
+    setPrescriptions(rxMapped);
     setLoading(false);
   }, [currentUser]);
 
@@ -115,6 +131,10 @@ export default function PatientResults() {
     return () => { supabase.removeChannel(ch); };
   }, [currentUser, fetchData]);
 
+  const TABS = [
+    { key: "lab", label: isRtl ? "التحاليل" : "Analyses", count: labResults.length, icon: "/icon_labs.png", imgSize: 42, imgTopInactive: -6, imgTopActive: -10, imgScale: 1.15, right: 10 },
+    { key: "pharmacy", label: isRtl ? "الوصفات" : "Ordonnances", count: prescriptions.length, icon: "/icon_pharmacy.png", imgSize: 42, imgTopInactive: -6, imgTopActive: -10, imgScale: 1.15, right: 10 },
+  ];
 
   return (
     <div style={{ paddingBottom: 32 }}>
@@ -129,10 +149,7 @@ export default function PatientResults() {
       <div style={{ padding: "16px 16px 0" }}>
         {/* Tabs */}
         <div style={{ display: "flex", gap: 8, background: "#f1f5f9", borderRadius: 16, padding: "6px 6px", marginBottom: 20, paddingTop: 16, flexDirection: isRtl ? "row" : "row-reverse" }}>
-          {[
-            { key: "lab",      label: t.results.tabLabs,          count: labResults.length,    icon: "/RESULT.png", imgSize: 64, imgTopActive: -10, imgTopInactive: 0, imgScale: 1.4, right: 8 },
-            { key: "pharmacy", label: t.results.tabPrescriptions, count: prescriptions.length, icon: "/icon_pharmacy.png", imgSize: 48, imgTopActive: -24, imgTopInactive: -12, imgScale: 1.2, right: 16 },
-          ].map(tb => (
+          {TABS.map(tb => (
             <button key={tb.key} onClick={() => setTab(tb.key as Tab)}
               className="btn"
               style={{ position: "relative", flex: 1, padding: "10px 0", borderRadius: 12, border: "none", fontFamily: "inherit", fontWeight: 800, fontSize: 14, cursor: "pointer", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)", background: tab === tb.key ? "linear-gradient(135deg, #22c55e, #16a34a)" : "transparent", color: tab === tb.key ? "#fff" : "#64748b", boxShadow: tab === tb.key ? "0 4px 14px rgba(22,163,74,0.3)" : "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
@@ -243,14 +260,18 @@ export default function PatientResults() {
           ) : prescriptions.map((rx: any) => {
             const doctor = Array.isArray(rx.doctor) ? rx.doctor[0] : rx.doctor;
             const isPaid = paidIds.has(rx.id) || rx.is_paid;
+            const isSent = pharmacyOrders.some((o: any) => o.prescription?.id === rx.id);
 
             return (
               <PrescriptionCard
                 key={rx.id}
+                isSent={isSent}
                 prescriptionId={rx.id}
                 isPaid={isPaid}
                 status={rx.status}
                 medications={Array.isArray(rx.medications) ? rx.medications : []}
+                labTests={rx.lab_requests?.[0]?.tests_list || []}
+                labRequestId={rx.lab_requests?.[0]?.id || null}
                 doctorNotes={rx.doctor_notes}
                 qrToken={rx.qr_token}
                 doctorName={doctor?.full_name}
