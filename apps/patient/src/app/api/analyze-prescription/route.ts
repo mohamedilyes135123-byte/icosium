@@ -1,6 +1,7 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 
+export const runtime = 'edge';
 export const maxDuration = 60; // Allow max duration for AI analysis
 
 // 🚀🚀 Prompts per document type (French & Highly Concise) 🚀🚀🚀
@@ -68,7 +69,7 @@ export async function POST(req: Request) {
 
             if (file) {
               const arrayBuffer = await file.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
+              const buffer = new Uint8Array(arrayBuffer);
               const mimeType = file.type || 'image/jpeg';
 
               const { text: analysisText } = await generateText({
