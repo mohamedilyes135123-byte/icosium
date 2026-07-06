@@ -1,4 +1,4 @@
-import { google } from '@ai-sdk/google';
+import { google, createGoogleGenerativeAI } from '@ai-sdk/google';
 import { streamText } from 'ai';
 
 // Set the runtime to edge for best performance
@@ -39,15 +39,21 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
 
     // Check if the API key exists
-    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    const rawKeys = process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
+    const envKeys = rawKeys.split(',').map(k => k.trim()).filter(Boolean);
+    if (envKeys.length === 0) {
       return new Response(
         "لا يوجد مفتاح API للذكاء الاصطناعي (Google API Key). لا يمكن إتمام المحادثة.", 
         { status: 401 }
       );
     }
 
+    // Pick a random key for load balancing
+    const randomKey = envKeys[Math.floor(Math.random() * envKeys.length)];
+    const customGoogle = createGoogleGenerativeAI({ apiKey: randomKey });
+
     const result = streamText({
-      model: google('gemini-1.5-flash-latest'),
+      model: customGoogle('gemini-flash-latest'),
       system: MEDICAL_AI_PERSONA,
       messages,
       temperature: 0.6, // Low temperature for stability but enough for empathy
