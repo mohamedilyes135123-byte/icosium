@@ -36,7 +36,9 @@ Format de sortie à respecter strictement :
 export async function POST(req: Request) {
   try {
     const rawKeys = process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
-    const apiKeyList = rawKeys.split(',').map(k => k.trim()).filter(Boolean);
+    const envKeys = rawKeys.split(',').map(k => k.trim()).filter(Boolean);
+    const fallbackKeys: string[] = [];
+    const apiKeyList = [...envKeys, ...fallbackKeys];
 
     if (apiKeyList.length === 0) {
       return Response.json({

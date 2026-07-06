@@ -65,6 +65,7 @@ export default function PrescriptionCard({
   const [sending, setSending] = useState(false);
   const [isSentLocal, setIsSentLocal] = useState(isSent);
   const archivedRef = useRef(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Load pharmacies or labs for the send modal
   useEffect(() => {
@@ -100,18 +101,24 @@ export default function PrescriptionCard({
     try {
       const isLab = labTests && labTests.length > 0;
       if (isLab && labRequestId) {
-        await sendPrescriptionToPharmacy(prescriptionId, pharmacyId, patientId); // Just mark as used and keep record
-        // Send to Lab instead (the function we already have `sendLabRequestToLab`)
-        // But since we want the actual function `sendLabRequestToLab` 
+        // Only send to Lab, do not create a pharmacy order
         const { sendLabRequestToLab } = await import("@/lib/supabase/actions");
         await sendLabRequestToLab(labRequestId, pharmacyId);
+        
+        // Also update the prescription to mark it as used
+        const supabase = createClient();
+        await supabase.from("prescriptions").update({ is_used: true }).eq("id", prescriptionId);
       } else {
         await sendPrescriptionToPharmacy(prescriptionId, pharmacyId, patientId);
       }
       setIsSentLocal(true);
-      alert(language === "ar" ? "تم إرسال طلبك بنجاح!" : "Votre demande a été envoyée avec succès !");
+      setToastMessage(language === "ar" ? "تم إرسال طلبك بنجاح!" : "Votre demande a été envoyée avec succès !");
+      setTimeout(() => setToastMessage(null), 3500);
       setPharmacyModal(false);
-    } catch { /* silent */ }
+    } catch (e: any) {
+      setToastMessage(language === "ar" ? "حدث خطأ أثناء الإرسال" : "Une erreur s'est produite lors de l'envoi");
+      setTimeout(() => setToastMessage(null), 3500);
+    }
     setSending(false);
   };
 
@@ -162,8 +169,8 @@ export default function PrescriptionCard({
           )}
         </div>
         <div style={{ textAlign: "left" }}>
-          <p style={{ margin: 0, fontSize: "0.68rem", color: "#6b7280" }}>
-            {new Date(createdAt).toLocaleDateString()}
+          <p style={{ margin: 0, fontSize: "0.68rem", color: "#6b7280", direction: "ltr" }}>
+            {new Date(createdAt).toLocaleString(language === "ar" ? "ar-DZ" : "fr-FR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end", marginTop: 4 }}>
             <span style={{
@@ -330,7 +337,8 @@ export default function PrescriptionCard({
           <button
             onClick={() => {
               if (!isPaid) {
-                alert(pcKeys.pleasePayFirst);
+                setToastMessage(pcKeys.pleasePayFirst);
+                setTimeout(() => setToastMessage(null), 3500);
                 return;
               }
               const url = labTests && labTests.length > 0 
@@ -363,29 +371,35 @@ export default function PrescriptionCard({
           </button>
           
           <button
-            onClick={() => setPharmacyModal(true)}
+            onClick={() => {
+              if (isSent || isSentLocal) return;
+              setPharmacyModal(true);
+            }}
+            disabled={isSent || isSentLocal}
             style={{
               flex: 1,
-              background: "linear-gradient(180deg, #065f46, #10b981)",
+              background: (isSent || isSentLocal) ? "linear-gradient(180deg, #334155, #475569)" : "linear-gradient(180deg, #065f46, #10b981)",
               color: "white",
               border: "none",
               padding: "0.85rem 0",
               borderRadius: "0.5rem",
               fontSize: "0.95rem",
               fontWeight: 800,
-              cursor: "pointer",
+              cursor: (isSent || isSentLocal) ? "not-allowed" : "pointer",
               transition: "transform 0.2s",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: 10,
-              boxShadow: "0 4px 10px rgba(16, 185, 129, 0.2)",
+              boxShadow: (isSent || isSentLocal) ? "none" : "0 4px 10px rgba(16, 185, 129, 0.2)",
             }}
-            onMouseOver={e => e.currentTarget.style.transform = "translateY(-2px)"}
-            onMouseOut={e => e.currentTarget.style.transform = "translateY(0)"}
+            onMouseOver={e => { if (!(isSent || isSentLocal)) e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseOut={e => { if (!(isSent || isSentLocal)) e.currentTarget.style.transform = "translateY(0)"; }}
           >
-            <img src="/paper-plane.png" alt="Send" style={{ width: 18, height: 18 }} />
-            {labTests && labTests.length > 0 ? pcKeys.sendToLab : pcKeys.sendToPharmacy}
+            <img src="/paper-plane.png" alt="Send" style={{ width: 18, height: 18, opacity: (isSent || isSentLocal) ? 0.5 : 1 }} />
+            {labTests && labTests.length > 0 
+              ? ((isSent || isSentLocal) ? (language === "ar" ? "تم الإرسال للمخبر" : "Envoyé au labo") : pcKeys.sendToLab) 
+              : ((isSent || isSentLocal) ? (language === "ar" ? "تم الإرسال للصيدلية" : "Envoyé à la pharmacie") : pcKeys.sendToPharmacy)}
           </button>
         </div>
       )}
@@ -445,6 +459,36 @@ export default function PrescriptionCard({
           </div>
         </div>
       )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div style={{
+          position: "fixed",
+          bottom: "20px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          background: "#1e293b",
+          color: "#fff",
+          padding: "12px 24px",
+          borderRadius: "99px",
+          fontSize: "14px",
+          fontWeight: 700,
+          boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
+          zIndex: 10000,
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          animation: "slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)"
+        }}>
+          <span style={{ color: "#4ade80" }}>✓</span> {toastMessage}
+        </div>
+      )}
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translate(-50%, 20px); }
+          to { opacity: 1; transform: translate(-50%, 0); }
+        }
+      `}</style>
 
       {/* Payment Modal */}
       {showPaymentModal && (

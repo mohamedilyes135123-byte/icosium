@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
@@ -33,6 +33,8 @@ export default function LabRequests() {
   const [uploadPanel, setUploadPanel] = useState<{ open: boolean; requestId: string; patientId: string } | null>(null);
   const [resultNotes, setResultNotes] = useState("");
   const [resultFileUrl, setResultFileUrl] = useState("");
+  const [resultFile, setResultFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -74,17 +76,43 @@ export default function LabRequests() {
   const submitResults = async () => {
     if (!uploadPanel || !currentUser) return;
     setUploading(true);
+
+    let finalFileUrl = resultFileUrl || null;
+
+    if (resultFile) {
+      const ext = resultFile.name.split('.').pop();
+      const fileName = `result_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("medical-docs")
+        .upload(fileName, resultFile);
+      
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        alert(lang === "ar" ? "حدث خطأ أثناء رفع الملف" : "Erreur lors du téléchargement du fichier");
+        setUploading(false);
+        return;
+      } else {
+        const { data: { publicUrl } } = supabase.storage
+          .from("medical-docs")
+          .getPublicUrl(fileName);
+        finalFileUrl = publicUrl;
+      }
+    }
+
     const { error } = await supabase.from("lab_results").insert([{
       lab_request_id: uploadPanel.requestId,
       lab_id: currentUser.id,
       patient_id: uploadPanel.patientId,
       result_notes: resultNotes || null,
-      file_url: resultFileUrl || null,
+      file_url: finalFileUrl,
     }]);
+
     if (!error) {
+      await supabase.from("lab_requests").update({ status: "COMPLETED" }).eq("id", uploadPanel.requestId);
       setUploadPanel(null);
       setResultNotes("");
       setResultFileUrl("");
+      setResultFile(null);
     }
     setUploading(false);
   };
@@ -285,16 +313,27 @@ export default function LabRequests() {
 
                 <div className="space-y-4 mb-8">
                   <div>
-                    <label className="text-sm font-bold text-slate-700 mb-2 block">{t("resultSummaryLabel")}</label>
+                    <label className="text-sm font-bold text-slate-700 mb-2 block">
+                      {t("resultSummaryLabel")} <span className="text-slate-400 font-normal text-xs">{lang === "ar" ? "(اختياري)" : "(Optionnel)"}</span>
+                    </label>
                     <textarea value={resultNotes} onChange={e => setResultNotes(e.target.value)}
                       placeholder={t("resultSummaryPlaceholder")}
                       className="w-full p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-emerald-400 focus:bg-white outline-none resize-none h-28 text-slate-700 font-medium transition-all" />
                   </div>
                   <div>
-                    <label className="text-sm font-bold text-slate-700 mb-2 block">{t("resultFileLinkLabel")}</label>
-                    <input value={resultFileUrl} onChange={e => setResultFileUrl(e.target.value)}
-                      placeholder={t("resultFileLinkPlaceholder")}
-                      className="w-full p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-emerald-400 focus:bg-white outline-none text-slate-700 font-medium transition-all" />
+                    <label className="text-sm font-bold text-slate-700 mb-2 block">{lang === "ar" ? "ملف النتيجة (PDF, JPG...)" : "Fichier de résultat (PDF, JPG...)"}</label>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) setResultFile(file);
+                      }}
+                      className="w-full p-3 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-emerald-400 focus:bg-white outline-none text-slate-700 font-medium transition-all" 
+                    />
+                    {resultFileUrl && !resultFile && (
+                      <p className="text-xs text-slate-500 mt-2">رابط حالي: {resultFileUrl}</p>
+                    )}
                   </div>
                 </div>
 

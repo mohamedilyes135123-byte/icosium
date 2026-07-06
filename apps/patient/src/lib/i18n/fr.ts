@@ -65,7 +65,7 @@ export const fr = {
     doctors: 'Trouver un médecin',
     requests: 'Mes demandes',
     appointments: 'Mes rendez-vous',
-    results: 'Mes résultats',
+    results: 'Mes résultats et ordonnances',
     vitals: 'Mes constantes',
     profile: 'Dossier médical',
     logout: 'Se déconnecter',

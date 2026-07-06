@@ -126,14 +126,20 @@ export async function sendPrescriptionToPharmacy(
   const { error: orderError } = await supabase
     .from("pharmacy_orders")
     .insert([{ prescription_id: prescriptionId, patient_id: patientId, pharmacy_id: pharmacyId }]);
-  if (orderError) throw new Error(orderError.message);
+  if (orderError) {
+    console.error("sendPrescriptionToPharmacy Insert Error:", orderError);
+    throw new Error(orderError.message);
+  }
 
   // Mark prescription as used
   const { error: rxError } = await supabase
     .from("prescriptions")
     .update({ is_used: true, sent_to_pharmacy_id: pharmacyId })
     .eq("id", prescriptionId);
-  if (rxError) throw new Error(rxError.message);
+  if (rxError) {
+    console.error("sendPrescriptionToPharmacy Update Error:", rxError);
+    throw new Error(rxError.message);
+  }
 }
 
 /**
@@ -141,11 +147,19 @@ export async function sendPrescriptionToPharmacy(
  */
 export async function sendLabRequestToLab(labReqId: string, labId: string) {
   const supabase = createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("lab_requests")
     .update({ lab_id: labId })
-    .eq("id", labReqId);
-  if (error) throw new Error(error.message);
+    .eq("id", labReqId)
+    .select();
+  if (error) {
+    console.error("sendLabRequestToLab error:", error);
+    throw new Error(error.message);
+  }
+  if (!data || data.length === 0) {
+    console.error("sendLabRequestToLab failed: No rows updated. Possibly RLS or invalid labReqId:", labReqId);
+    throw new Error("لم يتم تحديث أي بيانات. يرجى التحقق من الصلاحيات (RLS) أو المعرف.");
+  }
 }
 
 // ── Medication Reminder Actions ───────────────────────────────────

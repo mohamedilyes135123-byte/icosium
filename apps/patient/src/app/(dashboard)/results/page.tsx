@@ -89,7 +89,7 @@ export default function PatientResults() {
         .order("created_at", { ascending: false }),
       supabase
         .from("lab_requests")
-        .select("id, request_id, tests_list")
+        .select("id, request_id, tests_list, lab_id")
         .eq("patient_id", currentUser.id),
     ]);
 
@@ -132,8 +132,8 @@ export default function PatientResults() {
   }, [currentUser, fetchData]);
 
   const TABS = [
-    { key: "lab", label: isRtl ? "التحاليل" : "Analyses", count: labResults.length, icon: "/icon_labs.png", imgSize: 42, imgTopInactive: -6, imgTopActive: -10, imgScale: 1.15, right: 10 },
-    { key: "pharmacy", label: isRtl ? "الوصفات" : "Ordonnances", count: prescriptions.length, icon: "/icon_pharmacy.png", imgSize: 42, imgTopInactive: -6, imgTopActive: -10, imgScale: 1.15, right: 10 },
+    { key: "lab", label: isRtl ? "التحاليل" : "Analyses", count: labResults.length, icon: "/التحاليل.png", imgSize: 42, imgTopInactive: -6, imgTopActive: -10, imgScale: 1.15, right: 10 },
+    { key: "pharmacy", label: isRtl ? "الوصفات" : "Ordonnances", count: prescriptions.length, icon: "/صيدلية.png", imgSize: 42, imgTopInactive: -6, imgTopActive: -10, imgScale: 1.15, right: 10 },
   ];
 
   return (
@@ -177,7 +177,7 @@ export default function PatientResults() {
           labResults.length === 0 ? (
             <div style={{ textAlign: "center", padding: "64px 16px" }}>
               <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
-                <Image src="/icon_labs.png" alt="" width={120} height={120} style={{ filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.15))" }} />
+                <Image src="/التحاليل.png" alt="" width={120} height={120} style={{ filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.15))" }} />
               </div>
               <p style={{ fontWeight: 700, color: "#6b7280" }}>{t.results.noLabs}</p>
               <p style={{ fontSize: 13, color: "#9ca3af" }}>{t.results.noLabsDesc}</p>
@@ -194,7 +194,7 @@ export default function PatientResults() {
                     <Image src="/icon_approved.png" alt="" width={20} height={20} /> {t.results.labResult}
                   </span>
                   <span style={{ fontSize: 11, color: "#9ca3af" }}>
-                    {result.uploaded_at ? new Date(result.uploaded_at).toLocaleDateString(isRtl ? "ar-DZ" : "fr-FR") : ""}
+                    {result.uploaded_at ? new Date(result.uploaded_at).toLocaleString(isRtl ? "ar-DZ" : "fr-FR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : ""}
                   </span>
                 </div>
 
@@ -225,7 +225,7 @@ export default function PatientResults() {
                   {result.file_url && (
                     <a href={ensureAbsoluteUrl(result.file_url)} target="_blank" rel="noopener noreferrer"
                       style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "10px 0", borderRadius: 12, background: "linear-gradient(135deg,#3b82f6,#1d4ed8)", color: "#fff", fontWeight: 900, fontSize: 12, textDecoration: "none" }}>
-                      <span>📥</span> {t.results.download}
+                      <Image src="/download.png" alt="Download" width={18} height={18} /> {t.results.download}
                     </a>
                   )}
                   {!result.file_url && (
@@ -234,9 +234,15 @@ export default function PatientResults() {
                     </div>
                   )}
                   <button
-                    onClick={() => window.print()}
+                    onClick={() => {
+                      if (result.file_url) {
+                        window.open(ensureAbsoluteUrl(result.file_url), '_blank');
+                      } else {
+                        window.print();
+                      }
+                    }}
                     style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "10px 0", borderRadius: 12, background: "linear-gradient(135deg,#22c55e,#16a34a)", color: "#fff", fontWeight: 900, fontSize: 12, border: "none", cursor: "pointer" }}>
-                    <span>🖨️</span> {t.results.print}
+                    <Image src="/printer.png" alt="Print" width={18} height={18} /> {t.results.print}
                   </button>
                 </div>
               </div>
@@ -249,7 +255,7 @@ export default function PatientResults() {
           prescriptions.length === 0 ? (
             <div style={{ textAlign: "center", padding: "64px 16px" }}>
               <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
-                <Image src="/icon_pharmacy.png" alt="" width={120} height={120} style={{ filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.15))" }} />
+                <Image src="/صيدلية.png" alt="" width={120} height={120} style={{ filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.15))" }} />
               </div>
               <p style={{ fontWeight: 700, color: "#6b7280" }}>{t.results.noPrescriptions}</p>
               <p style={{ fontSize: 13, color: "#9ca3af" }}>{t.results.noPrescriptionsDesc}</p>
@@ -260,7 +266,10 @@ export default function PatientResults() {
           ) : prescriptions.map((rx: any) => {
             const doctor = Array.isArray(rx.doctor) ? rx.doctor[0] : rx.doctor;
             const isPaid = paidIds.has(rx.id) || rx.is_paid;
-            const isSent = pharmacyOrders.some((o: any) => o.prescription?.id === rx.id);
+            const isLab = rx.lab_requests?.[0]?.tests_list?.length > 0;
+            const isSent = isLab 
+              ? !!rx.lab_requests?.[0]?.lab_id 
+              : pharmacyOrders.some((o: any) => o.prescription?.id === rx.id);
 
             return (
               <PrescriptionCard

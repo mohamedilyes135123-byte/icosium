@@ -160,6 +160,7 @@ export default function PatientRequests() {
             setAiAnalyses(prev => [...prev, data.analysis]);
           } else {
             console.warn("AI Analysis skipped:", data.message);
+            alert((isRtl ? "خطأ في الذكاء الاصطناعي: " : "Erreur IA: ") + (data.message || "Unknown error"));
           }
         } catch (fetchErr: any) {
           console.warn("AI Analysis aborted or failed due to timeout:", fetchErr.message);
@@ -167,8 +168,10 @@ export default function PatientRequests() {
         }
       }
     } catch (err: any) {
-      console.error("Upload failed:", err.message);
-      alert((isRtl ? "حدث خطأ أثناء رفع الملف: " : "Erreur lors du téléchargement : ") + err.message);
+      console.error("Outer Catch - Upload failed:", err);
+      alert((isRtl ? "حدث خطأ أثناء رفع الملف لـ Supabase: " : "Erreur lors du téléchargement vers Supabase: ") + (err.message || JSON.stringify(err)));
+      setDocFiles([]);
+      setDocFileUrls([]);
     }
 
     setUploading(false);
@@ -251,14 +254,6 @@ export default function PatientRequests() {
 
   const REQUEST_TYPES = [
     {
-      v: "APPOINTMENT" as RequestType,
-      label: t.requests.typeAppt,
-      icon: "/icon_calendar.png",
-      grad: "linear-gradient(135deg, #16a34a, #15803d)",
-      shadow: "rgba(22,163,74,0.3)",
-      desc: t.requests.typeApptDesc,
-    },
-    {
       v: "PRESCRIPTION" as RequestType,
       label: t.requests.typeRenew,
       icon: "/icon_pharmacy.png",
@@ -307,16 +302,16 @@ export default function PatientRequests() {
             {/* Type */}
             <div>
               <label style={{ fontSize: 13, fontWeight: 900, color: "#374151", display: "block", marginBottom: 8, textAlign: isRtl ? "right" : "left" }}>{t.requests.reqType}</label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, paddingTop: 56 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 16, paddingTop: 56 }}>
                 {REQUEST_TYPES.map(o => (
                   <button key={o.v} type="button" onClick={() => setReqType(o.v)}
                     className="btn"
-                    style={{ position: "relative", padding: "12px 8px 8px", borderRadius: 16, border: reqType === o.v ? "2px solid transparent" : "2px solid #e5e7eb", background: reqType === o.v ? o.grad : "#fff", color: reqType === o.v ? "#fff" : "#6b7280", boxShadow: reqType === o.v ? `0 4px 14px ${o.shadow}` : "none", fontFamily: "inherit", fontWeight: 800, fontSize: 13, cursor: "pointer", textAlign: "center", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
-                    <div style={{ position: "absolute", top: -52, left: "50%", transform: "translateX(-50%)" }}>
-                      <Image src={o.icon} alt="" width={72} height={72} style={{ filter: reqType === o.v ? "drop-shadow(0 6px 12px rgba(0,0,0,0.3))" : "none", transform: reqType === o.v ? "scale(1.1)" : "scale(0.9)", transition: "all 0.3s" }} />
+                    style={{ position: "relative", padding: "16px 8px 12px", borderRadius: 16, border: reqType === o.v ? "2px solid transparent" : "2px solid #e5e7eb", background: reqType === o.v ? o.grad : "#fff", color: reqType === o.v ? "#fff" : "#6b7280", boxShadow: reqType === o.v ? `0 4px 14px ${o.shadow}` : "none", fontFamily: "inherit", fontWeight: 800, fontSize: 13, cursor: "pointer", textAlign: "center", transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
+                    <div style={{ position: "absolute", top: -48, left: "50%", transform: "translateX(-50%)", width: 72, height: 72, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Image src={o.icon} alt="" width={72} height={72} style={{ objectFit: "contain", filter: reqType === o.v ? "drop-shadow(0 6px 12px rgba(0,0,0,0.3))" : "none", transform: reqType === o.v ? "scale(1.1)" : "scale(0.9)", transition: "all 0.3s" }} />
                     </div>
-                    <div style={{ marginTop: 8 }}>{o.label}</div>
-                    <div style={{ fontSize: 10, opacity: 0.8, marginTop: 2 }}>{o.desc}</div>
+                    <div style={{ marginTop: 12 }}>{o.label}</div>
+                    <div style={{ fontSize: 11, opacity: 0.8, marginTop: 4 }}>{o.desc}</div>
                   </button>
                 ))}
               </div>
@@ -641,7 +636,7 @@ export default function PatientRequests() {
                   )}
 
                   {isApproved && (prescription || labReq) && (
-                    <a href="/results?tab=pharmacy"
+                    <a href={labReq ? "/results?tab=lab" : "/results?tab=pharmacy"}
                       className="btn"
                       style={{ textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", padding: "14px 0", borderRadius: 16, border: "none", background: "linear-gradient(135deg, #10b981, #059669)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 15, cursor: "pointer", marginBottom: 8, boxShadow: "0 6px 20px rgba(16,185,129,0.35)", flexDirection: isRtl ? "row" : "row-reverse" }}>
                       <Image src="/icon_results.png" alt="" width={28} height={28} />
