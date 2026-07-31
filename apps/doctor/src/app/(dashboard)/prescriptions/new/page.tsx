@@ -165,6 +165,7 @@ function NewPrescriptionContent() {
   // State
   const [saving, setSaving] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [saved, setSaved] = useState<{ rx: any; qr: string } | null>(null);
   const [step, setStep] = useState<"form" | "preview">("form");
 
@@ -337,7 +338,7 @@ function NewPrescriptionContent() {
     }]);
     
     setIsSent(true);
-    alert("تم إرسال الوصفة للمريض بنجاح، وتلقى إشعاراً بذلك!");
+    setShowSuccessModal(true);
   };
 
   // ── FORM VIEW ────────────────────────────────────────────────────────────────
@@ -959,6 +960,26 @@ function NewPrescriptionContent() {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full flex flex-col items-center text-center relative z-50">
+              <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-500 mb-6">
+                <CheckCircle className="w-10 h-10" />
+              </div>
+              <h3 className="text-2xl font-black text-slate-800 mb-2">تم الإرسال بنجاح</h3>
+              <p className="text-sm text-slate-500 mb-8">تم إرسال الوصفة للمريض في منصته وتلقى إشعاراً بذلك.</p>
+              <button onClick={() => setShowSuccessModal(false)}
+                className="w-full h-12 bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-colors">
+                حسناً، فهمت
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

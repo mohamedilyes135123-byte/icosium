@@ -58,18 +58,30 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    let channel: any;
+
+    const fetchNotifs = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        supabase
+        const { count } = await supabase
           .from("notifications")
           .select("id", { count: "exact", head: true })
           .eq("user_id", user.id)
-          .eq("is_read", false)
-          .then(({ count }) => {
-            setNotifCount(count || 0);
-          });
+          .eq("is_read", false);
+        setNotifCount(count || 0);
       }
-    });
+    };
+
+    fetchNotifs();
+
+    channel = supabase
+      .channel("patient-notifications-count")
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, fetchNotifs)
+      .subscribe();
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [pathname]);
 
   if (checking) {
@@ -119,8 +131,8 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
           <nav style={{ flex: 1, padding: "24px 16px", display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
             {sideNav.map(item => {
               const active = isActive(item.href);
-              const isApptsOrReqs = item.href === "/requests" || item.href === "/appointments";
-              const showBadge = isApptsOrReqs && notifCount > 0;
+              const isResults = item.href === "/results";
+              const showBadge = isResults && notifCount > 0;
               return (
                 <Link key={item.href} href={item.href} prefetch={true} style={{
                   position: "relative",
@@ -184,8 +196,8 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
         <nav className="premium-bottom-nav glass-panel md:hidden border-t border-emerald-100">
           {mobileNav.map(item => {
             const active = isActive(item.href);
-            const isApptsOrReqs = item.href === "/requests" || item.href === "/appointments";
-            const showBadge = isApptsOrReqs && notifCount > 0;
+            const isResults = item.href === "/results";
+            const showBadge = isResults && notifCount > 0;
             return (
               <Link key={item.href} href={item.href} prefetch={true} className={`nav-item${active ? " active" : ""}`} style={{ position: "relative" }}>
                 <div className="nav-icon" style={{ color: active ? "#16a34a" : "#9ca3af", position: "relative" }}>

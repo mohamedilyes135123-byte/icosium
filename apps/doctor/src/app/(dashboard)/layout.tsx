@@ -141,7 +141,7 @@ export default function DoctorLayout({
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="w-full h-full overflow-y-auto"
             >
-              <div className="p-8 max-w-[1700px] mx-auto min-h-full">
+              <div className="p-3 sm:p-6 lg:p-8 max-w-[1700px] mx-auto min-h-full">
                 {children}
               </div>
             </motion.div>

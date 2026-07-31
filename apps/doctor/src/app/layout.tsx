@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--font-cairo" });
 
 export const metadata: Metadata = {
-  title: "عناية | بوابة الطبيب",
+  title: "عناية طبيب",
   description: "منصة عناية الطبية - إدارة العيادة، المرضى، والوصفات الطبية",
   manifest: "/manifest.json",
   themeColor: "#059669",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
   openGraph: {
     type: "website",
-    title: "عناية | بوابة الطبيب",
+    title: "عناية طبيب",
     description: "منصة عناية الطبية للطبيب",
   },
 };

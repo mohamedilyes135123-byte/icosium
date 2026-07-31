@@ -98,7 +98,15 @@ export default function PharmacyPrescriptions() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
           {orders.map((order) => {
-            const rx = order.prescription;
+            const rx = Array.isArray(order.prescription) ? order.prescription[0] : order.prescription;
+            let medicationsList = [];
+            try {
+              medicationsList = typeof rx?.medications === 'string' 
+                ? JSON.parse(rx.medications) 
+                : (rx?.medications || []);
+            } catch(e) {
+              console.error("Failed to parse medications", e);
+            }
             const st = STATUS_MAP[order.status] || STATUS_MAP.PENDING;
             const isExpanded = expandedId === order.id;
 
@@ -177,18 +185,18 @@ export default function PharmacyPrescriptions() {
                         </button>
                       </div>
 
-                      {rx?.medications && (
+                      {medicationsList && medicationsList.length > 0 && (
                         <div className="space-y-2">
-                          {(isExpanded ? rx.medications : rx.medications.slice(0, 2)).map((med: any, i: number) => (
+                          {(isExpanded ? medicationsList : medicationsList.slice(0, 2)).map((med: any, i: number) => (
                             <div key={i} className="bg-white rounded-xl p-2.5 border border-slate-200">
                               <p className="font-bold text-slate-800 text-sm">{med.name} <span className="text-slate-500 font-medium">{med.dose}</span></p>
                               <p className="text-xs text-slate-500 mt-0.5">{med.frequency} — {med.duration}</p>
                               {med.notes && <p className="text-xs text-amber-600 mt-0.5">⚠️ {med.notes}</p>}
                             </div>
                           ))}
-                          {!isExpanded && rx.medications.length > 2 && (
+                          {!isExpanded && medicationsList.length > 2 && (
                             <p className="text-xs text-center text-slate-400 font-medium">
-                              + {rx.medications.length - 2} {t("moreItems")}
+                              + {medicationsList.length - 2} {t("moreItems")}
                             </p>
                           )}
                         </div>

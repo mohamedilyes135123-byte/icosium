@@ -16,7 +16,8 @@
     "dev:patient": "npm run dev -w apps/patient -- -p 3004",
     "dev:pharmacy": "npm run dev -w apps/pharmacy -- -p 3003",
     "dev:mobile-patient": "npm run start -w apps/mobile-patient -- --port 8085 --lan",
-    "dev:mobile-doctor": "npm run start -w apps/mobile-doctor -- --port 8086 --lan"
+    "dev:mobile-doctor": "npm run start -w apps/mobile-doctor -- --port 8086 --lan",
+    "dev:all": "npx concurrently \"npm run dev:patient\" \"npm run dev:doctor\" \"npm run dev:lab\" \"npm run dev:pharmacy\""
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.62",

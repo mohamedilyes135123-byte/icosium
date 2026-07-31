@@ -557,10 +557,12 @@ export default function PatientRequests() {
               const prescription = req.prescriptions?.[0];
               const labReq = req.lab_requests?.[0];
               const isApproved = req.status === "APPROVED";
+              const isModified = req.status === "MODIFIED";
+              const isApprovedOrModified = isApproved || isModified;
               const isPending = req.status === "PENDING";
 
-              const cardBorder = isApproved ? "2px solid rgba(134, 239, 172, 0.5)" : isPending ? "2px solid rgba(254, 240, 138, 0.5)" : "2px solid rgba(147, 197, 253, 0.5)";
-              const cardBg = isApproved ? "linear-gradient(to bottom, #f0fdf4, #ffffff)" : isPending ? "linear-gradient(to bottom, #fefce8, #ffffff)" : "linear-gradient(to bottom, #eff6ff, #ffffff)";
+              const cardBorder = isApprovedOrModified ? "2px solid rgba(134, 239, 172, 0.5)" : isPending ? "2px solid rgba(254, 240, 138, 0.5)" : "2px solid rgba(147, 197, 253, 0.5)";
+              const cardBg = isApprovedOrModified ? "linear-gradient(to bottom, #f0fdf4, #ffffff)" : isPending ? "linear-gradient(to bottom, #fefce8, #ffffff)" : "linear-gradient(to bottom, #eff6ff, #ffffff)";
 
               return (
                 <div key={req.id} style={{ background: cardBg, borderRadius: 24, border: cardBorder, padding: 20, marginBottom: 16, boxShadow: "0 8px 24px rgba(0,0,0,0.04)", transition: "transform 0.2s ease" }}>
@@ -635,7 +637,7 @@ export default function PatientRequests() {
                     </div>
                   )}
 
-                  {isApproved && (prescription || labReq) && (
+                  {isApprovedOrModified && (prescription || labReq) && (
                     <a href={labReq ? "/results?tab=lab" : "/results?tab=pharmacy"}
                       className="btn"
                       style={{ textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", padding: "14px 0", borderRadius: 16, border: "none", background: "linear-gradient(135deg, #10b981, #059669)", color: "#fff", fontFamily: "inherit", fontWeight: 900, fontSize: 15, cursor: "pointer", marginBottom: 8, boxShadow: "0 6px 20px rgba(16,185,129,0.35)", flexDirection: isRtl ? "row" : "row-reverse" }}>

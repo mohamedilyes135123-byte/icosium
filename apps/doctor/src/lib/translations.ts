@@ -11,6 +11,7 @@ export const translations = {
     platformTitle: "منصة الطبيب",
     
     // Dashboard content
+    welcomeDashboard: "مرحبا بك في لوحة تحكم الطبيب الشاملة",
     emergencyCases: "حالات الطوارئ",
     emergencyDesc: "عليك مراجعة طلبات الاستشارة عن بعد فوراً.",
     reviewCases: "استعراض الحالات",
@@ -169,6 +170,7 @@ export const translations = {
     platformTitle: "Plateforme du Médecin",
     
     // Dashboard content
+    welcomeDashboard: "Bienvenue sur le tableau de bord complet du médecin",
     emergencyCases: "Urgences",
     emergencyDesc: "Vous devez examiner les demandes de téléconsultation immédiatement.",
     reviewCases: "Voir les cas",

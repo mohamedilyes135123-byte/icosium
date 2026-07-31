@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useLanguage } from "@/components/LanguageContext";
 import { Globe, TestTube2, LogOut, ClipboardList, Beaker, LayoutDashboard, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
 
 export default function LabLayout({
   children,
@@ -13,6 +15,36 @@ export default function LabLayout({
 }) {
   const pathname = usePathname();
   const { t, lang, setLang } = useLanguage();
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    const supabase = createClient();
+    let channel: any;
+
+    const fetchPending = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { count } = await supabase
+        .from("lab_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("lab_id", user.id)
+        .eq("status", "PENDING");
+        
+      setPendingCount(count || 0);
+    };
+
+    fetchPending();
+
+    channel = supabase
+      .channel("lab-requests-count")
+      .on("postgres_changes", { event: "*", schema: "public", table: "lab_requests" }, fetchPending)
+      .subscribe();
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, []);
 
   return (
     <div className="flex h-[100dvh] bg-slate-50 overflow-hidden text-slate-800 font-sans selection:bg-indigo-500/20 relative" dir="rtl">
@@ -36,7 +68,7 @@ export default function LabLayout({
         
         <nav className="flex-1 px-4 py-6 space-y-2 relative z-10">
           <NavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5"/>} label={t("dashboard")} current={pathname} />
-          <NavItem href="/requests" icon={<ClipboardList className="w-5 h-5"/>} label={t("requests")} current={pathname} />
+          <NavItem href="/requests" icon={<ClipboardList className="w-5 h-5"/>} label={t("requests")} current={pathname} badge={pendingCount > 0 ? pendingCount : undefined} />
           <NavItem href="/results" icon={<Beaker className="w-5 h-5"/>} label={lang === "ar" ? "النتائج" : "Résultats"} current={pathname} />
           <NavItem href="/settings" icon={<Settings className="w-5 h-5"/>} label={t("settings")} current={pathname} />
         </nav>
@@ -79,7 +111,7 @@ export default function LabLayout({
   );
 }
 
-function NavItem({ href, icon, label, current }: { href: string; icon: React.ReactNode; label: string, current: string }) {
+function NavItem({ href, icon, label, current, badge }: { href: string; icon: React.ReactNode; label: string, current: string, badge?: number }) {
   const isActive = current === href || (href !== '/dashboard' && current.startsWith(href));
   
   return (
@@ -93,10 +125,15 @@ function NavItem({ href, icon, label, current }: { href: string; icon: React.Rea
           className="absolute inset-0 bg-white shadow-lg backdrop-blur-sm rounded-xl"
         />
       )}
-      <div className={`relative z-10 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+      <div className={`relative z-10 transition-transform duration-300 flex items-center justify-center ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
         {icon}
+        {badge !== undefined && (
+          <span className="absolute -top-2 -right-2 flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-black border-2 border-white shadow-sm">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
       </div>
-      <span className="relative z-10">{label}</span>
+      <span className="relative z-10 flex-1">{label}</span>
     </Link>
   );
 }

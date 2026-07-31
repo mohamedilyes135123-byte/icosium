@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   User, Phone, MapPin, Calendar, Heart, Shield,
   AlertTriangle, CheckCircle, Edit3, Save, X,
-  Droplets, Pill, Activity
+  Droplets, Pill, Activity, ClipboardList
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "react-qr-code";
@@ -56,8 +56,6 @@ export default function PatientProfile() {
         allergies:        form.allergies,
         chronic_diseases: form.chronic_diseases,
         current_meds:     form.current_meds,
-        emergency_contact: form.emergency_contact,
-        emergency_phone:  form.emergency_phone,
       }
     });
 
@@ -73,8 +71,6 @@ export default function PatientProfile() {
     allergies:         form.allergies         || meta.allergies,
     chronic_diseases:  form.chronic_diseases  || meta.chronic_diseases,
     current_meds:      form.current_meds      || meta.current_meds,
-    emergency_contact: form.emergency_contact || meta.emergency_contact,
-    emergency_phone:   form.emergency_phone   || meta.emergency_phone,
   };
 
   if (loading) return (
@@ -232,21 +228,24 @@ export default function PatientProfile() {
           onChange={(v: string) => setForm({ ...form, current_meds: v })} />
       </motion.section>
 
-      {/* Emergency contact */}
-      <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+
+
+      {/* Medical Documents */}
+      <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
         className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl p-6 mb-5 shadow-sm">
         <h2 className={`font-black text-slate-700 text-sm mb-4 flex items-center gap-2 ${isRtl ? "flex-row text-right" : "flex-row-reverse text-left"}`}>
-          <Activity className="w-4 h-4 text-blue-500" /> {t.profile.emergencyContact}
+          <ClipboardList className="w-4 h-4 text-purple-500" /> {isRtl ? "وثائقي الطبية" : "Mes documents médicaux"}
         </h2>
         <div className="space-y-4">
-          <Field label={t.profile.name} icon={<User className="w-4 h-4" />}
-            value={form.emergency_contact ?? medical.emergency_contact}
-            editing={editing} isRtl={isRtl}
-            onChange={(v: string) => setForm({ ...form, emergency_contact: v })} />
-          <Field label={t.profile.phone} icon={<Phone className="w-4 h-4" />}
-            value={form.emergency_phone ?? medical.emergency_phone}
-            editing={editing} isRtl={isRtl}
-            onChange={(v: string) => setForm({ ...form, emergency_phone: v })} />
+           <div className={`p-4 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-between ${isRtl ? "flex-row text-right" : "flex-row-reverse text-left"}`}>
+             <div>
+               <p className="font-bold text-slate-700 text-sm">{isRtl ? "نتائج تحاليلي ووصفاتي" : "Mes résultats et ordonnances"}</p>
+               <p className="text-xs text-slate-500 mt-1">{isRtl ? "يمكنك الوصول إلى كافة ملفاتك الطبية (الوصفات والتحاليل) من هنا" : "Accédez à tous vos dossiers médicaux (ordonnances et analyses) d'ici"}</p>
+             </div>
+             <a href="/results" className="px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-700 transition-colors shadow-sm whitespace-nowrap">
+               {isRtl ? "تصفح الوثائق" : "Parcourir les documents"}
+             </a>
+           </div>
         </div>
       </motion.section>
 

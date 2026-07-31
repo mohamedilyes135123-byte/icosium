@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--font-cairo" });
 
 export const metadata: Metadata = {
-  title: "منصة عناية | 3inaya Medical Ecosystem",
+  title: "عناية الصيدلية",
   description: "A production-ready digital health platform for the Algerian market connecting patients, doctors, pharmacies, and laboratories.",
 };
 

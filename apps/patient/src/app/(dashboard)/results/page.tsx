@@ -24,7 +24,7 @@ export default function PatientResults() {
   };
 
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get("tab") as Tab) || "lab";
+  const initialTab = (searchParams.get("tab") as Tab) || "pharmacy";
   const [tab, setTab] = useState<Tab>(initialTab);
   const [labResults, setLabResults] = useState<any[]>([]);
   const [pharmacyOrders, setPharmacyOrders] = useState<any[]>([]);
@@ -132,8 +132,8 @@ export default function PatientResults() {
   }, [currentUser, fetchData]);
 
   const TABS = [
-    { key: "lab", label: isRtl ? "التحاليل" : "Analyses", count: labResults.length, icon: "/التحاليل.png", imgSize: 42, imgTopInactive: -6, imgTopActive: -10, imgScale: 1.15, right: 10 },
-    { key: "pharmacy", label: isRtl ? "الوصفات" : "Ordonnances", count: prescriptions.length, icon: "/صيدلية.png", imgSize: 42, imgTopInactive: -6, imgTopActive: -10, imgScale: 1.15, right: 10 },
+    { key: "pharmacy", label: isRtl ? "طلبات التحاليل والوصفات الطبية" : "Ordonnances & Demandes", count: prescriptions.length, icon: "/صيدلية.png", imgSize: 42, imgTopInactive: -6, imgTopActive: -10, imgScale: 1.15, right: 10 },
+    { key: "lab", label: isRtl ? "نتائج التحاليل" : "Résultats d'analyses", count: labResults.length, icon: "/التحاليل.png", imgSize: 42, imgTopInactive: -6, imgTopActive: -10, imgScale: 1.15, right: 10 },
   ];
 
   return (
