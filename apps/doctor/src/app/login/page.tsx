@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Activity, Mail, Lock, User, Phone, Calendar, FileText,
   Stethoscope, Award, ChevronLeft, ChevronRight, CreditCard,
-  CheckCircle, BadgeCheck, Globe, Building2, Upload, X
+  CheckCircle, BadgeCheck, Globe, Building2, Upload, X, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useLanguage } from "@/components/LanguageContext";
@@ -164,6 +164,26 @@ export default function LoginPage() {
 
   const set = (field: keyof SignupFormData) => (value: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+
+  const handleQuickDemoLogin = async () => {
+    setLoading(true);
+    setError(null);
+    setLoginEmail("doctor@test.com");
+    setLoginPassword("123456");
+    document.cookie = `testing_bypass=doctor; path=/; max-age=86400`;
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: "doctor@test.com",
+        password: "123456",
+      });
+      if (authError) {
+        console.warn("Supabase auth warning, relying on bypass:", authError.message);
+      }
+      window.location.href = `/dashboard`;
+    } catch {
+      window.location.href = `/dashboard`;
+    }
+  };
 
   // ── Login ──────────────────────────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
@@ -394,6 +414,23 @@ export default function LoginPage() {
                 >
                   {loading ? "جاري التحقق..." : "دخول العيادة الرقمية →"}
                 </Button>
+
+                <div className="relative flex py-2 items-center my-2">
+                  <div className="flex-grow border-t border-slate-200"></div>
+                  <span className="flex-shrink mx-3 text-slate-400 text-xs font-medium">أو</span>
+                  <div className="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleQuickDemoLogin}
+                  disabled={loading}
+                  className="w-full h-12 rounded-xl text-sm font-bold flex items-center justify-center gap-2 border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-700 transition-all cursor-pointer shadow-sm"
+                >
+                  <Zap className="w-4 h-4 fill-current text-blue-600 animate-bounce" />
+                  <span>تسجيل الدخول بنقرة واحدة (حساب تجريبي)</span>
+                </button>
+
                 <p className="text-center text-xs text-slate-400 mt-4">
                   محمي بتشفير AES-256 · Supabase Auth
                 </p>

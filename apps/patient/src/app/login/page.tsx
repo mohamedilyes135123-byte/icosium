@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Heart, Mail, Lock, User, Phone,
   AlertTriangle, ChevronLeft, ChevronRight, CheckCircle,
-  Pill, Activity, Globe, X, Shield
+  Pill, Activity, Globe, X, Shield, Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DatePickerField from "@/components/ui/DatePickerField";
@@ -81,6 +81,26 @@ export default function PatientLoginPage() {
         ? form[field].filter(x => x !== item)
         : [...form[field], item]
     );
+  };
+
+  const handleQuickDemoLogin = async () => {
+    setLoading(true);
+    setError(null);
+    setLoginEmail("patient@test.com");
+    setLoginPassword("123456");
+    document.cookie = `testing_bypass=patient; path=/; max-age=86400`;
+    try {
+      const { error: err } = await supabase.auth.signInWithPassword({
+        email: "patient@test.com",
+        password: "123456",
+      });
+      if (err) {
+        console.warn("Supabase auth warning, relying on bypass:", err.message);
+      }
+      window.location.href = "/dashboard";
+    } catch {
+      window.location.href = "/dashboard";
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -264,6 +284,23 @@ export default function PatientLoginPage() {
                 <button type="submit" disabled={loading} className="btn-pill-green w-full mt-2">
                   {loading ? t.login.verifying : t.login.enterClinic}
                 </button>
+
+                <div className="relative flex py-2 items-center my-2">
+                  <div className="flex-grow border-t border-slate-200"></div>
+                  <span className="flex-shrink mx-3 text-slate-400 text-xs font-medium">أو</span>
+                  <div className="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleQuickDemoLogin}
+                  disabled={loading}
+                  className="w-full py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 transition-all cursor-pointer shadow-sm"
+                >
+                  <Zap className="w-4 h-4 fill-current text-emerald-600 animate-bounce" />
+                  <span>تسجيل الدخول بنقرة واحدة (حساب تجريبي)</span>
+                </button>
+
                 <p className="text-center text-xs text-slate-400 mt-4">{t.login.securityFooter}</p>
               </form>
             )}

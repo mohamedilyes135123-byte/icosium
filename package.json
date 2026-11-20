@@ -17,7 +17,7 @@
     "dev:pharmacy": "npm run dev -w apps/pharmacy -- -p 3003",
     "dev:mobile-patient": "npm run start -w apps/mobile-patient -- --port 8085 --lan",
     "dev:mobile-doctor": "npm run start -w apps/mobile-doctor -- --port 8086 --lan",
-    "dev:all": "npx concurrently \"npm run dev:patient\" \"npm run dev:doctor\" \"npm run dev:lab\" \"npm run dev:pharmacy\""
+    "dev:all": "npx concurrently \"npm run dev:admin\" \"npm run dev:patient\" \"npm run dev:doctor\" \"npm run dev:lab\" \"npm run dev:pharmacy\""
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.62",
@@ -45,6 +45,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "class-variance-authority": "^0.7.1",
+    "concurrently": "^9.2.5",
+    "concurrently": "^9.1.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
     "tailwindcss": "^4",
