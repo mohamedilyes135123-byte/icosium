@@ -1,0 +1,32 @@
+# Ignore all other apps
+apps/admin
+apps/doctor
+apps/lab
+apps/patient
+apps/pharmacy
+apps/flutter-patient
+apps/flutter-doctor
+apps/mobile-doctor
+
+# Ignore build artifacts and modules
+.next
+**/.next
+node_modules
+**/node_modules
+.expo
+**/.expo
+android
+**/android
+ios
+**/ios
+build
+**/build
+dist
+**/dist
+.git
+medical
+1ordonnance
+.vscode
+*.log
+*.zip
+*.tar.gz
