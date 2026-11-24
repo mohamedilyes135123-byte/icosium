@@ -47,6 +47,8 @@ export async function middleware(request: NextRequest) {
     path === '/login' ||
     path === '/unauthorized' ||
     path === '/' ||
+    path === '/privacy' ||
+    path.startsWith('/auth/') ||
     path.startsWith('/api/') ||
     path.startsWith('/_next/');
 
